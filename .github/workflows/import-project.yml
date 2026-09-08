@@ -1,0 +1,31 @@
+name: Import CGPA+ UniPort project
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  import-project:
+    if: ${{ github.event.head_commit.message != 'Import CGPA+ UniPort project files' && hashFiles('CGPA-UniPort-GitHub-upload.zip') != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract project
+        run: |
+          unzip -o CGPA-UniPort-GitHub-upload.zip -d .
+          rm CGPA-UniPort-GitHub-upload.zip
+
+      - name: Commit project files
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'Import CGPA+ UniPort project files' || exit 0
+          git push
