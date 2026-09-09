@@ -4,6 +4,7 @@ import { registerFirebaseBackend } from '../integration/firebase-adapters.js';
 import { registerStudentBackendFixes } from '../integration/student-backend-fixes.js';
 import { registerStudentResultFixes } from '../integration/student-result-fixes.js';
 import { registerStudentReadFix } from '../integration/student-read-fix.js';
+import { registerAdminFixes } from '../integration/admin-fix.js';
 
 const SessionContext = createContext(null);
 
@@ -23,6 +24,7 @@ export function SessionProvider({ children }) {
         await registerStudentBackendFixes();
         await registerStudentResultFixes();
         await registerStudentReadFix();
+        await registerAdminFixes();
 
         if (!active) return;
 
