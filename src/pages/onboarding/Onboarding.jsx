@@ -15,11 +15,11 @@ export default function Onboarding() {
     event.preventDefault();
     const required = ['facultyId', 'departmentId', 'programmeId', 'admissionSessionId', 'currentLevelId', 'currentSessionId', 'currentSemesterId'];
     if (required.some(key => !form[key])) {
-      setValidation('Complete each academic selector before saving. Available choices must come from the connected backend.');
+      setValidation('Please complete Faculty, Department, Programme, Admission Session, Current Level, Current Session and Current Semester.');
       return;
     }
     setValidation('');
-    action.run(() => academicService.updateProfile({ ...form, universityId: UNIVERSITY.id }), () => navigate('/app'), 'Your academic profile has been updated.');
+    action.run(() => academicService.updateProfile({ ...form, universityId: UNIVERSITY.id }), () => navigate('/app'), 'Your academic profile has been saved.');
   }
   return (
     <div className="onboarding-page">
@@ -27,11 +27,11 @@ export default function Onboarding() {
       <main className="onboarding-container">
         <span className="eyebrow">LET'S MAKE THIS YOURS</span>
         <h1 tabIndex={-1} data-page-heading>Your UniPort journey.<br />Your academic profile.</h1>
-        <p className="onboarding-description">A few details help put your results in the right context. Your university is already selected. No other institutions, no unnecessary steps.</p>
+        <p className="onboarding-description">Tell us where you are academically so CGPA+ can put every result in the correct place. Your university is already fixed to the University of Port Harcourt.</p>
         <div className="onboarding-steps"><span><i>1</i>Your account</span><span className="active"><i>2</i>Academic profile</span><span><i>3</i>Your workspace</span></div>
         <form className="panel form-stack" onSubmit={submit}>
           <AcademicFields form={form} setForm={setForm} />
-          <Notice>Faculty, department, programme, level and session options come from the backend. No unverified UniPort catalogue is hard-coded.</Notice>
+          <Notice>Start from the top: choose your Faculty first, then Department, then Programme. After that choose your admission session, current level, current academic session and current semester.</Notice>
           {validation && <p className="field-error" role="alert">{validation}</p>}
           <ActionError error={action.error} />
           <Button type="submit" busy={action.busy} endIcon="arrow">Save academic profile</Button>
