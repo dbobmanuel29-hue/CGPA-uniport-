@@ -1,0 +1,4 @@
+.public-layout:has(.nav-start[href="#/app"]) a[href="#/login"],
+.public-layout:has(.nav-start[href="#/app"]) .hero-sign-in {
+  display: none !important;
+}
