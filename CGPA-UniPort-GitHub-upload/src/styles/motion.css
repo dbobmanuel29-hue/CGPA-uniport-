@@ -1,0 +1,108 @@
+/* Scroll reveal. The hidden state only applies once the observer is active. */
+.reveal-ready [data-reveal]{opacity:0;transform:translateY(26px);transition:opacity .75s cubic-bezier(.22,.68,.3,1),transform .75s cubic-bezier(.22,.68,.3,1);will-change:opacity,transform}
+.reveal-ready [data-reveal='left']{transform:translateX(-30px)}
+.reveal-ready [data-reveal='right']{transform:translateX(30px)}
+.reveal-ready [data-reveal='scale']{transform:scale(.955)}
+.reveal-ready [data-reveal='fade']{transform:none}
+.reveal-ready [data-reveal='rise']{transform:translateY(46px)}
+.reveal-ready [data-reveal].revealed{opacity:1;transform:none}
+.reveal-ready [data-reveal-delay='1']{transition-delay:.07s}
+.reveal-ready [data-reveal-delay='2']{transition-delay:.14s}
+.reveal-ready [data-reveal-delay='3']{transition-delay:.21s}
+.reveal-ready [data-reveal-delay='4']{transition-delay:.28s}
+.reveal-ready [data-reveal-delay='5']{transition-delay:.35s}
+.reveal-ready [data-reveal-delay='6']{transition-delay:.42s}
+.reveal-ready [data-reveal-delay='7']{transition-delay:.49s}
+
+/* Staggered children: one attribute animates a whole row or grid. */
+.reveal-ready [data-reveal-group]>*{opacity:0;transform:translateY(24px);transition:opacity .7s cubic-bezier(.22,.68,.3,1),transform .7s cubic-bezier(.22,.68,.3,1)}
+.reveal-ready [data-reveal-group].revealed>*{opacity:1;transform:none}
+.reveal-ready [data-reveal-group].revealed>*:nth-child(1){transition-delay:.04s}
+.reveal-ready [data-reveal-group].revealed>*:nth-child(2){transition-delay:.11s}
+.reveal-ready [data-reveal-group].revealed>*:nth-child(3){transition-delay:.18s}
+.reveal-ready [data-reveal-group].revealed>*:nth-child(4){transition-delay:.25s}
+.reveal-ready [data-reveal-group].revealed>*:nth-child(5){transition-delay:.32s}
+.reveal-ready [data-reveal-group].revealed>*:nth-child(6){transition-delay:.39s}
+.reveal-ready [data-reveal-group].revealed>*:nth-child(7){transition-delay:.46s}
+.reveal-ready [data-reveal-group].revealed>*:nth-child(8){transition-delay:.53s}
+.reveal-ready [data-reveal-group].revealed>*:nth-child(n+9){transition-delay:.6s}
+
+/* Line and bar growth used by timelines and progress rails. */
+.reveal-ready [data-reveal-line]{transform-origin:top center;transform:scaleY(0);transition:transform 1.1s cubic-bezier(.3,.7,.3,1)}
+.reveal-ready [data-reveal-line].revealed{transform:scaleY(1)}
+.reveal-ready [data-reveal-bar]{transform-origin:left center;transform:scaleX(0);transition:transform 1s cubic-bezier(.3,.7,.3,1)}
+.reveal-ready [data-reveal-bar].revealed{transform:scaleX(1)}
+
+/* Reading progress bar on long pages. */
+.read-progress{position:fixed;top:0;left:0;right:0;height:2px;z-index:60;pointer-events:none;background:transparent}
+.read-progress span{display:block;height:100%;background:linear-gradient(90deg,var(--green),var(--lime));transition:width .12s linear}
+
+/* Infinite marquee strips. */
+.marquee{display:flex;overflow:hidden;user-select:none;gap:0;mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent)}
+.marquee-track{display:flex;align-items:center;gap:34px;padding-right:34px;flex-shrink:0;min-width:100%;animation:marquee-slide 42s linear infinite}
+.marquee-fast .marquee-track{animation-duration:26s}
+.marquee:hover .marquee-track{animation-play-state:paused}
+@keyframes marquee-slide{from{transform:translateX(0)}to{transform:translateX(-100%)}}
+
+/* Ambient motion for decorative accents. */
+@keyframes float-soft{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+@keyframes pulse-soft{0%,100%{opacity:.55;transform:scale(1)}50%{opacity:1;transform:scale(1.06)}}
+@keyframes sheen{from{background-position:-220% 0}to{background-position:220% 0}}
+@keyframes scroll-hint{0%{transform:translateY(0);opacity:0}35%{opacity:1}100%{transform:translateY(11px);opacity:0}}
+@keyframes ring-expand{0%{transform:scale(.72);opacity:.7}100%{transform:scale(1.5);opacity:0}}
+.float-soft{animation:float-soft 6s ease-in-out infinite}
+.pulse-soft{animation:pulse-soft 3.4s ease-in-out infinite}
+
+/* Number flip used when a projected figure changes. */
+@keyframes value-in{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+.value-animate{animation:value-in .32s cubic-bezier(.2,.7,.3,1)}
+
+/* Workspace pages animate on load rather than on scroll, since they are short. */
+.workspace-content .stats-grid>*,
+.workspace-content>.panel,
+.workspace-content .two-panel-grid>*,
+.workspace-content .dashboard-grid>*,
+.workspace-content .dashboard-bottom>*,
+.workspace-content .quick-actions>*{animation:enter .5s cubic-bezier(.22,.68,.3,1) both}
+.workspace-content .stats-grid>*:nth-child(2),
+.workspace-content .dashboard-grid>*:nth-child(2),
+.workspace-content .dashboard-bottom>*:nth-child(2),
+.workspace-content .two-panel-grid>*:nth-child(2),
+.workspace-content .quick-actions>*:nth-child(2){animation-delay:.06s}
+.workspace-content .stats-grid>*:nth-child(3),
+.workspace-content .two-panel-grid>*:nth-child(3),
+.workspace-content .dashboard-grid>*:nth-child(3),
+.workspace-content .quick-actions>*:nth-child(3){animation-delay:.12s}
+.workspace-content .stats-grid>*:nth-child(4),
+.workspace-content .two-panel-grid>*:nth-child(4),
+.workspace-content .dashboard-grid>*:nth-child(4),
+.workspace-content .quick-actions>*:nth-child(4){animation-delay:.18s}
+.workspace-content .stats-grid>*:nth-child(n+5),
+.workspace-content .two-panel-grid>*:nth-child(n+5),
+.workspace-content .quick-actions>*:nth-child(n+5){animation-delay:.24s}
+.workspace-content .stat,
+.workspace-content .quick-actions>a{transition:transform .22s,box-shadow .22s,border-color .22s}
+.workspace-content .stat:hover{transform:translateY(-3px);box-shadow:0 10px 26px #16321f0d}
+.workspace-content .quick-actions>a:hover{transform:translateY(-3px);border-color:var(--green)}
+
+@media(prefers-reduced-motion:reduce){
+  .workspace-content .stats-grid>*,
+  .workspace-content>.panel,
+  .workspace-content .two-panel-grid>*,
+  .workspace-content .dashboard-grid>*,
+  .workspace-content .dashboard-bottom>*,
+  .workspace-content .quick-actions>*{animation:none}
+  .workspace-content .stat:hover,
+  .workspace-content .quick-actions>a:hover{transform:none}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .reveal-ready [data-reveal],
+  .reveal-ready [data-reveal-group]>*,
+  .reveal-ready [data-reveal-line],
+  .reveal-ready [data-reveal-bar]{opacity:1!important;transform:none!important;transition:none!important}
+  .marquee-track{animation:none;transform:none}
+  .marquee{mask-image:none;overflow-x:auto;scrollbar-width:none}
+  .float-soft,.pulse-soft,.value-animate{animation:none}
+  .read-progress{display:none}
+}

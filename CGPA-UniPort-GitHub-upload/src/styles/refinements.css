@@ -1,0 +1,79 @@
+:root{--muted:#687267}
+:root[data-theme='dark']{--muted:#a7b2a8}
+
+/* Keep navigation in normal flow, then pinned above scrolling page content. */
+@media screen {
+  .public-header,
+  .workspace-header,
+  .onboarding-nav {
+    position: sticky;
+    top: 0;
+    z-index: 45;
+    flex-shrink: 0;
+    box-shadow: 0 4px 18px rgb(18 36 28 / 6%);
+  }
+
+  .onboarding-nav {
+    background: var(--bg);
+  }
+}
+
+main[tabindex='-1']:focus{outline:none}
+.mobile-theme-control{display:flex;align-items:center;justify-content:space-between;margin-top:22px;font-size:12px;color:var(--muted)}
+.mobile-theme-control .theme-button{display:inline-flex!important}
+.gpa-output .output-detail strong{max-width:58%;text-align:right;line-height:1.7}
+.public-content .support-category-button{border-radius:5px;padding-left:7px;padding-right:7px}
+.preview-course-row>select{cursor:pointer}
+.preview-course-row>select:hover{border-color:var(--green)}
+.preview-tabs button:hover,.feature-filter button:hover,.tabs button:hover{color:var(--green)}
+.section-link:hover,.small-link:hover,.hero-sign-in:hover{opacity:.75}
+.upload-label:hover{border-color:var(--green);background:var(--soft)}
+.chart-figure .chart-no-data{pointer-events:none}
+.graduation-demo{display:block;transition:border-color .2s,box-shadow .2s}
+.graduation-demo:hover{border-color:var(--green);box-shadow:0 6px 24px #193a320a}
+
+/* The hero now carries trust chips, so it grows with its content. */
+.home-hero{height:auto;min-height:652px}
+@media(max-width:991px){.home-hero{min-height:624px}}
+@media(max-width:767px){.home-hero{height:auto;min-height:642px}}
+@media(max-width:419px){.home-hero{height:auto;min-height:658px}}
+.admin-workspace .table-toolbar>.button{flex-shrink:0}
+.async-field{min-width:0}
+.select-retry{display:inline-flex;align-items:center;gap:5px;padding:4px 0;border:0;background:transparent;color:var(--green);font-size:9px;margin-top:3px}
+.select-retry:hover{text-decoration:underline}
+.table-filters>.async-field{flex:1;min-width:170px}
+@media(min-width:992px){
+  .desktop-public-nav{font-size:12px}
+  .sign-in-link{font-size:12px}
+  .nav-actions .button{font-size:12px}
+  .announcement-bar{font-size:10px}
+  .hero-eyebrow{font-size:10px}
+  .hero-description{font-size:14px;max-width:405px}
+  .hero-actions .button{font-size:12px;min-height:47px;padding:12px 20px}
+  .hero-sign-in{font-size:11px}
+  .university-ribbon .container>span:first-child{font-size:9px}
+  .university-ribbon .container>span:nth-child(2){font-size:11px}
+  .tool-copy p{font-size:12px}
+  .tool-index{font-size:10px}
+  .story-copy>p{font-size:13px}
+  .benefit h3{font-size:15px}
+  .benefit p{font-size:11px}
+  .step p{font-size:12px}
+  .footer-link-group a{font-size:11px}
+  .footer-top p{font-size:11px}
+  .footer-link-group h3{font-size:11px}
+  .footer-bottom{font-size:10px}
+  .public-footer .legal-note{font-size:9px}
+}
+@media(max-width:767px){
+  .icon-button{min-width:40px;min-height:40px}
+  .preview-course-row select{min-height:39px}
+  .preview-course-row .input{font-size:16px}
+  .notification-item .row-actions{gap:8px}
+  .table-pagination .button{min-width:40px;min-height:40px}
+  .page-header .header-actions .badge{font-size:10px}
+  .table-filters>.async-field{min-width:calc(50% - 8px)}
+  .table-filters>.async-field:nth-child(3){max-width:calc(50% - 6px)}
+  .select-retry{min-height:28px;font-size:10px}
+}
+@media(max-width:419px){.table-filters>.async-field{min-width:100%;max-width:none!important}}

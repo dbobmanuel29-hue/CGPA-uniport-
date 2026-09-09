@@ -1,0 +1,25 @@
+export const FEATURES = [
+  { icon: 'calculator', title: 'GPA Calculator', description: 'Turn course units and grade points into a clearer picture of your semester.', route: '/app/calculator', category: 'Calculate' },
+  { icon: 'chart', title: 'CGPA Calculator', description: 'Bring your semesters together with a credit-weighted cumulative average.', route: '/app/cgpa', category: 'Calculate' },
+  { icon: 'book', title: 'Academic Record', description: 'A home for every course, result and academic session.', route: '/app/academic', category: 'Organize' },
+  { icon: 'grid', title: 'Semester Tracking', description: 'See each semester in context, from your first course to your final year.', route: '/app/academic', category: 'Organize' },
+  { icon: 'timeline', title: 'Academic Timeline', description: 'Follow the chapters of your journey with a visual academic timeline.', route: '/app/timeline', category: 'Organize' },
+  { icon: 'bars', title: 'Analytics', description: 'Understand trends, grade distribution and the areas that need attention.', route: '/app/analytics', category: 'Understand' },
+  { icon: 'chart', title: 'CGPA Projection', description: 'Explore what your next semesters could mean for your final CGPA.', route: '/app/projection', category: 'Plan ahead' },
+  { icon: 'target', title: 'Target CGPA', description: 'Set a goal and work backwards to the GPA you need.', route: '/app/target', category: 'Plan ahead' },
+  { icon: 'spark', title: 'Required GPA', description: 'Know whether a target is achievable under your own assumptions.', route: '/app/target', category: 'Calculate' },
+  { icon: 'alert', title: 'Failed Course Tracking', description: 'Keep courses needing attention visible, without guessing university policy.', route: '/app/failed', category: 'Understand' },
+  { icon: 'refresh', title: 'Repeated Course Tracking', description: 'Review repeated courses using rules supplied by your academic backend.', route: '/app/failed', category: 'Organize' },
+  { icon: 'graduation', title: 'Graduation Readiness', description: 'Follow credit progress and outstanding courses as you plan your next step.', route: '/app/graduation', category: 'Plan ahead' },
+  { icon: 'file', title: 'Reports', description: 'Prepare clearly labelled CGPA+ Academic Reports for personal reference.', route: '/app/reports', category: 'Organize' },
+  { icon: 'bell', title: 'Notifications', description: 'One place for academic reminders, updates and support messages.', route: '/app/notifications', category: 'Organize' },
+  { icon: 'message', title: 'Support', description: 'Raise a request, follow its progress and keep the conversation together.', route: '/app/support', category: 'Organize' },
+  { icon: 'user', title: 'Student Profile', description: 'Your academic identity, tailored exclusively to University of Port Harcourt.', route: '/app/profile', category: 'Organize' },
+];
+export const FAQ = [
+  ['Is CGPA+ an official UniPort platform?', 'No. CGPA+ UniPort is an independent student-focused planning tool. It is not owned by or officially affiliated with the University of Port Harcourt unless that authorization is explicitly announced.'],
+  ['Can I calculate my GPA without an account?', 'Yes. The local GPA, CGPA, target and projection calculators work without signing in. Calculations stay in memory and are not saved as academic records.'],
+  ['Which grading system does the calculator use?', 'The planning tools accept grade points you enter yourself, with an adjustable maximum scale. The example previews use a 5-point scale. Official UniPort grading policies and classifications must be supplied by the backend.'],
+  ['Will my results be saved?', 'Cloud storage is not connected in this frontend release. Save actions show an honest integration notice rather than pretending your results were saved. A future backend will provide authenticated storage.'],
+  ['Is my CGPA+ report an official transcript?', 'No. A CGPA+ Academic Report is for planning and personal reference. Only the University of Port Harcourt can issue an official academic transcript or determine graduation eligibility.'],
+];

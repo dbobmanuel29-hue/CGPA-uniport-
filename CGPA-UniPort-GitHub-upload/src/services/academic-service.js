@@ -1,0 +1,2 @@
+import { createService } from './adapter.js';
+export const academicService = createService('academic', ['getProfile', 'updateProfile', 'getFaculties', 'getDepartments', 'getProgrammes', 'getAcademicVersions', 'getLevels', 'getSemesters', 'getAcademicSessions', 'getGradingRules', 'getCourses', 'getResults', 'getResult', 'saveResult', 'updateResult', 'deleteResult', 'saveSemester', 'getDashboard', 'getSummary', 'getAnalytics', 'getAcademicTimeline', 'getGraduationProgress', 'getFailedCourses', 'getRepeatedCourses', 'getOutstandingCourses', 'getAttentionCourses']);

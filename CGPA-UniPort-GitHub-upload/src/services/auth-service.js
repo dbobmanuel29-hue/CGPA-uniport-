@@ -1,0 +1,2 @@
+import { createService } from './adapter.js';
+export const authService = createService('auth', ['login', 'loginWithGoogle', 'register', 'sendPasswordReset', 'logout', 'getCurrentUser', 'subscribeToAuthState', 'getIdToken', 'sendEmailVerification', 'updatePassword', 'updateAccount', 'changePhoto', 'deleteAccount', 'getSignInMethods', 'getSessions', 'revokeSession', 'getPreferences', 'updatePreferences', 'requestDataExport']);

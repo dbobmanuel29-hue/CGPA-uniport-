@@ -1,0 +1,2 @@
+import { createService } from './adapter.js';
+export const supportService = createService('support', ['createPublicRequest', 'getTickets', 'getTicket', 'createTicket', 'replyToTicket', 'updateTicketStatus', 'assignTicket', 'addInternalNote']);
