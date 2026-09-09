@@ -15,7 +15,7 @@ export default function Dashboard() {
   const data = resource.data || {};
   const summary = data.summary || {};
   const profile = profileResource.data || null;
-  useEffect(() => notificationService.subscribeToNotifications(() => resource.refresh()), [resource.refresh]);
+  useEffect(() => { let unsubscribe; notificationService.subscribeToNotifications(() => resource.refresh()).then(stop => { unsubscribe = stop; }).catch(() => {}); return () => unsubscribe?.(); }, [resource.refresh]);
   const currentSemester = profile ? {
     name: profile.currentSemesterName || findFallback(FALLBACK_SEMESTERS, profile.currentSemesterId)?.name || '--',
     sessionName: profile.currentSessionName || findFallback(FALLBACK_SESSIONS, profile.currentSessionId)?.name || '--',
