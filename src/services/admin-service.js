@@ -10,5 +10,5 @@ export const adminService = createService('admin', [
   'getSemesters', 'createSemester', 'updateSemester', 'deleteSemester',
   'getAcademicSessions', 'createAcademicSession', 'updateAcademicSession', 'deleteAcademicSession',
   'getGradingRules', 'createGradingRule', 'updateGradingRule', 'deleteGradingRule',
-  'getNotifications', 'saveNotificationDraft', 'sendNotification', 'scheduleNotification',
+  'getNotifications', 'saveNotificationDraft', 'sendNotification', 'scheduleNotification', 'updateNotification', 'deleteNotification',
 ]);
