@@ -6,6 +6,7 @@ import { registerStudentResultFixes } from '../integration/student-result-fixes.
 import { registerStudentReadFix } from '../integration/student-read-fix.js';
 import { registerAdminFixes } from '../integration/admin-fix.js';
 import { registerAdminDeleteFix } from '../integration/admin-delete-fix.js';
+import { registerSparkBackendFixes } from '../integration/spark-backend-fixes.js';
 
 const SessionContext = createContext(null);
 
@@ -26,11 +27,27 @@ export function SessionProvider({ children }) {
         await registerStudentReadFix();
         await registerAdminFixes();
         await registerAdminDeleteFix();
+        await registerSparkBackendFixes();
         if (!active) return;
         const value = await authService.getCurrentUser();
+        if (value?.accountStatus === 'deleted') {
+          await authService.logout().catch(() => {});
+          if (active) { setUser(null); setStatus('connected'); }
+          return;
+        }
         if (active && epoch.current === initialEpoch) { setUser(value); setStatus('connected'); }
         const stop = await authService.subscribeToAuthState(value => {
-          if (active) { epoch.current += 1; setUser(value); setStatus('connected'); }
+          if (!active) return;
+          if (value?.accountStatus === 'deleted') {
+            authService.logout().catch(() => {});
+            epoch.current += 1;
+            setUser(null);
+            setStatus('connected');
+            return;
+          }
+          epoch.current += 1;
+          setUser(value);
+          setStatus('connected');
         });
         if (!active && typeof stop === 'function') stop(); else unsubscribe = stop;
       } catch {
