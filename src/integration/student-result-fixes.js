@@ -40,8 +40,6 @@ function friendlyError(error) {
 export async function registerStudentResultFixes() {
   const originalGetResults = academicService.getResults;
   const originalGetResult = academicService.getResult;
-  const originalSaveResult = academicService.saveResult;
-  const originalUpdateResult = academicService.updateResult;
 
   configureServices({
     academic: {
@@ -50,22 +48,43 @@ export async function registerStudentResultFixes() {
         const result = await originalGetResult(resultId);
         return result ? normalize(result) : result;
       },
+
+      // Save directly to Firestore. The old adapter saved the document and then
+      // immediately called getResult(), which performs several extra collection
+      // reads. During onboarding this could make the browser appear frozen.
       saveResult: async payload => {
         const result = normalizePayload(payload);
         try {
           const sdk = await getFirebase();
           if (!sdk?.auth.currentUser) throw Object.assign(new Error('Your session has expired. Please sign in again.'), { code: 'unauthorized' });
-          return normalize(await originalSaveResult(result));
+          const user = sdk.auth.currentUser;
+          const ref = await sdk.db.collection('results').add({
+            ...result,
+            userId: user.uid,
+            status: result.points === 0 ? 'failed' : 'passed',
+            createdAt: window.firebase.firestore.FieldValue.serverTimestamp(),
+            updatedAt: window.firebase.firestore.FieldValue.serverTimestamp(),
+          });
+          return normalize({ id: ref.id, ...result, userId: user.uid, status: result.points === 0 ? 'failed' : 'passed' });
         } catch (error) {
           throw friendlyError(error);
         }
       },
+
+      // Update directly too, so editing a result does not trigger the expensive
+      // save -> getResult -> listOwnedResults chain.
       updateResult: async (resultId, payload) => {
         const result = normalizePayload(payload);
         try {
           const sdk = await getFirebase();
           if (!sdk?.auth.currentUser) throw Object.assign(new Error('Your session has expired. Please sign in again.'), { code: 'unauthorized' });
-          return normalize(await originalUpdateResult(resultId, result));
+          const user = sdk.auth.currentUser;
+          const ref = sdk.db.collection('results').doc(resultId);
+          const snap = await ref.get();
+          if (!snap.exists || snap.data().userId !== user.uid) throw Object.assign(new Error('Result not found.'), { code: 'not-found' });
+          const status = result.points === 0 ? 'failed' : 'passed';
+          await ref.set({ ...result, userId: user.uid, status, updatedAt: window.firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+          return normalize({ id: resultId, ...result, userId: user.uid, status });
         } catch (error) {
           throw friendlyError(error);
         }
