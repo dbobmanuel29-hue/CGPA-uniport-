@@ -9,6 +9,7 @@ import { useHashRoute, navigate } from './utils/routing';
 import { useSession } from './state/session';
 import { useRevealObserver, useScrollProgress } from './hooks/useReveal';
 import Home from './pages/public/Home';
+import LegalPage from './pages/public/LegalPage';
 
 const loadNamed = (loader, name) => lazy(() => loader().then(module => ({ default: module[name] })));
 const publicPages = () => import('./pages/public/Pages');
@@ -19,7 +20,6 @@ const About = loadNamed(publicPages, 'About');
 const Features = loadNamed(publicPages, 'Features');
 const HowItWorks = loadNamed(publicPages, 'HowItWorks');
 const PublicSupport = loadNamed(publicPages, 'PublicSupport');
-const LegalPage = loadNamed(publicPages, 'LegalPage');
 const Auth = lazy(() => import('./pages/auth/Auth'));
 const Onboarding = lazy(() => import('./pages/onboarding/Onboarding'));
 const Dashboard = lazy(() => import('./pages/student/Dashboard'));
