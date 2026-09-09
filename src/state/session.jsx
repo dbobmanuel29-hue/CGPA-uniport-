@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { authService } from '../services/auth-service';
 import { registerFirebaseBackend } from '../integration/firebase-adapters.js';
+import { registerStudentBackendFixes } from '../integration/student-backend-fixes.js';
 const SessionContext = createContext(null);
 export function SessionProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -13,6 +14,7 @@ export function SessionProvider({ children }) {
     (async () => {
       try {
         await registerFirebaseBackend();
+        await registerStudentBackendFixes();
         if (!active) return;
         const value = await authService.getCurrentUser();
         if (active && epoch.current === initialEpoch) { setUser(value); setStatus('connected'); }
