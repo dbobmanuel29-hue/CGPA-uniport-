@@ -37,5 +37,5 @@ export const studentNavigation = [
   { group: 'Your account', label: 'Settings', path: '/app/settings', icon: 'settings' },
 ];
 export const adminNavigation = [
-  ['Dashboard', '', 'grid'], ['Students', '/students', 'users'], ['Academic data', '/academic', 'book'], ['Faculties', '/faculties', 'graduation'], ['Departments', '/departments', 'timeline'], ['Programmes', '/programmes', 'target'], ['Courses', '/courses', 'file'], ['Notifications', '/notifications', 'bell'], ['Support', '/support', 'message'], ['Payments', '/payments', 'card'], ['Reports', '/reports', 'chart'], ['Audit logs', '/logs', 'shield'], ['Settings', '/settings', 'settings'],
+  ['Dashboard', '', 'grid'], ['Students', '/students', 'users'], ['Academic data', '/academic', 'book'], ['Faculties', '/faculties', 'graduation'], ['Departments', '/departments', 'timeline'], ['Programmes', '/programmes', 'target'], ['Courses', '/courses', 'file'], ['Notifications', '/notifications', 'bell'], ['Support', '/support', 'message'], ['Reports', '/reports', 'chart'], ['Audit logs', '/logs', 'shield'], ['Settings', '/settings', 'settings'],
 ].map(([label, path, icon]) => ({ label, path: `/admin${path}`, icon, group: 'Administration' }));
