@@ -1,79 +1,107 @@
 :root{--muted:#687267}
 :root[data-theme='dark']{--muted:#a7b2a8}
 
-/* Keep navigation in normal flow, then pinned above scrolling page content. */
 @media screen {
-  .public-header,
-  .workspace-header,
-  .onboarding-nav {
-    position: sticky;
-    top: 0;
-    z-index: 45;
-    flex-shrink: 0;
-    box-shadow: 0 4px 18px rgb(18 36 28 / 6%);
-  }
-
-  .onboarding-nav {
-    background: var(--bg);
-  }
+  .public-header,.workspace-header,.onboarding-nav{position:sticky;top:0;z-index:45;flex-shrink:0;box-shadow:0 4px 18px rgb(18 36 28 / 6%)}
+  .onboarding-nav{background:var(--bg)}
 }
-
 main[tabindex='-1']:focus{outline:none}
 .mobile-theme-control{display:flex;align-items:center;justify-content:space-between;margin-top:22px;font-size:12px;color:var(--muted)}
 .mobile-theme-control .theme-button{display:inline-flex!important}
 .gpa-output .output-detail strong{max-width:58%;text-align:right;line-height:1.7}
 .public-content .support-category-button{border-radius:5px;padding-left:7px;padding-right:7px}
-.preview-course-row>select{cursor:pointer}
-.preview-course-row>select:hover{border-color:var(--green)}
+.preview-course-row>select{cursor:pointer}.preview-course-row>select:hover{border-color:var(--green)}
 .preview-tabs button:hover,.feature-filter button:hover,.tabs button:hover{color:var(--green)}
 .section-link:hover,.small-link:hover,.hero-sign-in:hover{opacity:.75}
 .upload-label:hover{border-color:var(--green);background:var(--soft)}
 .chart-figure .chart-no-data{pointer-events:none}
-.graduation-demo{display:block;transition:border-color .2s,box-shadow .2s}
-.graduation-demo:hover{border-color:var(--green);box-shadow:0 6px 24px #193a320a}
-
-/* The hero now carries trust chips, so it grows with its content. */
+.graduation-demo{display:block;transition:border-color .2s,box-shadow .2s}.graduation-demo:hover{border-color:var(--green);box-shadow:0 6px 24px #193a320a}
 .home-hero{height:auto;min-height:652px}
-@media(max-width:991px){.home-hero{min-height:624px}}
-@media(max-width:767px){.home-hero{height:auto;min-height:642px}}
-@media(max-width:419px){.home-hero{height:auto;min-height:658px}}
-.admin-workspace .table-toolbar>.button{flex-shrink:0}
-.async-field{min-width:0}
-.select-retry{display:inline-flex;align-items:center;gap:5px;padding:4px 0;border:0;background:transparent;color:var(--green);font-size:9px;margin-top:3px}
-.select-retry:hover{text-decoration:underline}
-.table-filters>.async-field{flex:1;min-width:170px}
-@media(min-width:992px){
-  .desktop-public-nav{font-size:12px}
-  .sign-in-link{font-size:12px}
-  .nav-actions .button{font-size:12px}
-  .announcement-bar{font-size:10px}
-  .hero-eyebrow{font-size:10px}
-  .hero-description{font-size:14px;max-width:405px}
-  .hero-actions .button{font-size:12px;min-height:47px;padding:12px 20px}
-  .hero-sign-in{font-size:11px}
-  .university-ribbon .container>span:first-child{font-size:9px}
-  .university-ribbon .container>span:nth-child(2){font-size:11px}
-  .tool-copy p{font-size:12px}
-  .tool-index{font-size:10px}
-  .story-copy>p{font-size:13px}
-  .benefit h3{font-size:15px}
-  .benefit p{font-size:11px}
-  .step p{font-size:12px}
-  .footer-link-group a{font-size:11px}
-  .footer-top p{font-size:11px}
-  .footer-link-group h3{font-size:11px}
-  .footer-bottom{font-size:10px}
-  .public-footer .legal-note{font-size:9px}
+.admin-workspace .table-toolbar>.button{flex-shrink:0}.async-field{min-width:0}.select-retry{display:inline-flex;align-items:center;gap:5px;padding:4px 0;border:0;background:transparent;color:var(--green);font-size:9px;margin-top:3px}.select-retry:hover{text-decoration:underline}.table-filters>.async-field{flex:1;min-width:170px}
+
+/* Calculator redesign: roomy desktop, stacked tablet, compact mobile. */
+.calculator-layout{grid-template-columns:minmax(0,1fr) 330px;gap:24px;align-items:start}
+.calculator-summary{min-width:0;position:sticky;top:92px}
+.course-entry{min-width:0;overflow:hidden}
+.course-grid-labels,.course-entry-row{grid-template-columns:minmax(90px,1fr) minmax(140px,1.5fr) 90px 110px 32px;gap:10px}
+.course-entry-row .field{min-width:0}
+.course-entry-row .input{width:100%;min-width:0}
+.planner-grid{grid-template-columns:minmax(0,1.25fr) minmax(280px,.85fr);gap:24px}
+.projection-inputs{grid-template-columns:repeat(3,minmax(0,1fr)) auto}
+.projection-output-grid{grid-template-columns:minmax(0,1.5fr) minmax(260px,1fr)}
+.student-delete-button{color:var(--danger)!important}
+
+@media(min-width:1200px){
+  .calculator-layout{grid-template-columns:minmax(0,1fr) 340px}
+  .planner-grid{grid-template-columns:minmax(0,1.25fr) minmax(320px,.85fr)}
 }
+
+@media(max-width:1199px){
+  .calculator-layout{grid-template-columns:1fr;gap:18px}
+  .calculator-summary{position:static;display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,.7fr);gap:16px;align-items:start}
+  .calculator-summary>.calculator-tip{grid-column:1/-1}
+  .gpa-output{min-width:0}
+  .planner-grid{grid-template-columns:1fr;gap:18px}
+  .projection-inputs{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .projection-inputs>.button{grid-column:1/-1;justify-self:start}
+  .projection-output-grid{grid-template-columns:1fr 1fr}
+}
+
 @media(max-width:767px){
-  .icon-button{min-width:40px;min-height:40px}
-  .preview-course-row select{min-height:39px}
-  .preview-course-row .input{font-size:16px}
-  .notification-item .row-actions{gap:8px}
-  .table-pagination .button{min-width:40px;min-height:40px}
-  .page-header .header-actions .badge{font-size:10px}
-  .table-filters>.async-field{min-width:calc(50% - 8px)}
-  .table-filters>.async-field:nth-child(3){max-width:calc(50% - 6px)}
-  .select-retry{min-height:28px;font-size:10px}
+  .workspace-content{padding-left:18px;padding-right:18px}
+  .calculator-nav{gap:20px;margin-left:-2px;margin-right:-2px;padding-bottom:2px}
+  .calculator-nav a{font-size:10.5px;padding-bottom:12px}
+  .calculator-layout,.planner-grid{display:flex;flex-direction:column;gap:14px}
+  .calculator-layout>* ,.planner-grid>*{width:100%;min-width:0}
+  .calculator-summary{display:flex;flex-direction:column;gap:12px;width:100%}
+  .course-entry{padding:18px 15px}
+  .course-entry .panel-header{align-items:flex-start;gap:12px;flex-wrap:wrap}
+  .course-entry .panel-header>div{min-width:0;flex:1}
+  .scale-select{width:100%;justify-content:space-between;border-top:1px solid var(--border);padding-top:12px}
+  .course-grid-labels{display:none}
+  .course-entry-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 34px;gap:9px;padding:13px 0}
+  .course-entry-row .field{display:block;min-width:0}
+  .course-entry-row .field:nth-child(1),.course-entry-row .field:nth-child(2){grid-column:1/-1}
+  .course-entry-row .field:nth-child(3),.course-entry-row .field:nth-child(4){grid-column:auto}
+  .course-entry-row .remove-course{grid-column:3;grid-row:3;align-self:end;width:34px;height:38px}
+  .course-entry-row .field-label{display:block;font-size:9px;margin-bottom:5px}
+  .course-entry-row .input{font-size:13px;min-height:42px;padding:9px 10px}
+  .add-course-button{min-height:44px}
+  .calculator-form-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  .calculator-form-actions>.button{width:100%;min-height:44px}
+  .calculator-form-actions>.text-button{grid-column:1/-1;margin-left:0;justify-self:center}
+  .gpa-output{padding:22px 18px;border-radius:11px}
+  .gpa-big{font-size:clamp(46px,16vw,64px);letter-spacing:-2px}
+  .gpa-output .output-detail{font-size:10px}
+  .gpa-output .output-detail strong{max-width:62%}
+  .projection-inputs{grid-template-columns:1fr 1fr;gap:11px}
+  .projection-inputs>.button{grid-column:1/-1;width:100%;justify-self:stretch}
+  .projection-output-grid{grid-template-columns:1fr;gap:14px}
+  .range{margin:15px 0 20px}
+  .custom-projection-result strong{font-size:34px}
+  .two-panel-grid{grid-template-columns:1fr}
 }
-@media(max-width:419px){.table-filters>.async-field{min-width:100%;max-width:none!important}}
+
+@media(max-width:419px){
+  .workspace-content{padding-left:14px;padding-right:14px}
+  .page-header{margin-bottom:22px}
+  .page-header h1{font-size:24px;line-height:1.22}
+  .page-header p{font-size:11px}
+  .course-entry{padding:15px 12px}
+  .course-entry-row{grid-template-columns:minmax(0,1fr) 34px;gap:8px}
+  .course-entry-row .field:nth-child(1),.course-entry-row .field:nth-child(2){grid-column:1/-1}
+  .course-entry-row .field:nth-child(3){grid-column:1}.course-entry-row .field:nth-child(4){grid-column:1}
+  .course-entry-row .remove-course{grid-column:2;grid-row:4;align-self:end}
+  .calculator-form-actions{grid-template-columns:1fr}
+  .calculator-form-actions>.button{grid-column:1}
+  .calculator-form-actions>.text-button{grid-column:1}
+  .projection-inputs{grid-template-columns:1fr}
+  .projection-inputs>.button{grid-column:1}
+}
+
+@media(min-width:768px) and (max-width:991px){
+  .workspace-content{padding-left:24px;padding-right:24px}
+  .calculator-summary{grid-template-columns:1fr 1fr}
+  .course-entry-row .input{font-size:11px}
+  .course-grid-labels,.course-entry-row{grid-template-columns:minmax(80px,1fr) minmax(110px,1.2fr) 70px 90px 28px;gap:7px}
+}
