@@ -15,7 +15,7 @@ const loadNamed = (loader, name) => lazy(() => loader().then(module => ({ defaul
 const publicPages = () => import('./pages/public/Pages');
 const calculators = () => import('./pages/student/Calculators');
 const journeys = () => import('./pages/student/Journey');
-const operations = () => import('./pages/admin/Operations');
+const adminSupportAndAudit = () => import('./pages/admin/SupportAndAudit');
 const About = loadNamed(publicPages, 'About');
 const Features = loadNamed(publicPages, 'Features');
 const HowItWorks = loadNamed(publicPages, 'HowItWorks');
@@ -42,9 +42,9 @@ const AdminStudents = lazy(() => import('./pages/admin/Students'));
 const AdminAcademic = lazy(() => import('./pages/admin/AcademicData'));
 const AcademicCrud = loadNamed(() => import('./pages/admin/AcademicData'), 'AcademicCrud');
 const AdminNotifications = lazy(() => import('./pages/admin/Notifications'));
-const AdminSupport = loadNamed(operations, 'AdminSupport');
+const AdminSupport = loadNamed(adminSupportAndAudit, 'AdminSupport');
 const AdminReports = lazy(() => import('./pages/admin/Reports'));
-const AuditLogs = loadNamed(operations, 'AuditLogs');
+const AuditLogs = loadNamed(adminSupportAndAudit, 'AuditLogs');
 const AdminSettings = lazy(() => import('./pages/admin/Settings'));
 
 const PUBLIC_CALCULATORS = new Set(['/app/calculator', '/app/cgpa', '/app/target', '/app/projection']);
