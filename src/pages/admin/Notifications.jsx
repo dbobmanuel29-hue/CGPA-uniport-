@@ -1,0 +1,25 @@
+import { useState } from 'react';
+import { PageHeader, Panel, Button, Field, Input, Select, Textarea, Badge, Notice, AsyncSelect } from '../../components/ui';
+import { Modal, ActionError, useAction } from '../../components/feedback';
+import { DataTable } from '../../components/table';
+import { Icon } from '../../components/Icon';
+import { useResource } from '../../hooks/useResource';
+import { adminService } from '../../services/admin-service';
+import { dateTime, titleCase } from '../../utils/formatting';
+
+export default function AdminNotifications() {
+  const [form, setForm] = useState({ title: '', message: '', type: 'announcement', audience: 'all_students', facultyId: '', priority: 'normal' });
+  const [validation, setValidation] = useState('');
+  const [confirm, setConfirm] = useState(false);
+  const action = useAction();
+  const resource = useResource(() => adminService.getNotifications());
+  const change = key => e => setForm({ ...form, [key]: e.target.value });
+  function submit(e) {
+    e.preventDefault();
+    if (form.audience === 'faculty' && !form.facultyId) return setValidation('Select a faculty before sending.');
+    if (!form.title.trim() || form.message.trim().length < 5) return setValidation('Enter a title and a message of at least 5 characters.');
+    setValidation('');
+    setConfirm(true);
+  }
+  return <><PageHeader eyebrow="TIMELY. RELEVANT. CONSIDERED." title="Platform notifications." description="Send announcements and academic updates directly to students in their CGPA+ dashboard." /><div className="compose-grid"><Panel title="Compose a notification"><form className="form-stack" onSubmit={submit}><Field label="Title"><Input required maxLength={180} value={form.title} onChange={change('title')} placeholder="A clear subject line" /></Field><Field label="Message"><Textarea required minLength={5} maxLength={5000} value={form.message} onChange={change('message')} placeholder="What do students need to know?" /></Field><div className="form-grid"><Field label="Type"><Select value={form.type} onChange={change('type')}>{['announcement', 'academic', 'system', 'support'].map(t => <option value={t} key={t}>{titleCase(t)}</option>)}</Select></Field><Field label="Audience"><Select value={form.audience} onChange={change('audience')}><option value="all_students">All students</option><option value="faculty">Selected faculty</option></Select></Field>{form.audience === 'faculty' && <AsyncSelect label="Faculty" loader={() => adminService.getFaculties()} value={form.facultyId} onChange={change('facultyId')} />}<Field label="Priority"><Select value={form.priority} onChange={change('priority')}>{['low', 'normal', 'high'].map(p => <option value={p} key={p}>{titleCase(p)}</option>)}</Select></Field></div>{validation && <p className="field-error" role="alert">{validation}</p>}<ActionError error={action.error} /><div className="compose-actions"><Button type="submit" endIcon="arrow" busy={action.busy}>Send notification</Button></div></form></Panel><Panel title="Message preview" description="This is exactly what the notification content will contain."><div className="notification-compose-preview"><span className="notification-symbol"><Icon name="bell" size={24} /></span><Badge>{titleCase(form.type)}</Badge><h3>{form.title || 'Your notification title'}</h3><p>{form.message || 'Your message will appear here as you write.'}</p><div><span>{titleCase(form.audience)}</span><Badge tone={form.priority === 'high' ? 'warning' : 'neutral'}>{titleCase(form.priority)} priority</Badge></div></div><Notice>Sending creates real notification records for the selected students. Students see them in their dashboard and notification center.</Notice></Panel></div><h2 className="section-mini-heading">Notification history</h2><DataTable resource={resource} columns={[{ key: 'title', label: 'Title' }, { key: 'type', label: 'Type', render: titleCase }, { key: 'audience', label: 'Audience', render: titleCase }, { key: 'status', label: 'Status', render: v => <Badge>{titleCase(v)}</Badge> }, { key: 'recipientCount', label: 'Recipients' }, { key: 'createdAt', label: 'Created', render: dateTime }]} emptyTitle="No notifications sent yet." /><Modal open={confirm} onClose={() => setConfirm(false)} title="Send this notification?"><p className="muted">{form.title} will be delivered to {titleCase(form.audience).toLowerCase()}. Students will see it in their dashboard notification area.</p><ActionError error={action.error} /><div className="modal-actions"><Button variant="outline" onClick={() => setConfirm(false)}>Cancel</Button><Button busy={action.busy} onClick={() => action.run(() => adminService.sendNotification(form), () => { setConfirm(false); setForm({ title: '', message: '', type: 'announcement', audience: 'all_students', facultyId: '', priority: 'normal' }); resource.refresh(); }, 'Notification sent to the selected students.')}>Send now</Button></div></Modal></>;
+}
