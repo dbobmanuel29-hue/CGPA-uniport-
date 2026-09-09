@@ -1,11 +1,13 @@
 const { onCall, HttpsError } = require('firebase-functions/v2/https');
 const { onDocumentWritten } = require('firebase-functions/v2/firestore');
+const { defineSecret } = require('firebase-functions/params');
 const { initializeApp } = require('firebase-admin/app');
 const { getAuth } = require('firebase-admin/auth');
 const { getFirestore, FieldValue } = require('firebase-admin/firestore');
 
 initializeApp();
 const db = getFirestore();
+const bootstrapAdminSecret = defineSecret('CGPA_BOOTSTRAP_ADMIN_SECRET');
 
 function isAdmin(request) {
   return !!request.auth && (request.auth.token?.admin === true || request.auth.token?.role === 'admin');
@@ -39,10 +41,10 @@ async function enforceRateLimit(request, { name, limit, windowSeconds }) {
   });
 }
 
-exports.grantAdminRole = onCall(async request => {
+exports.grantAdminRole = onCall({ secrets: [bootstrapAdminSecret] }, async request => {
   await enforceRateLimit(request, { name: 'grantAdminRole', limit: 5, windowSeconds: 15 * 60 });
-  const bootstrapSecret = process.env.CGPA_BOOTSTRAP_ADMIN_SECRET;
-  if (!bootstrapSecret || request.data?.secret !== bootstrapSecret) throw new HttpsError('permission-denied', 'Invalid bootstrap credentials.');
+  const secret = bootstrapAdminSecret.value();
+  if (!secret || request.data?.secret !== secret) throw new HttpsError('permission-denied', 'Invalid bootstrap credentials.');
   const email = String(request.data?.email || '').trim().toLowerCase();
   if (!email) throw new HttpsError('invalid-argument', 'An email address is required.');
   const user = await getAuth().getUserByEmail(email);
