@@ -1,6 +1,6 @@
 import { createService } from './adapter.js';
 export const adminService = createService('admin', [
-  'getDashboard', 'getStudents', 'getStudent', 'getAcademicProfile', 'getAuditLogs', 'getSettings', 'updateSettings',
+  'getDashboard', 'getStudents', 'getStudent', 'deleteStudent', 'getAcademicProfile', 'getAuditLogs', 'getSettings', 'updateSettings',
   'getFaculties', 'createFaculty', 'updateFaculty', 'deleteFaculty',
   'getDepartments', 'createDepartment', 'updateDepartment', 'deleteDepartment',
   'getProgrammes', 'createProgramme', 'updateProgramme', 'deleteProgramme',
