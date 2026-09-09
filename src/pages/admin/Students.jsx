@@ -11,9 +11,26 @@ import { resultColumns } from '../student/Academic';
 function StudentDetail({ studentId, initialTab = 'profile', onClose }) {
   const [tab, setTab] = useState(initialTab);
   const resource = useResource(() => adminService.getStudent(studentId), [studentId], !!studentId);
-  const academic = useResource(() => adminService.getAcademicProfile(studentId), [studentId], !!studentId);
   useEffect(() => { setTab(initialTab); }, [studentId, initialTab]);
-  return <Modal open={!!studentId} onClose={onClose} title={resource.data?.fullName || 'Student details'} description="Personal and academic data require authorized backend access." wide><Tabs value={tab} onChange={setTab} options={['profile', 'academic', 'results', 'GPA history', 'support history']} />{tab === 'academic' ? <ConnectionState resource={academic} title="academic profile" emptyTitle="No academic profile found.">{p => <dl className="detail-grid">{[['universityName', 'University'], ['facultyName', 'Faculty'], ['departmentName', 'Department'], ['programmeName', 'Programme'], ['currentLevelName', 'Level'], ['admissionSessionName', 'Admission session'], ['currentSessionName', 'Current session'], ['currentSemesterName', 'Semester']].map(([key, label]) => <div key={key}><dt>{label}</dt><dd>{p[key] || '--'}</dd></div>)}</dl>}</ConnectionState> : <ConnectionState resource={resource} title="student details" emptyTitle="Student not found.">{data => <>{tab === 'profile' && <><dl className="detail-grid">{[['fullName', 'Full name'], ['email', 'Email'], ['phone', 'Phone'], ['accountStatus', 'Account status'], ['createdAt', 'Registered']].map(([key, label]) => <div key={key}><dt>{label}</dt><dd>{key === 'createdAt' ? date(data[key]) : data[key] || '--'}</dd></div>)}</dl><div className="stats-grid stats-three"><Stat label="Current CGPA" value={number(data.summary?.cgpa)} accent /><Stat label="Current GPA" value={number(data.summary?.gpa)} /><Stat label="Credits" value={number(data.summary?.totalCredits, 0)} /></div></>}{tab === 'results' && <DataTable columns={resultColumns} resource={{ status: 'success', data: data.results || [], error: null, refresh: resource.refresh }} emptyTitle="No academic results available." />}{tab === 'GPA history' && <LineChart values={(data.gpaHistory || []).map(r => r.gpa)} labels={(data.gpaHistory || []).map(r => r.label)} max={data.summary?.maxPoint || 5} />}{tab === 'support history' && <DataTable resource={{ status: 'success', data: data.tickets || [], error: null, refresh: resource.refresh }} columns={[{ key: 'id', label: 'Request' }, { key: 'subject', label: 'Subject' }, { key: 'status', label: 'Status', render: titleCase }, { key: 'createdAt', label: 'Date', render: date }]} emptyTitle="No support history available." />}</>}</ConnectionState>}</Modal>;
+
+  return <Modal open={!!studentId} onClose={onClose} title={resource.data?.fullName || 'Student details'} description="Personal and academic data require authorized backend access." wide>
+    <Tabs value={tab} onChange={setTab} options={['profile', 'academic', 'results', 'GPA history', 'support history']} />
+    <ConnectionState resource={resource} title="student details" emptyTitle="Student not found.">
+      {data => {
+        const academic = data.academicProfile;
+        return <>
+          {tab === 'profile' && <>
+            <dl className="detail-grid">{[['fullName', 'Full name'], ['email', 'Email'], ['phone', 'Phone'], ['accountStatus', 'Account status'], ['createdAt', 'Registered']].map(([key, label]) => <div key={key}><dt>{label}</dt><dd>{key === 'createdAt' ? date(data[key]) : data[key] || '--'}</dd></div>)}</dl>
+            <div className="stats-grid stats-three"><Stat label="Current CGPA" value={number(data.summary?.cgpa)} accent /><Stat label="Current GPA" value={number(data.summary?.gpa)} /><Stat label="Credits" value={number(data.summary?.totalCredits, 0)} /></div>
+          </>}
+          {tab === 'academic' && <ConnectionState resource={{ status: academic ? 'success' : 'empty', data: academic, error: null }} title="academic profile" emptyTitle="No academic profile found.">{p => <dl className="detail-grid">{[['universityName', 'University'], ['facultyName', 'Faculty'], ['departmentName', 'Department'], ['programmeName', 'Programme'], ['currentLevelName', 'Level'], ['admissionSessionName', 'Admission session'], ['currentSessionName', 'Current session'], ['currentSemesterName', 'Semester']].map(([key, label]) => <div key={key}><dt>{label}</dt><dd>{p[key] || '--'}</dd></div>)}</dl>}</ConnectionState>}
+          {tab === 'results' && <DataTable columns={resultColumns} resource={{ status: 'success', data: data.results || [], error: null, refresh: resource.refresh }} emptyTitle="No academic results available." />}
+          {tab === 'GPA history' && <LineChart values={(data.gpaHistory || []).map(r => r.gpa)} labels={(data.gpaHistory || []).map(r => r.label)} max={data.summary?.maxPoint || 5} />}
+          {tab === 'support history' && <DataTable resource={{ status: 'success', data: data.tickets || [], error: null, refresh: resource.refresh }} columns={[{ key: 'id', label: 'Request' }, { key: 'subject', label: 'Subject' }, { key: 'status', label: 'Status', render: titleCase }, { key: 'createdAt', label: 'Date', render: date }]} emptyTitle="No support history available." />}
+        </>;
+      }}
+    </ConnectionState>
+  </Modal>;
 }
 
 export default function Students() {
