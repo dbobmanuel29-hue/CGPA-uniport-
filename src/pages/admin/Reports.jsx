@@ -1,0 +1,21 @@
+import { useState } from 'react';
+import { PageHeader, Panel, Button, Field, Input, Select, Badge } from '../../components/ui';
+import { Modal, ActionError, useAction } from '../../components/feedback';
+import { DataTable } from '../../components/table';
+import { ReportPreview } from '../../components/report-preview';
+import { reportService } from '../../services/report-service';
+import { useResource } from '../../hooks/useResource';
+import { downloadReportFile } from '../../utils/files';
+import { dateTime, titleCase } from '../../utils/formatting';
+
+export default function AdminReports() {
+  const [request, setRequest] = useState({ type: 'academic', from: '', to: '', studentId: '', scope: 'admin' });
+  const [preview, setPreview] = useState(null);
+  const [reportId, setReportId] = useState(null);
+  const [confirm, setConfirm] = useState(false);
+  const action = useAction();
+  const resource = useResource(() => reportService.getReports(request), [request.type, request.from, request.to]);
+  const change = key => e => { setRequest({ ...request, [key]: e.target.value }); setPreview(null); setReportId(null); };
+  const studentReport = request.type === 'academic' || request.type === 'semester';
+  return <><PageHeader eyebrow="THE INFORMATION BEHIND THE DECISIONS" title="Admin report center." description="Academic and support reporting for platform administration. Reports are clearly labelled as CGPA+ documents, never official university transcripts." /><div className="reports-layout"><div><Panel title="Report configuration"><form className="form-stack" onSubmit={e => { e.preventDefault(); action.run(() => reportService.getReportPreview({ ...request, reportId }), setPreview); }}><Field label="Report category"><Select value={request.type} onChange={change('type')}><option value="academic">Student academic report</option><option value="semester">Semester report</option><option value="platform">Platform report</option><option value="support">Support report</option></Select></Field>{studentReport && <Field label="Student ID" hint="Use an existing backend student ID."><Input value={request.studentId} onChange={change('studentId')} placeholder="Student ID" /></Field>}<div className="form-grid"><Field label="From"><Input type="date" value={request.from} max={request.to || undefined} onChange={change('from')} /></Field><Field label="To"><Input type="date" value={request.to} min={request.from || undefined} onChange={change('to')} /></Field></div><Button variant="outline" type="submit" icon="eye" busy={action.busy}>Load preview</Button><Button icon="file" onClick={() => setConfirm(true)}>Generate report</Button><Button variant="outline" icon="download" busy={action.busy} onClick={() => action.run(() => reportService.downloadReport({ ...request, reportId }), f => downloadReportFile(f, `CGPA-${request.type}-Report.pdf`))}>Download</Button><ActionError error={action.error} /></form></Panel></div><ReportPreview preview={preview} type={studentReport ? (request.type === 'academic' ? 'Student academic report' : 'Semester report') : `${titleCase(request.type)} report`} /></div><h2 className="section-mini-heading">Generated reports</h2><DataTable resource={resource} columns={[{ key: 'id', label: 'Report ID' }, { key: 'name', label: 'Report name' }, { key: 'type', label: 'Type', render: titleCase }, { key: 'status', label: 'Status', render: v => <Badge>{titleCase(v)}</Badge> }, { key: 'createdAt', label: 'Generated', render: dateTime }]} onView={r => { setReportId(r.id); action.run(() => reportService.getReportPreview({ scope: 'admin', reportId: r.id }), setPreview); }} emptyTitle="No reports have been loaded." /><Modal open={confirm} onClose={() => setConfirm(false)} title="Generate an admin report?"><p className="muted">The backend will authorize the requested academic or support data and create a CGPA+ report.</p><ActionError error={action.error} /><div className="modal-actions"><Button variant="outline" onClick={() => setConfirm(false)}>Cancel</Button><Button busy={action.busy} onClick={() => action.run(() => reportService.generateReport(request), r => { setReportId(r.id); if (r.preview) setPreview(r.preview); setConfirm(false); resource.refresh(); }, 'Report generation request accepted.')}>Generate report</Button></div></Modal></>;
+}
