@@ -41,9 +41,9 @@ const AdminDashboard = lazy(() => import('./pages/admin/Dashboard'));
 const AdminStudents = lazy(() => import('./pages/admin/Students'));
 const AdminAcademic = lazy(() => import('./pages/admin/AcademicData'));
 const AcademicCrud = loadNamed(() => import('./pages/admin/AcademicData'), 'AcademicCrud');
-const AdminNotifications = loadNamed(operations, 'AdminNotifications');
+const AdminNotifications = lazy(() => import('./pages/admin/Notifications'));
 const AdminSupport = loadNamed(operations, 'AdminSupport');
-const AdminReports = loadNamed(operations, 'AdminReports');
+const AdminReports = lazy(() => import('./pages/admin/Reports'));
 const AuditLogs = loadNamed(operations, 'AuditLogs');
 const AdminSettings = lazy(() => import('./pages/admin/Settings'));
 
