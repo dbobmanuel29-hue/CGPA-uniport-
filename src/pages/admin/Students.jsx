@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { PageHeader, Button, Badge, Tabs, AsyncSelect, Stat } from '../../components/ui';
-import { ConnectionState, Modal } from '../../components/feedback';
+import { ConnectionState, Modal, useAction } from '../../components/feedback';
 import { DataTable, SearchBox, StatusFilter } from '../../components/table';
 import { LineChart } from '../../components/charts';
 import { adminService } from '../../services/admin-service';
@@ -40,6 +40,35 @@ export default function Students() {
   const [student, setStudent] = useState(null);
   const [tab, setTab] = useState('profile');
   const resource = useResource(() => adminService.getStudents({ status, facultyId: faculty }), [status, faculty]);
-  const columns = [{ key: 'fullName', label: 'Name', render: v => <strong>{v}</strong> }, { key: 'email', label: 'Email' }, { key: 'facultyName', label: 'Faculty' }, { key: 'departmentName', label: 'Department' }, { key: 'programmeName', label: 'Programme' }, { key: 'levelName', label: 'Level' }, { key: 'cgpa', label: 'CGPA', render: v => number(v) }, { key: 'accountStatus', label: 'Status', render: v => <Badge tone={v === 'active' ? 'success' : v === 'suspended' ? 'danger' : 'neutral'}>{titleCase(v) || '--'}</Badge> }, { key: 'academic', label: 'Academic profile', render: (_, row) => <Button variant="ghost" className="button-small" onClick={() => { setTab('academic'); setStudent(row.id); }}>View academic</Button> }];
-  return <><PageHeader eyebrow="STUDENTS AT THE CENTER" title="The student directory." description="Find an account, review academic context and understand a student's journey." actions={<Button variant="outline" icon="refresh" onClick={resource.refresh}>Refresh</Button>} /><div className="table-toolbar"><SearchBox value={search} onChange={setSearch} placeholder="Search name, email or programme..." /><StatusFilter value={status} onChange={setStatus} options={['active', 'pending', 'suspended']} /></div><div className="admin-student-filters"><AsyncSelect label="Faculty" loader={() => adminService.getFaculties()} required={false} value={faculty} onChange={e => setFaculty(e.target.value)} placeholder="All faculties" /></div><DataTable columns={columns} resource={resource} search={search} onView={row => { setTab('profile'); setStudent(row.id); }} emptyTitle="No students loaded." emptyDescription="Student accounts and their academic information come from the authorized admin service." /><StudentDetail studentId={student} initialTab={tab} onClose={() => setStudent(null)} /></>;
+  const action = useAction();
+
+  const removeStudent = row => {
+    const name = row.fullName || row.email || 'this student';
+    if (!window.confirm(`Delete ${name}? This permanently removes the student's UniPort profile, results, support history and other stored account data. This cannot be undone.`)) return;
+    action.run(
+      () => adminService.deleteStudent(row.id),
+      () => { setStudent(null); resource.refresh(); }
+    );
+  };
+
+  const columns = [
+    { key: 'fullName', label: 'Name', render: v => <strong>{v}</strong> },
+    { key: 'email', label: 'Email' },
+    { key: 'facultyName', label: 'Faculty' },
+    { key: 'departmentName', label: 'Department' },
+    { key: 'programmeName', label: 'Programme' },
+    { key: 'levelName', label: 'Level' },
+    { key: 'cgpa', label: 'CGPA', render: v => number(v) },
+    { key: 'accountStatus', label: 'Status', render: v => <Badge tone={v === 'active' ? 'success' : v === 'suspended' ? 'danger' : 'neutral'}>{titleCase(v) || '--'}</Badge> },
+    { key: 'academic', label: 'Academic profile', render: (_, row) => <Button variant="ghost" className="button-small" onClick={() => { setTab('academic'); setStudent(row.id); }}>View academic</Button> },
+    { key: 'delete', label: 'Delete', render: (_, row) => <Button variant="ghost" className="button-small student-delete-button" disabled={action.busy} onClick={() => removeStudent(row)}>Delete</Button> },
+  ];
+
+  return <>
+    <PageHeader eyebrow="STUDENTS AT THE CENTER" title="The student directory." description="Find an account, review academic context and understand a student's journey." actions={<Button variant="outline" icon="refresh" onClick={resource.refresh}>Refresh</Button>} />
+    <div className="table-toolbar"><SearchBox value={search} onChange={setSearch} placeholder="Search name, email or programme..." /><StatusFilter value={status} onChange={setStatus} options={['active', 'pending', 'suspended']} /></div>
+    <div className="admin-student-filters"><AsyncSelect label="Faculty" loader={() => adminService.getFaculties()} required={false} value={faculty} onChange={e => setFaculty(e.target.value)} placeholder="All faculties" /></div>
+    <DataTable columns={columns} resource={resource} search={search} onView={row => { setTab('profile'); setStudent(row.id); }} emptyTitle="No students loaded." emptyDescription="Student accounts and their academic information come from the authorized admin service." />
+    <StudentDetail studentId={student} initialTab={tab} onClose={() => setStudent(null)} />
+  </>;
 }
