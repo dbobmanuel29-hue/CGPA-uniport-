@@ -50,71 +50,20 @@ const AuditLogs = loadNamed(operations, 'AuditLogs');
 const AdminSettings = lazy(() => import('./pages/admin/Settings'));
 
 const ROUTES = {
-  '/': { title: 'Your Academic Journey, Simplified', element: <Home /> },
-  '/about': { title: 'About', element: <About /> },
-  '/features': { title: 'Features', element: <Features /> },
-  '/how-it-works': { title: 'How it works', element: <HowItWorks /> },
-  '/support': { title: 'Help center', element: <PublicSupport /> },
-  '/terms': { title: 'Terms of service', element: <LegalPage type="terms" /> },
-  '/privacy': { title: 'Privacy policy', element: <LegalPage type="privacy" /> },
-  '/login': { title: 'Sign in', element: <Auth mode="login" /> },
-  '/register': { title: 'Create account', element: <Auth mode="register" /> },
-  '/forgot-password': { title: 'Reset password', element: <Auth mode="forgot-password" /> },
-  '/onboarding': { title: 'Your UniPort profile', element: <Onboarding /> },
-  '/app': { title: 'Your workspace', element: <Dashboard /> },
-  '/app/academic': { title: 'Academic record', element: <Academic /> },
-  '/app/calculator': { title: 'GPA calculator', element: <Gpa /> },
-  '/app/cgpa': { title: 'CGPA calculator', element: <Cgpa /> },
-  '/app/target': { title: 'Target CGPA', element: <Target /> },
-  '/app/projection': { title: 'CGPA projection', element: <Projection /> },
-  '/app/analytics': { title: 'Analytics', element: <Analytics /> },
-  '/app/timeline': { title: 'Academic timeline', element: <Timeline /> },
-  '/app/graduation': { title: 'Graduation planning', element: <Graduation /> },
-  '/app/failed': { title: 'Course attention', element: <CourseAttention /> },
-  '/app/reports': { title: 'Academic reports', element: <Reports /> },
-  '/app/notifications': { title: 'Notifications', element: <Notifications /> },
-  '/app/support': { title: 'Support requests', element: <Support /> },
-  '/app/profile': { title: 'Your profile', element: <Profile /> },
-  '/app/settings': { title: 'Settings', element: <Settings /> },
-  '/admin': { title: 'Admin dashboard', element: <AdminDashboard /> },
-  '/admin/students': { title: 'Student directory', element: <AdminStudents /> },
-  '/admin/academic': { title: 'Academic data', element: <AdminAcademic /> },
-  '/admin/faculties': { title: 'Faculties', element: <AcademicCrud entity="faculties" /> },
-  '/admin/departments': { title: 'Departments', element: <AcademicCrud entity="departments" /> },
-  '/admin/programmes': { title: 'Programmes', element: <AcademicCrud entity="programmes" /> },
-  '/admin/courses': { title: 'Courses', element: <AcademicCrud entity="courses" /> },
-  '/admin/notifications': { title: 'Admin notifications', element: <AdminNotifications /> },
-  '/admin/support': { title: 'Support desk', element: <AdminSupport /> },
-  '/admin/payments': { title: 'Payments', element: <AdminPayments /> },
-  '/admin/reports': { title: 'Admin reports', element: <AdminReports /> },
-  '/admin/logs': { title: 'Audit trail', element: <AuditLogs /> },
-  '/admin/settings': { title: 'Admin settings', element: <AdminSettings /> },
+  '/': { title: 'Your Academic Journey, Simplified', element: <Home /> }, '/about': { title: 'About', element: <About /> }, '/features': { title: 'Features', element: <Features /> }, '/how-it-works': { title: 'How it works', element: <HowItWorks /> }, '/support': { title: 'Help center', element: <PublicSupport /> }, '/terms': { title: 'Terms of service', element: <LegalPage type="terms" /> }, '/privacy': { title: 'Privacy policy', element: <LegalPage type="privacy" /> }, '/login': { title: 'Sign in', element: <Auth mode="login" /> }, '/register': { title: 'Create account', element: <Auth mode="register" /> }, '/forgot-password': { title: 'Reset password', element: <Auth mode="forgot-password" /> }, '/onboarding': { title: 'Your UniPort profile', element: <Onboarding /> }, '/app': { title: 'Your workspace', element: <Dashboard /> }, '/app/academic': { title: 'Academic record', element: <Academic /> }, '/app/calculator': { title: 'GPA calculator', element: <Gpa /> }, '/app/cgpa': { title: 'CGPA calculator', element: <Cgpa /> }, '/app/target': { title: 'Target CGPA', element: <Target /> }, '/app/projection': { title: 'CGPA projection', element: <Projection /> }, '/app/analytics': { title: 'Analytics', element: <Analytics /> }, '/app/timeline': { title: 'Academic timeline', element: <Timeline /> }, '/app/graduation': { title: 'Graduation planning', element: <Graduation /> }, '/app/failed': { title: 'Course attention', element: <CourseAttention /> }, '/app/reports': { title: 'Academic reports', element: <Reports /> }, '/app/notifications': { title: 'Notifications', element: <Notifications /> }, '/app/support': { title: 'Support requests', element: <Support /> }, '/app/profile': { title: 'Your profile', element: <Profile /> }, '/app/settings': { title: 'Settings', element: <Settings /> }, '/admin': { title: 'Admin dashboard', element: <AdminDashboard /> }, '/admin/students': { title: 'Student directory', element: <AdminStudents /> }, '/admin/academic': { title: 'Academic data', element: <AdminAcademic /> }, '/admin/faculties': { title: 'Faculties', element: <AcademicCrud entity="faculties" /> }, '/admin/departments': { title: 'Departments', element: <AcademicCrud entity="departments" /> }, '/admin/programmes': { title: 'Programmes', element: <AcademicCrud entity="programmes" /> }, '/admin/courses': { title: 'Courses', element: <AcademicCrud entity="courses" /> }, '/admin/notifications': { title: 'Admin notifications', element: <AdminNotifications /> }, '/admin/support': { title: 'Support desk', element: <AdminSupport /> }, '/admin/payments': { title: 'Payments', element: <AdminPayments /> }, '/admin/reports': { title: 'Admin reports', element: <AdminReports /> }, '/admin/logs': { title: 'Audit trail', element: <AuditLogs /> }, '/admin/settings': { title: 'Admin settings', element: <AdminSettings /> },
 };
 
-class PageBoundary extends Component {
-  state = { error: false };
-  static getDerivedStateFromError() { return { error: true }; }
-  render() {
-    if (this.state.error) return <EmptyState title="Something interrupted this page." description="Your records have not been changed. Please reload the page and try again." icon="alert" action={<Button onClick={() => window.location.reload()}>Reload page</Button>} />;
-    return this.props.children;
-  }
-}
-
-function ReadingProgress() {
-  const progress = useScrollProgress();
-  return <div className="read-progress" aria-hidden="true"><span style={{ width: `${progress}%` }} /></div>;
-}
-
+class PageBoundary extends Component { state = { error: false }; static getDerivedStateFromError() { return { error: true }; } render() { if (this.state.error) return <EmptyState title="Something interrupted this page." description="Your records have not been changed. Please try again." icon="alert" action={<Button onClick={() => window.location.hash = '#/app/academic'}>Return to academic record</Button>} />; return this.props.children; } }
+function ReadingProgress() { const progress = useScrollProgress(); return <div className="read-progress" aria-hidden="true"><span style={{ width: `${progress}%` }} /></div>; }
 function Router() {
-  const path = useHashRoute();
-  const session = useSession();
-  const route = ROUTES[path];
+  const path = useHashRoute(); const session = useSession(); const route = ROUTES[path];
   useEffect(() => {
     if (!backendConfigured()) return;
     if (path === '/login' || path === '/register' || path === '/forgot-password' || path === '/onboarding' || !path.startsWith('/app') && !path.startsWith('/admin')) return;
+    if (session.status === 'loading') return;
     if (!session.user) { navigate('/login'); return; }
     if (path.startsWith('/admin') && session.user.role !== 'admin') navigate('/app');
-  }, [path, session.user]);
+  }, [path, session.user, session.status]);
   useRevealObserver();
   useEffect(() => { document.title = `${route?.title || 'Page not found'} | CGPA+ UniPort`; }, [path, route]);
   const page = <PageBoundary key={path}><Suspense fallback={<div className="route-loading"><Skeleton label="Loading your next page..." rows={5} /></div>}>{route?.element || <div className="not-found"><span className="eyebrow">A SMALL DETOUR</span><h1 tabIndex={-1} data-page-heading>Let's get you back on track.</h1><p>This page is not part of your CGPA+ journey.</p><Button href="#/" endIcon="arrow">Return home</Button></div>}</Suspense></PageBoundary>;
@@ -123,7 +72,4 @@ function Router() {
   if (['/login', '/register', '/forgot-password', '/onboarding'].includes(path)) return page;
   return <PublicLayout path={path}><ReadingProgress />{page}</PublicLayout>;
 }
-
-export default function Application() {
-  return <AppearanceProvider><ToastProvider><SessionProvider><CalculatorProvider><Router /></CalculatorProvider></SessionProvider></ToastProvider></AppearanceProvider>;
-}
+export default function Application() { return <AppearanceProvider><ToastProvider><SessionProvider><CalculatorProvider><Router /></CalculatorProvider></SessionProvider></ToastProvider></AppearanceProvider>; }
