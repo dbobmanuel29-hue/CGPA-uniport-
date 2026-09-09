@@ -1,9 +1,11 @@
+import { useEffect } from 'react';
 import { PageHeader, Button, Badge, Panel, Stat } from '../../components/ui';
 import { Icon } from '../../components/Icon';
 import { ConnectionState, EmptyState, Skeleton } from '../../components/feedback';
 import { LineChart, Progress } from '../../components/charts';
 import { useResource } from '../../hooks/useResource';
 import { academicService } from '../../services/academic-service';
+import { notificationService } from '../../services/notification-service';
 import { number, date } from '../../utils/formatting';
 import { FALLBACK_LEVELS, FALLBACK_SEMESTERS, FALLBACK_SESSIONS, findFallback } from '../../data/uniport-catalogue';
 
@@ -13,6 +15,7 @@ export default function Dashboard() {
   const data = resource.data || {};
   const summary = data.summary || {};
   const profile = profileResource.data || null;
+  useEffect(() => notificationService.subscribeToNotifications(() => resource.refresh()), [resource.refresh]);
   const currentSemester = profile ? {
     name: profile.currentSemesterName || findFallback(FALLBACK_SEMESTERS, profile.currentSemesterId)?.name || '--',
     sessionName: profile.currentSessionName || findFallback(FALLBACK_SESSIONS, profile.currentSessionId)?.name || '--',
