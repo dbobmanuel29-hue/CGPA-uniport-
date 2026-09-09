@@ -28,7 +28,7 @@ function textBlobToPdf(blob) {
       '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
       `<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`,
     ];
-    let pdf = '%PDF-1.4\n%\xE2\xE3\xCF\xD3\n';
+    let pdf = '%PDF-1.4\n%CGPA+\n';
     const offsets = [0];
     objects.forEach((object, index) => { offsets[index + 1] = pdf.length; pdf += `${index + 1} 0 obj\n${object}\nendobj\n`; });
     const xref = pdf.length;
