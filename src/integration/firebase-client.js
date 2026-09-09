@@ -6,7 +6,6 @@ let firebaseApp;
 let firestore;
 let firebaseAuth;
 let firebaseStorage;
-let firebaseFunctions;
 
 function configFromEnv() {
   const values = {
@@ -48,14 +47,12 @@ export async function getFirebase() {
     await loadScript(`${CDN_BASE}/firebase-auth-compat.js`);
     await loadScript(`${CDN_BASE}/firebase-firestore-compat.js`);
     await loadScript(`${CDN_BASE}/firebase-storage-compat.js`);
-    await loadScript(`${CDN_BASE}/firebase-functions-compat.js`);
     const config = configFromEnv();
     firebaseApp = window.firebase.apps.length ? window.firebase.app() : window.firebase.initializeApp(config);
     firestore = window.firebase.firestore(firebaseApp);
     firebaseAuth = window.firebase.auth(firebaseApp);
     firebaseStorage = window.firebase.storage(firebaseApp);
-    firebaseFunctions = window.firebase.functions(firebaseApp);
-    return { firebase: window.firebase, app: firebaseApp, db: firestore, auth: firebaseAuth, storage: firebaseStorage, functions: firebaseFunctions };
+    return { firebase: window.firebase, app: firebaseApp, db: firestore, auth: firebaseAuth, storage: firebaseStorage, functions: null };
   })();
   return sdkPromise;
 }
@@ -66,5 +63,4 @@ export function clearFirebaseForTests() {
   firestore = undefined;
   firebaseAuth = undefined;
   firebaseStorage = undefined;
-  firebaseFunctions = undefined;
 }
