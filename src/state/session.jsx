@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { authService } from '../services/auth-service';
+import { registerFirebaseBackend } from '../integration/firebase-adapters.js';
 const SessionContext = createContext(null);
 export function SessionProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -9,15 +10,21 @@ export function SessionProvider({ children }) {
     let active = true;
     let unsubscribe;
     const initialEpoch = epoch.current;
-    authService.getCurrentUser().then(value => {
-      if (active && epoch.current === initialEpoch) { setUser(value); setStatus('connected'); }
-    }).catch(() => { if (active && epoch.current === initialEpoch) setStatus('disconnected'); });
-    authService.subscribeToAuthState(value => {
-      if (active) { epoch.current += 1; setUser(value); setStatus('connected'); }
-    }).then(stop => {
-      if (!active && typeof stop === 'function') stop();
-      else unsubscribe = stop;
-    }).catch(() => { /* A disconnected optional subscription never simulates a session. */ });
+    (async () => {
+      try {
+        await registerFirebaseBackend();
+        if (!active) return;
+        const value = await authService.getCurrentUser();
+        if (active && epoch.current === initialEpoch) { setUser(value); setStatus('connected'); }
+        const stop = await authService.subscribeToAuthState(value => {
+          if (active) { epoch.current += 1; setUser(value); setStatus('connected'); }
+        });
+        if (!active && typeof stop === 'function') stop();
+        else unsubscribe = stop;
+      } catch (error) {
+        if (active && epoch.current === initialEpoch) setStatus('disconnected');
+      }
+    })();
     return () => { active = false; if (typeof unsubscribe === 'function') unsubscribe(); };
   }, []);
   function accept(value) {
