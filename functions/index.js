@@ -49,6 +49,24 @@ async function deleteUserFirestoreData(uid) {
   }
 }
 
+exports.getAdminUserStats = onCall(async request => {
+  await enforceRateLimit(request, { name: 'getAdminUserStats', limit: 60, windowSeconds: 15 * 60 });
+  if (!isAdmin(request)) throw new HttpsError('permission-denied', 'Administrator access required.');
+  let totalAuthUsers = 0;
+  let pageToken;
+  do {
+    const page = await auth.listUsers(1000, pageToken);
+    totalAuthUsers += page.users.filter(user => user.uid !== OWNER_ADMIN_UID).length;
+    pageToken = page.pageToken;
+  } while (pageToken);
+  const firestoreUsers = await db.collection('users').get();
+  const studentDocs = firestoreUsers.docs.filter(doc => doc.id !== OWNER_ADMIN_UID && doc.data()?.role !== 'admin');
+  const activeStudents = studentDocs.filter(doc => (doc.data()?.accountStatus || 'active') === 'active').length;
+  const verifiedAccounts = studentDocs.filter(doc => doc.data()?.emailVerified === true).length;
+  const premiumStudents = studentDocs.filter(doc => doc.data()?.subscriptionStatus === 'active' || doc.data()?.plan === 'premium').length;
+  return { totalAuthUsers, totalStudents: studentDocs.length, activeStudents, verifiedAccounts, premiumStudents };
+});
+
 exports.deleteStudentAccount = onCall(async request => {
   await enforceRateLimit(request, { name: 'deleteStudentAccount', limit: 20, windowSeconds: 15 * 60 });
   if (!isAdmin(request)) throw new HttpsError('permission-denied', 'Administrator access required.');
