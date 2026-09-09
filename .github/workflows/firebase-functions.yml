@@ -44,3 +44,5 @@ jobs:
 
       - name: Deploy Firebase Functions
         run: firebase deploy --only functions --project "$FIREBASE_PROJECT" --non-interactive
+
+      # Keep deployment workflow explicit and traceable.
