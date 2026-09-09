@@ -87,8 +87,16 @@ async function deleteStudentData(db, uid) {
 export async function registerAdminFixes() {
   const methods = {
     async getDashboard() {
-      const { db } = await requireAdmin();
+      const { db, functions } = await requireAdmin();
       const users = rows(await db.collection('users').get()).filter(user => user.id !== OWNER_ADMIN_UID && user.role !== 'admin');
+      let authStats = null;
+      try {
+        const callable = functions.httpsCallable('getAdminUserStats');
+        const response = await callable({});
+        authStats = response.data || null;
+      } catch (error) {
+        console.warn('Admin Auth stats unavailable; using Firestore student records.', error?.code || error?.message || error);
+      }
       const activeStudents = users.filter(user => (user.accountStatus || 'active') === 'active');
       const verifiedAccounts = users.filter(user => user.emailVerified === true).length;
       const premiumStudents = users.filter(user => user.subscriptionStatus === 'active' || user.plan === 'premium').length;
@@ -96,11 +104,11 @@ export async function registerAdminFixes() {
       const tickets = rows(await db.collection('supportTickets').get());
       return {
         stats: {
-          totalStudents: users.length,
-          activeStudents: activeStudents.length,
+          totalStudents: authStats?.totalAuthUsers ?? users.length,
+          activeStudents: authStats?.activeStudents ?? activeStudents.length,
           newStudents: users.filter(user => { const t = Date.parse(cleanDate(user.createdAt)); return t && Date.now() - t < 30 * 86400000; }).length,
-          verifiedAccounts,
-          premiumStudents,
+          verifiedAccounts: authStats?.verifiedAccounts ?? verifiedAccounts,
+          premiumStudents: authStats?.premiumStudents ?? premiumStudents,
           supportRequests: tickets.filter(t => !['resolved','closed'].includes(t.status)).length,
         },
         charts: { userGrowth: [], registrations: [], activeUsers: [], subscriptions: [] },
