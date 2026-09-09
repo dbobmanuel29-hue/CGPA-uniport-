@@ -1,43 +1,16 @@
-import { useState } from 'react';
-import { Logo, ThemeButton } from '../../components/navigation';
-import { AcademicFields, emptyAcademic } from '../../components/AcademicFields';
-import { ActionError, useAction } from '../../components/feedback';
-import { Button, Notice } from '../../components/ui';
+import { useEffect,useState } from 'react';
+import { Logo,ThemeButton } from '../../components/navigation';
+import { ActionError,useAction } from '../../components/feedback';
+import { Button,Notice } from '../../components/ui';
+import { AcademicFields,emptyAcademic } from '../../components/AcademicFields';
+import { ResultEditor } from '../student/Academic';
 import { academicService } from '../../services/academic-service';
+import { authService } from '../../services/auth-service';
 import { navigate } from '../../utils/routing';
 import { UNIVERSITY } from '../../data/uniport';
+import { FALLBACK_LEVELS } from '../../data/uniport-catalogue';
 
-export default function Onboarding() {
-  const [form, setForm] = useState(emptyAcademic);
-  const [validation, setValidation] = useState('');
-  const action = useAction();
-  function submit(event) {
-    event.preventDefault();
-    const required = ['facultyId', 'departmentId', 'programmeId', 'admissionSessionId', 'currentLevelId', 'currentSessionId', 'currentSemesterId'];
-    if (required.some(key => !form[key])) {
-      setValidation('Please complete Faculty, Department, Programme, Admission Session, Current Level, Current Session and Current Semester.');
-      return;
-    }
-    setValidation('');
-    action.run(() => academicService.updateProfile({ ...form, universityId: UNIVERSITY.id }), () => navigate('/app'), 'Your academic profile has been saved.');
-  }
-  return (
-    <div className="onboarding-page">
-      <header className="onboarding-nav"><Logo /><ThemeButton /></header>
-      <main className="onboarding-container">
-        <span className="eyebrow">LET'S MAKE THIS YOURS</span>
-        <h1 tabIndex={-1} data-page-heading>Your UniPort journey.<br />Your academic profile.</h1>
-        <p className="onboarding-description">Tell us where you are academically so CGPA+ can put every result in the correct place. Your university is already fixed to the University of Port Harcourt.</p>
-        <div className="onboarding-steps"><span><i>1</i>Your account</span><span className="active"><i>2</i>Academic profile</span><span><i>3</i>Your workspace</span></div>
-        <form className="panel form-stack" onSubmit={submit}>
-          <AcademicFields form={form} setForm={setForm} />
-          <Notice>Start from the top: choose your Faculty first, then Department, then Programme. After that choose your admission session, current level, current academic session and current semester.</Notice>
-          {validation && <p className="field-error" role="alert">{validation}</p>}
-          <ActionError error={action.error} />
-          <Button type="submit" busy={action.busy} endIcon="arrow">Save academic profile</Button>
-        </form>
-        <div className="auth-bottom">Just exploring? <a href="#/app">Preview the workspace without signing in</a></div>
-      </main>
-    </div>
-  );
-}
+const levelNo=id=>Number(String(id||'').match(/\d+/)?.[0]||100);
+function History({form,onBack}){const[results,setResults]=useState([]);const[editor,setEditor]=useState(false);const action=useAction();const levels=FALLBACK_LEVELS.filter(x=>levelNo(x.id)<=levelNo(form.currentLevelId));const load=()=>academicService.getResults({}).then(setResults);useEffect(()=>{load().catch(()=>{})},[]);const missing=levels.filter(l=>!results.some(r=>r.levelId===l.id));const finish=()=>action.run(async()=>{await academicService.updateProfile({...form,universityId:UNIVERSITY.id,markOnboardingComplete:true});return authService.getCurrentUser()},()=>navigate('/app'),'Your academic profile and results are ready.');return <div className="onboarding-panel"><span className="eyebrow">BUILD YOUR CGPA HISTORY</span><h2>Results up to {levelNo(form.currentLevelId)} Level</h2><p>Enter your actual results for every level you have reached. 200 Level requires 100 + 200 Level; 300 Level requires 100 + 200 + 300 Level.</p><Notice>Add a result, choose its level, session and semester, then enter the course, units and grade. You can add multiple courses.</Notice><div className="history-summary">{levels.map(l=><div key={l.id}><span>{l.name}</span><strong>{results.filter(r=>r.levelId===l.id).length}</strong></div>)}</div><div className="history-actions"><small>{missing.length?`Still needed: ${missing.map(l=>l.name).join(', ')}`:'All required levels have results.'}</small><Button type="button" onClick={()=>setEditor(true)}>Add result</Button></div><p className="onboarding-note">You can add or correct results later in Academic Records. CGPA+ uses A=5, B=4, C=3, D=2, E=1, F=0.</p><ActionError error={action.error}/><div className="onboarding-footer-actions"><Button variant="outline" type="button" onClick={onBack}>Back to profile</Button><Button type="button" busy={action.busy} disabled={missing.length>0} onClick={finish}>Finish setup</Button></div><ResultEditor open={editor} onClose={()=>setEditor(false)} onSaved={()=>{setEditor(false);load()}}/></div>}
+export default function Onboarding(){const[form,setForm]=useState(emptyAcademic);const[step,setStep]=useState('profile');const[validation,setValidation]=useState('');const action=useAction();const current=levelNo(form.currentLevelId);function submit(e){e.preventDefault();setValidation('');const keys=['facultyId','departmentId','programmeId','admissionSessionId','currentLevelId','currentSessionId','currentSemesterId'];if(keys.some(k=>!form[k]))return setValidation('Please complete Faculty, Department, Programme, Admission Session, Current Level, Current Session and Current Semester.');action.run(()=>academicService.updateProfile({...form,universityId:UNIVERSITY.id,markOnboardingComplete:false}),()=>setStep(current>100?'history':'done'),'Your academic profile has been saved.')}if(step==='done')return <Page><span className="eyebrow">READY TO GO</span><h1>Your workspace is ready.</h1><p className="onboarding-description">You are in 100 Level, so there are no previous results to enter. Start adding your current courses and results.</p><Button onClick={()=>academicService.updateProfile({...form,universityId:UNIVERSITY.id,markOnboardingComplete:true}).then(()=>navigate('/app'))}>Open my workspace</Button></Page>;return <Page><span className="eyebrow">{step==='profile'?"LET'S MAKE THIS YOURS":'BUILD YOUR CGPA HISTORY'}</span><h1>{step==='profile'?<>Your UniPort journey.<br/>Your academic profile.</>:<>Bring your previous results<br/>with you.</>}</h1><p className="onboarding-description">{step==='profile'?'Tell us your Faculty, Department, Programme and current level. Your university is already fixed to the University of Port Harcourt.':`You selected ${current} Level. Add the results you already have from every level up to ${current} Level so CGPA+ can calculate your GPA and CGPA.`}</p><div className="onboarding-steps"><span className={step==='profile'?'active':''}><i>1</i>Academic profile</span><span className={step==='history'?'active':''}><i>2</i>Result history</span><span><i>3</i>Your workspace</span></div><div className="onboarding-progress"><span style={{width:`${step==='profile'?33:75}%`}}/></div>{step==='profile'?<form className="onboarding-panel form-stack" onSubmit={submit}><AcademicFields form={form} setForm={setForm}/><Notice>Your current level controls the history required: 100 → none, 200 → 100 + 200, 300 → 100 + 200 + 300, and so on.</Notice>{validation&&<p className="field-error" role="alert">{validation}</p>}<ActionError error={action.error}/><Button type="submit" busy={action.busy}>Continue to {current>100?'result history':'workspace'}</Button></form>:<History form={form} onBack={()=>setStep('profile')}/>}</Page>}
+function Page({children}){return <div className="onboarding-page"><header className="onboarding-nav"><Logo/><ThemeButton/></header><main className="onboarding-container">{children}</main></div>}
