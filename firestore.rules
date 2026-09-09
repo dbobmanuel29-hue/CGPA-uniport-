@@ -18,8 +18,6 @@ service cloud.firestore {
     match /supportTickets/{ticketId} { allow read, update: if signedIn() && (resource.data.userId == request.auth.uid || admin()); allow create: if signedIn() && request.resource.data.userId == request.auth.uid; allow delete: if admin(); }
     match /publicSupportRequests/{id} { allow create: if true; allow read, update, delete: if admin(); }
     match /reports/{id} { allow read: if signedIn() && (resource.data.userId == request.auth.uid || admin()); allow create: if signedIn() && request.resource.data.userId == request.auth.uid; allow update, delete: if admin(); }
-    match /transactions/{id} { allow read: if signedIn() && (resource.data.userId == request.auth.uid || admin()); allow write: if admin(); }
-    match /subscriptions/{uid} { allow read: if self(uid) || admin(); allow write: if admin(); }
     match /dataExportRequests/{id} { allow create: if signedIn() && request.resource.data.userId == request.auth.uid; allow read: if signedIn() && (resource.data.userId == request.auth.uid || admin()); allow update, delete: if admin(); }
     match /auditLogs/{id} { allow read: if admin(); allow write: if false; }
     match /adminSettings/{id} { allow read, write: if admin(); }
