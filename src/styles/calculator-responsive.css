@@ -1,0 +1,264 @@
+/* Calculator-only responsive hardening.
+   Keeps the existing visual design while preventing clipping, overflow and
+   cramped controls across phones, tablets, laptops and wide displays. */
+
+.calculator-layout,
+.planner-grid,
+.projection-output-grid,
+.calculator-summary,
+.course-entry,
+.course-entry form,
+.course-rows,
+.projection-inputs,
+.custom-projection-result,
+.gpa-output,
+.planner-grid > *,
+.projection-output-grid > * {
+  min-width: 0;
+}
+
+.calculator-nav {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.calculator-nav a {
+  flex: 0 0 auto;
+}
+
+.course-entry-row > .field,
+.projection-inputs > .field {
+  min-width: 0;
+}
+
+.course-entry-row .input,
+.projection-inputs .input,
+.form-grid .input,
+.form-grid .select {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.gpa-output,
+.gpa-big,
+.output-caption,
+.output-detail,
+.output-detail strong,
+.custom-projection-result strong {
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+.projection-output-grid .panel,
+.projection-output-grid .bar-chart {
+  min-width: 0;
+  max-width: 100%;
+}
+
+@media (max-width: 767px) {
+  .calculator-nav {
+    margin-left: -2px;
+    margin-right: -2px;
+    padding-right: 2px;
+  }
+
+  .calculator-layout,
+  .planner-grid,
+  .projection-output-grid {
+    width: 100%;
+  }
+
+  .calculator-form-actions {
+    align-items: stretch;
+  }
+
+  .calculator-form-actions > .button,
+  .calculator-form-actions > .text-button {
+    flex: 1 1 auto;
+  }
+
+  .calculator-form-actions > .text-button {
+    margin-left: 0;
+    text-align: center;
+  }
+
+  .projection-inputs {
+    grid-template-columns: 1fr;
+  }
+
+  .projection-inputs > .button {
+    width: 100%;
+  }
+
+  .projection-output-grid .bar-chart {
+    width: 100%;
+    min-height: 220px;
+  }
+
+  .gpa-output {
+    width: 100%;
+  }
+
+  .gpa-big {
+    font-size: clamp(48px, 17vw, 66px);
+  }
+}
+
+@media (max-width: 479px) {
+  .calculator-nav {
+    gap: 20px;
+  }
+
+  .calculator-nav a {
+    font-size: 10px;
+    padding-bottom: 13px;
+  }
+
+  .course-entry {
+    padding: 16px;
+  }
+
+  .course-entry .panel-header {
+    align-items: flex-start;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  .course-entry .scale-select {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .course-entry-row {
+    grid-template-columns: minmax(0, 1fr) 34px;
+    gap: 10px;
+    padding: 16px 0;
+  }
+
+  .course-entry-row > .field:first-child {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .course-entry-row > .field:nth-child(2) {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .course-entry-row > .field:nth-child(3) {
+    grid-column: 1;
+    grid-row: 3;
+  }
+
+  .course-entry-row > .field:nth-child(4) {
+    grid-column: 1;
+    grid-row: 4;
+  }
+
+  .course-entry-row > .remove-course {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+    width: 34px;
+    height: 42px;
+  }
+
+  .course-entry-row .input {
+    min-height: 45px;
+    font-size: 16px;
+  }
+
+  .calculator-form-actions {
+    flex-direction: column;
+  }
+
+  .calculator-form-actions > .button,
+  .calculator-form-actions > .text-button {
+    width: 100%;
+    flex: 1 1 100%;
+  }
+
+  .calculator-form-actions > .text-button {
+    padding: 9px;
+  }
+
+  .planner-grid .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .planner-grid .form-stack > .button,
+  .planner-grid .form-stack > .button[type="submit"] {
+    width: 100%;
+  }
+
+  .projection-output-grid {
+    gap: 14px;
+  }
+
+  .projection-output-grid .panel {
+    padding: 16px;
+  }
+
+  .projection-output-grid .bar-chart {
+    height: 220px;
+  }
+}
+
+@media (max-width: 359px) {
+  .calculator-nav {
+    gap: 16px;
+  }
+
+  .calculator-nav a {
+    font-size: 9px;
+  }
+
+  .course-entry {
+    padding: 14px;
+  }
+
+  .panel {
+    max-width: 100%;
+  }
+
+  .gpa-output {
+    padding: 22px 18px;
+  }
+
+  .gpa-big {
+    font-size: 46px;
+    letter-spacing: -2px;
+  }
+
+  .gpa-big small {
+    font-size: 10px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .calculator-layout {
+    grid-template-columns: minmax(0, 2.2fr) minmax(260px, 1fr);
+  }
+
+  .planner-grid {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  }
+
+  .projection-output-grid {
+    grid-template-columns: minmax(0, 1.5fr) minmax(300px, 1fr);
+  }
+}
+
+@media (min-width: 1600px) {
+  .calculator-layout {
+    gap: 28px;
+  }
+
+  .planner-grid,
+  .projection-output-grid {
+    gap: 28px;
+  }
+}
