@@ -7,6 +7,7 @@ import { registerStudentReadFix } from '../integration/student-read-fix.js';
 import { registerAdminFixes } from '../integration/admin-fix.js';
 import { registerAdminDeleteFix } from '../integration/admin-delete-fix.js';
 import { registerSparkBackendFixes } from '../integration/spark-backend-fixes.js';
+import { registerCloudinaryAdapter } from '../integration/cloudinary-adapter.js';
 
 const SessionContext = createContext(null);
 
@@ -28,6 +29,7 @@ export function SessionProvider({ children }) {
         await registerAdminFixes();
         await registerAdminDeleteFix();
         await registerSparkBackendFixes();
+        await registerCloudinaryAdapter();
         if (!active) return;
         const value = await authService.getCurrentUser();
         if (value?.accountStatus === 'deleted') {
