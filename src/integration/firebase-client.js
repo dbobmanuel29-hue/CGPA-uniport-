@@ -5,14 +5,12 @@ let sdkPromise;
 let firebaseApp;
 let firestore;
 let firebaseAuth;
-let firebaseStorage;
 
 function configFromEnv() {
   const values = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
     authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
     projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
     messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
     appId: import.meta.env.VITE_FIREBASE_APP_ID,
   };
@@ -46,13 +44,11 @@ export async function getFirebase() {
     await loadScript(`${CDN_BASE}/firebase-app-compat.js`);
     await loadScript(`${CDN_BASE}/firebase-auth-compat.js`);
     await loadScript(`${CDN_BASE}/firebase-firestore-compat.js`);
-    await loadScript(`${CDN_BASE}/firebase-storage-compat.js`);
     const config = configFromEnv();
     firebaseApp = window.firebase.apps.length ? window.firebase.app() : window.firebase.initializeApp(config);
     firestore = window.firebase.firestore(firebaseApp);
     firebaseAuth = window.firebase.auth(firebaseApp);
-    firebaseStorage = window.firebase.storage(firebaseApp);
-    return { firebase: window.firebase, app: firebaseApp, db: firestore, auth: firebaseAuth, storage: firebaseStorage, functions: null };
+    return { firebase: window.firebase, app: firebaseApp, db: firestore, auth: firebaseAuth, functions: null };
   })();
   return sdkPromise;
 }
@@ -62,5 +58,4 @@ export function clearFirebaseForTests() {
   firebaseApp = undefined;
   firestore = undefined;
   firebaseAuth = undefined;
-  firebaseStorage = undefined;
 }
