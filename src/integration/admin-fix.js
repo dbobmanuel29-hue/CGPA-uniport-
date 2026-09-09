@@ -5,6 +5,7 @@ const OWNER_ADMIN_UID = 'lmUB6IdhuaOlHjzkqBEyoNkE7PH2';
 const cleanDate = value => value?.toDate ? value.toDate().toISOString() : (value || null);
 const rows = snap => snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 const asNumber = value => Number(value || 0);
+const USER_DATA_COLLECTIONS = ['academicProfiles', 'results', 'notifications', 'supportTickets', 'reports', 'transactions', 'dataExportRequests'];
 
 async function requireAdmin() {
   const sdk = await getFirebase();
@@ -58,18 +59,57 @@ async function enrichResults(db, results) {
   const sessionMap = new Map(sessions.map(x => [x.id, x.name || x.title || '']));
   const semesterMap = new Map(semesters.map(x => [x.id, x.name || x.title || '']));
   const levelMap = new Map(levels.map(x => [x.id, x.name || x.title || '']));
-  return results.map(r => ({
-    ...r,
-    createdAt: cleanDate(r.createdAt),
-    updatedAt: cleanDate(r.updatedAt),
-    sessionName: r.sessionName || sessionMap.get(r.sessionId) || '',
-    semesterName: r.semesterName || semesterMap.get(r.semesterId) || '',
-    levelName: r.levelName || levelMap.get(r.levelId) || '',
-  }));
+  return results.map(r => ({ ...r, createdAt: cleanDate(r.createdAt), updatedAt: cleanDate(r.updatedAt), sessionName: r.sessionName || sessionMap.get(r.sessionId) || '', semesterName: r.semesterName || semesterMap.get(r.semesterId) || '', levelName: r.levelName || levelMap.get(r.levelId) || '' }));
+}
+
+async function deleteStudentData(db, uid) {
+  if (uid === OWNER_ADMIN_UID) throw Object.assign(new Error('The administrator account is protected.'), { code: 'permission-denied' });
+  for (const collection of USER_DATA_COLLECTIONS) {
+    const snap = await db.collection(collection).where('userId', '==', uid).get();
+    while (snap.size) {
+      const batch = db.batch();
+      snap.docs.slice(0, 450).forEach(doc => batch.delete(doc.ref));
+      await batch.commit();
+      if (snap.size <= 450) break;
+      const next = await db.collection(collection).where('userId', '==', uid).get();
+      if (!next.size) break;
+    }
+  }
+  for (const collection of ['users', 'academicProfiles', 'userPreferences', 'subscriptions']) {
+    const ref = db.collection(collection).doc(uid);
+    const snap = await ref.get();
+    if (snap.exists) await ref.delete();
+  }
+  try { await db.collection('publicSupportRequests').where('userId', '==', uid).get().then(async snap => { if (!snap.size) return; const batch = db.batch(); snap.docs.forEach(doc => batch.delete(doc.ref)); await batch.commit(); }); } catch {}
+  return { ok: true, uid };
 }
 
 export async function registerAdminFixes() {
   const methods = {
+    async getDashboard() {
+      const { db } = await requireAdmin();
+      const users = rows(await db.collection('users').get()).filter(user => user.id !== OWNER_ADMIN_UID && user.role !== 'admin');
+      const activeStudents = users.filter(user => (user.accountStatus || 'active') === 'active');
+      const verifiedAccounts = users.filter(user => user.emailVerified === true).length;
+      const premiumStudents = users.filter(user => user.subscriptionStatus === 'active' || user.plan === 'premium').length;
+      const recentStudents = [...users].sort((a,b) => (Date.parse(cleanDate(b.createdAt)) || 0) - (Date.parse(cleanDate(a.createdAt)) || 0)).slice(0, 5);
+      const tickets = rows(await db.collection('supportTickets').get());
+      return {
+        stats: {
+          totalStudents: users.length,
+          activeStudents: activeStudents.length,
+          newStudents: users.filter(user => { const t = Date.parse(cleanDate(user.createdAt)); return t && Date.now() - t < 30 * 86400000; }).length,
+          verifiedAccounts,
+          premiumStudents,
+          supportRequests: tickets.filter(t => !['resolved','closed'].includes(t.status)).length,
+        },
+        charts: { userGrowth: [], registrations: [], activeUsers: [], subscriptions: [] },
+        recentStudents,
+        recentTickets: tickets.sort((a,b) => (Date.parse(cleanDate(b.createdAt)) || 0) - (Date.parse(cleanDate(a.createdAt)) || 0)).slice(0, 5),
+        activity: [],
+      };
+    },
+
     async getStudents(filters = {}) {
       const { db } = await requireAdmin();
       const users = rows(await db.collection('users').get());
@@ -84,6 +124,13 @@ export async function registerAdminFixes() {
       if(filters.status) output=output.filter(x=>x.accountStatus===filters.status);
       if(filters.facultyId) output=output.filter(x=>x.facultyId===filters.facultyId);
       return output;
+    },
+
+    async deleteStudent(studentId) {
+      const { db } = await requireAdmin();
+      if (!studentId || studentId === OWNER_ADMIN_UID) throw Object.assign(new Error('The administrator account cannot be deleted.'), { code: 'permission-denied' });
+      await deleteStudentData(db, studentId);
+      return { ok: true };
     },
 
     async getAcademicProfile(studentId) {
@@ -107,14 +154,9 @@ export async function registerAdminFixes() {
       const effective=effectiveResults(results);
       const summary=calculate(effective);
       const semesterMap=new Map();
-      for(const result of results){
-        const key=`${result.levelName || result.levelId || 'Level'}:${result.semesterName || result.semesterId || 'Semester'}`;
-        const current=semesterMap.get(key)||[];
-        current.push(result);
-        semesterMap.set(key,current);
-      }
+      for(const result of results){ const key=`${result.levelName || result.levelId || 'Level'}:${result.semesterName || result.semesterId || 'Semester'}`; const current=semesterMap.get(key)||[]; current.push(result); semesterMap.set(key,current); }
       const gpaHistory=[...semesterMap.entries()].map(([label,items])=>({label,gpa:calculate(items).gpa}));
-      return {id:userSnap.id,...userSnap.data(),createdAt:cleanDate(userSnap.data().createdAt),academicProfile:profile,results,summary,gpaHistory,tickets:rows(ticketSnap).map(t=>({...t,createdAt:cleanDate(t.createdAt),updatedAt:cleanDate(t.updatedAt)}))};
+      return {id:userSnap.id,...userSnap.data(),createdAt:cleanDate(userSnap.data().createdAt),academicProfile:profile,results,gpaHistory,tickets:rows(ticketSnap).map(t=>({...t,createdAt:cleanDate(t.createdAt),updatedAt:cleanDate(t.updatedAt)})),summary};
     },
   };
   configureServices({ admin: methods });
