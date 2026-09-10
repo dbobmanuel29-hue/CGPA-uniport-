@@ -8,7 +8,7 @@ import { useSession } from '../state/session';
 import { authService } from '../services/auth-service';
 import { notificationService } from '../services/notification-service';
 
-export function Logo({ footer = false, light = false }) { return <a className={`brand ${footer ? 'brand-footer' : ''} ${light ? 'brand-light' : ''}`} href="#/" aria-label="CGPA+ UniPort home"><span className="brand-name">CGPA<span className="brand-plus">+</span></span><span className="brand-divider" /><span className="brand-school">UniPort<span>YOUR ACADEMIC COMPANION</span></span></a>; }
+export function Logo({ footer = false, light = false }) { return <a className={`brand ${footer ? 'brand-footer' : ''} ${light ? 'brand-light' : ''}`} href="#/" aria-label="CGPA+ UniPort home"><img className="brand-logo-image" src="/cgpa-plus-logo.svg" alt="CGPA+ UniPort" /></a>; }
 const THEME_ORDER = ['light', 'dark', 'system']; const THEME_LABELS = { light: 'Light', dark: 'Dark', system: 'System' }; const THEME_ICONS = { light: 'sun', dark: 'moon', system: 'monitor' };
 export function ThemeButton() { const { mode, setMode } = useAppearance(); const next = THEME_ORDER[(THEME_ORDER.indexOf(mode) + 1) % THEME_ORDER.length]; return <button className="icon-button theme-button" aria-label={`Switch appearance to ${THEME_LABELS[next]} mode`} title={`Appearance: ${THEME_LABELS[mode]} · click for ${THEME_LABELS[next]}`} onClick={() => setMode(next)}><Icon name={THEME_ICONS[mode]} size={18} /></button>; }
 function SkipLink({ target, children }) { return <a className="skip-link" href={`#${target}`} onClick={event => { event.preventDefault(); const main=document.getElementById(target); main?.focus({preventScroll:true}); main?.scrollIntoView({behavior:'instant'}); }}>{children}</a>; }
