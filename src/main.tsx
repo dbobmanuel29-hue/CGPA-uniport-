@@ -4,6 +4,11 @@ import "./index.css";
 import App from "./App";
 import { registerFirebaseBackend } from "./integration";
 import { registerReportAdminFix } from "./integration/report-admin-fix";
+import { initAnalytics } from "./integration/analytics";
+import { initSiteQuality } from "./integration/site-quality";
+
+initAnalytics();
+initSiteQuality();
 
 registerFirebaseBackend()
   .then(() => registerReportAdminFix())
