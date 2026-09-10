@@ -17,7 +17,22 @@ export function AcademicFields({ form, setForm, withUniversity = true, optional 
   const change = key => e => setForm(prev => ({ ...prev, [key]: e.target.value, ...(key === 'facultyId' ? { departmentId: '', programmeId: '', academicVersionId: '', currentLevelId: '', currentSemesterId: '' } : key === 'departmentId' ? { programmeId: '', academicVersionId: '', currentLevelId: '', currentSemesterId: '' } : key === 'programmeId' ? { academicVersionId: '', currentLevelId: '', currentSemesterId: '' } : {}) }));
   const facultyLoader = () => loadOrFallback(() => academicService.getFaculties(), FALLBACK_FACULTIES);
   const departmentLoader = () => loadOrFallback(() => academicService.getDepartments({ facultyId: form.facultyId }), FALLBACK_DEPARTMENTS.filter(row => row.facultyId === form.facultyId));
-  const programmeLoader = () => loadOrFallback(() => academicService.getProgrammes({ departmentId: form.departmentId }), FALLBACK_PROGRAMMES.filter(row => row.departmentId === form.departmentId));
+  const programmeLoader = async () => {
+    const departments = await departmentLoader();
+    const selectedDepartment = departments.find(row => row.id === form.departmentId);
+    try {
+      const rows = await academicService.getProgrammes({ departmentId: form.departmentId });
+      if (Array.isArray(rows) && rows.length) {
+        // Keep the catalogue IDs for compatibility, but present every course of study
+        // consistently as a B.Sc. programme in the student profile form.
+        return rows.map(row => ({ ...row, name: `B.Sc. ${String(row.name || selectedDepartment?.name || 'Programme').replace(/^B\.(Sc|Ed|Eng)\.\s*/i, '')}` }));
+      }
+    } catch {}
+    // Some departments may not yet have programme documents in Firestore.
+    // Provide a selectable B.Sc. fallback so the form never gets stuck.
+    if (selectedDepartment) return [{ id: `fallback-bsc-${selectedDepartment.id}`, name: `B.Sc. ${selectedDepartment.name}`, departmentId: selectedDepartment.id, status: 'active' }];
+    return [];
+  };
   const levelLoader = () => loadOrFallback(() => academicService.getLevels({ programmeId: form.programmeId }), FALLBACK_LEVELS);
   const semesterLoader = () => loadOrFallback(() => academicService.getSemesters({ programmeId: form.programmeId }), FALLBACK_SEMESTERS);
   const sessionLoader = () => loadOrFallback(() => academicService.getAcademicSessions(), FALLBACK_SESSIONS);
