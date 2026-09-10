@@ -16,7 +16,15 @@ service cloud.firestore {
     match /results/{resultId} { allow create: if signedIn() && request.resource.data.userId == request.auth.uid && request.resource.data.credits > 0 && request.resource.data.points >= 0 && request.resource.data.qualityPoints == request.resource.data.credits * request.resource.data.points; allow read: if signedIn() && (resource.data.userId == request.auth.uid || admin()); allow update: if signedIn() && (resource.data.userId == request.auth.uid || admin()) && request.resource.data.userId == resource.data.userId && request.resource.data.credits > 0 && request.resource.data.points >= 0 && request.resource.data.qualityPoints == request.resource.data.credits * request.resource.data.points; allow delete: if signedIn() && (resource.data.userId == request.auth.uid || admin()); }
     match /notifications/{notificationId} { allow read, update, delete: if signedIn() && (resource.data.userId == request.auth.uid || admin()); allow create: if admin(); }
     match /supportTickets/{ticketId} { allow read, update: if signedIn() && (resource.data.userId == request.auth.uid || admin()); allow create: if signedIn() && request.resource.data.userId == request.auth.uid; allow delete: if signedIn() && (resource.data.userId == request.auth.uid || admin()); }
-    match /publicSupportRequests/{id} { allow create: if request.app != null; allow read, update, delete: if admin(); }
+    match /publicSupportRequests/{id} {
+      allow create: if request.resource.data.keys().hasAll(['name','email','message','status','createdAt'])
+        && request.resource.data.name is string && request.resource.data.email is string && request.resource.data.message is string
+        && request.resource.data.status == 'open'
+        && request.resource.data.name.size() >= 2 && request.resource.data.name.size() <= 100
+        && request.resource.data.email.size() >= 5 && request.resource.data.email.size() <= 254
+        && request.resource.data.message.size() >= 5 && request.resource.data.message.size() <= 3000;
+      allow read, update, delete: if admin();
+    }
     match /reports/{id} { allow read: if signedIn() && (resource.data.userId == request.auth.uid || admin()); allow create: if signedIn() && request.resource.data.userId == request.auth.uid; allow update, delete: if signedIn() && (resource.data.userId == request.auth.uid || admin()); }
     match /dataExportRequests/{id} { allow create: if signedIn() && request.resource.data.userId == request.auth.uid; allow read: if signedIn() && (resource.data.userId == request.auth.uid || admin()); allow update, delete: if signedIn() && (resource.data.userId == request.auth.uid || admin()); }
     match /auditLogs/{id} { allow read: if admin(); allow write: if false; }
