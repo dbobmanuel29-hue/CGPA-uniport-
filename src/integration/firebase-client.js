@@ -39,8 +39,9 @@ function loadScript(src) {
 
 async function configureAppCheck(app) {
   const siteKey = String(import.meta.env.VITE_FIREBASE_APPCHECK_SITE_KEY || '').trim();
-  if (!siteKey || !window.firebase.appCheck) return null;
+  if (!siteKey) return null;
   await loadScript(`${CDN_BASE}/firebase-app-check-compat.js`);
+  if (!window.firebase.appCheck) return null;
   const appCheck = window.firebase.appCheck(app);
   appCheck.activate(siteKey, true);
   return appCheck;
