@@ -1,4 +1,4 @@
-const SDK_VERSION = '12.3.0';
+const SDK_VERSION = '12.18.0';
 const CDN_BASE = `https://www.gstatic.com/firebasejs/${SDK_VERSION}`;
 
 let sdkPromise;
