@@ -105,6 +105,43 @@ async function createNotificationRecords(payload) {
 
 export const adminService = Object.freeze({
   ...adminReadWriteService,
+
+  async getDashboard() {
+    const { db } = await requireAdmin();
+    const usersSnap = await db.collection('users').get();
+    const ticketsSnap = await db.collection('supportTickets').get();
+    const users = rows(usersSnap).filter(user =>
+      user.id !== OWNER_ADMIN_UID && (user.role || 'student') === 'student'
+    );
+    const tickets = rows(ticketsSnap);
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 30);
+    const activeStudents = users.filter(user => user.accountStatus === 'active');
+    const newStudents = users.filter(user => {
+      const created = user.createdAt?.toDate ? user.createdAt.toDate() : new Date(user.createdAt || 0);
+      return !Number.isNaN(created.getTime()) && created >= cutoff;
+    });
+    const recentStudents = [...users]
+      .sort((a, b) => String(b.createdAt?.toMillis?.() || b.createdAt || '').localeCompare(String(a.createdAt?.toMillis?.() || a.createdAt || '')))
+      .slice(0, 8);
+    const recentTickets = [...tickets]
+      .sort((a, b) => String(b.createdAt?.toMillis?.() || b.createdAt || '').localeCompare(String(a.createdAt?.toMillis?.() || a.createdAt || '')))
+      .slice(0, 8);
+    return {
+      stats: {
+        totalStudents: users.length,
+        activeStudents: activeStudents.length,
+        newStudents: newStudents.length,
+        verifiedAccounts: users.filter(user => user.emailVerified === true).length,
+        supportRequests: tickets.filter(ticket => ['open', 'in_progress'].includes(ticket.status)).length
+      },
+      charts: { userGrowth: [], registrations: [], activeUsers: [] },
+      recentStudents,
+      recentTickets,
+      activity: []
+    };
+  },
+
   async getStudents(filters = {}) {
     const { db } = await requireAdmin();
     const [usersSnap, profilesSnap, facultiesSnap, departmentsSnap, programmesSnap, levelsSnap] = await Promise.all([
@@ -115,7 +152,9 @@ export const adminService = Object.freeze({
       db.collection('programmes').get(),
       db.collection('levels').get()
     ]);
-    const users = rows(usersSnap);
+    const users = rows(usersSnap).filter(user =>
+      user.id !== OWNER_ADMIN_UID && (user.role || 'student') === 'student'
+    );
     const profiles = new Map(rows(profilesSnap).map(profile => [profile.id, profile]));
     const faculties = new Map(rows(facultiesSnap).map(row => [row.id, nameOf(row)]));
     const departments = new Map(rows(departmentsSnap).map(row => [row.id, nameOf(row)]));
@@ -140,6 +179,44 @@ export const adminService = Object.freeze({
     if (filters.facultyId) result = result.filter(row => row.facultyId === filters.facultyId);
     return result;
   },
+
+  async deleteStudent(studentId) {
+    const { db } = await requireAdmin();
+    if (!studentId || studentId === OWNER_ADMIN_UID) {
+      throw Object.assign(new Error('That account cannot be deleted.'), { code: 'validation/student-delete' });
+    }
+    const userRef = db.collection('users').doc(studentId);
+    const userSnap = await userRef.get();
+    if (!userSnap.exists) throw Object.assign(new Error('Student account not found.'), { code: 'not-found/student' });
+    const userData = userSnap.data() || {};
+    if ((userData.role || 'student') !== 'student') {
+      throw Object.assign(new Error('Only student accounts can be deleted here.'), { code: 'validation/student-delete' });
+    }
+
+    const collections = [
+      'academicProfiles', 'userPreferences', 'notifications', 'supportTickets',
+      'results', 'reports', 'dataExportRequests'
+    ];
+    for (const collection of collections) {
+      const snap = await db.collection(collection).where('userId', '==', studentId).get();
+      let batch = db.batch();
+      let operations = 0;
+      for (const doc of snap.docs) {
+        batch.delete(doc.ref);
+        operations += 1;
+        if (operations >= 450) {
+          await batch.commit();
+          batch = db.batch();
+          operations = 0;
+        }
+      }
+      if (operations) await batch.commit();
+    }
+    await db.collection('academicProfiles').doc(studentId).delete().catch(() => {});
+    await userRef.delete();
+    return { ok: true, id: studentId };
+  },
+
   async sendNotification(payload) {
     const title = String(payload?.title || '').trim();
     const message = String(payload?.message || '').trim();
