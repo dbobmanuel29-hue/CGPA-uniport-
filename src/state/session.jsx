@@ -10,6 +10,7 @@ import { registerSparkBackendFixes } from '../integration/spark-backend-fixes.js
 import { registerCloudinaryAdapter } from '../integration/cloudinary-adapter.js';
 import { registerNotificationAdminFixes } from '../integration/notification-admin-fixes.js';
 import { registerAuthPersistenceFix } from '../integration/auth-persistence-fix.js';
+import { registerGoogleAuthFix } from '../integration/google-auth-fix.js';
 
 const SessionContext = createContext(null);
 
@@ -21,7 +22,7 @@ export function SessionProvider({ children }) {
     let active = true; let unsubscribe; const initialEpoch = epoch.current;
     (async () => {
       try {
-        await registerFirebaseBackend(); await registerAuthPersistenceFix(); await registerStudentBackendFixes(); await registerStudentResultFixes(); await registerStudentReadFix(); await registerAdminFixes(); await registerAdminDeleteFix(); await registerSparkBackendFixes(); await registerCloudinaryAdapter(); registerNotificationAdminFixes();
+        await registerFirebaseBackend(); await registerAuthPersistenceFix(); await registerGoogleAuthFix(); await registerStudentBackendFixes(); await registerStudentResultFixes(); await registerStudentReadFix(); await registerAdminFixes(); await registerAdminDeleteFix(); await registerSparkBackendFixes(); await registerCloudinaryAdapter(); registerNotificationAdminFixes();
         if (!active) return;
         const value = await authService.getCurrentUser();
         if (value?.accountStatus === 'deleted') { await authService.logout().catch(() => {}); if (active) { setUser(null); setStatus('connected'); } return; }
