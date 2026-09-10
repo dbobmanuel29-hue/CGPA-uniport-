@@ -34,6 +34,72 @@ async function requireAdmin() {
 
 const rows = snapshot => snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 const nameOf = row => row?.name || row?.title || row?.label || '';
+const serverTimestamp = () => window.firebase.firestore.FieldValue.serverTimestamp();
+
+async function createNotificationRecords(payload) {
+  const { db, user } = await requireAdmin();
+  const audience = payload.audience || 'all_students';
+  const [usersSnap, profilesSnap] = await Promise.all([
+    db.collection('users').get(),
+    audience === 'faculty' ? db.collection('academicProfiles').get() : Promise.resolve(null)
+  ]);
+
+  let students = rows(usersSnap).filter(student => (student.role || 'student') === 'student');
+
+  if (audience === 'faculty') {
+    if (!payload.facultyId) throw Object.assign(new Error('Select a faculty before sending.'), { code: 'validation/faculty-required' });
+    const profileByUser = new Map(rows(profilesSnap).map(profile => [profile.id, profile]));
+    students = students.filter(student => profileByUser.get(student.id)?.facultyId === payload.facultyId);
+  }
+
+  const campaignRef = db.collection('notificationCampaigns').doc();
+  const campaign = {
+    title: String(payload.title || '').trim(),
+    message: String(payload.message || '').trim(),
+    type: payload.type || 'announcement',
+    audience,
+    facultyId: payload.facultyId || '',
+    priority: payload.priority || 'normal',
+    status: 'sent',
+    recipientCount: students.length,
+    createdBy: user.uid,
+    createdAt: serverTimestamp(),
+    sentAt: serverTimestamp()
+  };
+
+  const batchLimit = 450;
+  let batch = db.batch();
+  let operations = 0;
+  const flush = async () => {
+    if (!operations) return;
+    await batch.commit();
+    batch = db.batch();
+    operations = 0;
+  };
+
+  batch.set(campaignRef, campaign);
+  operations += 1;
+
+  for (const student of students) {
+    const notificationRef = db.collection('notifications').doc();
+    batch.set(notificationRef, {
+      userId: student.id,
+      title: campaign.title,
+      message: campaign.message,
+      body: campaign.message,
+      type: campaign.type,
+      priority: campaign.priority,
+      campaignId: campaignRef.id,
+      read: false,
+      createdAt: serverTimestamp()
+    });
+    operations += 1;
+    if (operations >= batchLimit) await flush();
+  }
+  await flush();
+
+  return { id: campaignRef.id, ...campaign, recipientCount: students.length };
+}
 
 export const adminService = Object.freeze({
   ...adminReadWriteService,
@@ -71,5 +137,11 @@ export const adminService = Object.freeze({
     if (filters.status) result = result.filter(row => row.accountStatus === filters.status);
     if (filters.facultyId) result = result.filter(row => row.facultyId === filters.facultyId);
     return result;
+  },
+  async sendNotification(payload) {
+    const title = String(payload?.title || '').trim();
+    const message = String(payload?.message || '').trim();
+    if (!title || message.length < 5) throw Object.assign(new Error('Enter a title and a message of at least 5 characters.'), { code: 'validation/notification' });
+    return createNotificationRecords(payload);
   }
 });
