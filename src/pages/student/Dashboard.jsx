@@ -60,14 +60,10 @@ export default function Dashboard() {
     );
     const credits = currentRows.reduce((sum, row) => sum + Number(row.credits || 0), 0);
     const qualityPoints = currentRows.reduce((sum, row) => sum + Number(row.qualityPoints ?? Number(row.credits || 0) * Number(row.points || 0)), 0);
-    return {
-      ...fallback,
-      courseCount: currentRows.length,
-      gpa: credits ? qualityPoints / credits : 0
-    };
+    return { ...fallback, courseCount: currentRows.length, gpa: credits ? qualityPoints / credits : 0 };
   }, [profile, results]);
 
-  const actions = [['plus', 'Add result', '/app/academic?add=1'], ['book', 'My courses', '/app/academic'], ['calculator', 'Calculate GPA', '/app/calculator'], ['bars', 'Analytics', '/app/analytics'], ['target', 'Target CGPA', '/app/target'], ['file', 'Generate report', '/app/reports'], ['help', 'Contact support', '/app/support']];
+  const actions = [['plus', 'Add result', '/app/academic?add=1'], ['upload', 'Import from Excel', '/app/import'], ['book', 'My courses', '/app/academic'], ['calculator', 'Calculate GPA', '/app/calculator'], ['bars', 'Analytics', '/app/analytics'], ['target', 'Target CGPA', '/app/target'], ['file', 'Generate report', '/app/reports'], ['help', 'Contact support', '/app/support']];
   const hasAcademicProfile = Boolean(profile?.programmeId || profile?.facultyId);
   const hasResults = results.length > 0 || Boolean(summary.totalCredits);
   const dashboardLoading = resource.status === 'loading' || profileResource.status === 'loading' || resultsResource.status === 'loading';
