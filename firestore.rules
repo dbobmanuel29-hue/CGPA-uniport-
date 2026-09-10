@@ -15,7 +15,15 @@ service cloud.firestore {
     match /userPreferences/{uid} { allow read, create, update, delete: if self(uid) || admin(); }
     match /results/{resultId} { allow create: if signedIn() && request.resource.data.userId == request.auth.uid && request.resource.data.credits > 0 && request.resource.data.points >= 0 && request.resource.data.qualityPoints == request.resource.data.credits * request.resource.data.points; allow read: if signedIn() && (resource.data.userId == request.auth.uid || admin()); allow update: if signedIn() && (resource.data.userId == request.auth.uid || admin()) && request.resource.data.userId == resource.data.userId && request.resource.data.credits > 0 && request.resource.data.points >= 0 && request.resource.data.qualityPoints == request.resource.data.credits * request.resource.data.points; allow delete: if signedIn() && (resource.data.userId == request.auth.uid || admin()); }
     match /notifications/{notificationId} { allow read, update, delete: if signedIn() && (resource.data.userId == request.auth.uid || admin()); allow create: if admin(); }
-    match /supportTickets/{ticketId} { allow read, update: if signedIn() && (resource.data.userId == request.auth.uid || admin()); allow create: if signedIn() && request.resource.data.userId == request.auth.uid; allow delete: if admin(); }
+    match /supportTickets/{ticketId} {
+      allow read: if signedIn() && (resource.data.userId == request.auth.uid || admin());
+      allow create: if signedIn() && request.resource.data.userId == request.auth.uid;
+      allow update: if admin() || (
+        signedIn() && resource.data.userId == request.auth.uid &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['messages', 'updatedAt'])
+      );
+      allow delete: if admin();
+    }
     match /publicSupportRequests/{id} {
       allow create: if request.resource.data.keys().hasAll(['name','email','message','status','createdAt'])
         && request.resource.data.name is string && request.resource.data.email is string && request.resource.data.message is string
