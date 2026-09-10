@@ -21,7 +21,7 @@ const adminSupportAndAudit = () => import('./pages/admin/SupportAndAudit');
 const About = loadNamed(publicPages, 'About');
 const Features = loadNamed(publicPages, 'Features');
 const HowItWorks = loadNamed(publicPages, 'HowItWorks');
-const PublicSupport = loadNamed(publicPages, 'PublicSupport');
+const PublicSupport = lazy(() => import('./pages/public/PublicSupport'));
 const Auth = lazy(() => import('./pages/auth/Auth'));
 const Onboarding = lazy(() => import('./pages/onboarding/Onboarding'));
 const Dashboard = lazy(() => import('./pages/student/Dashboard'));
