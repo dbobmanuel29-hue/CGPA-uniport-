@@ -13,6 +13,8 @@
   .workspace-header-actions .workspace-search{display:none}
   .workspace-header-actions>.nav-start{display:inline-flex!important;font-size:8px;min-height:31px;padding:7px 9px;white-space:nowrap}
   .workspace-header-actions>.theme-button,.workspace-header-actions>.notification-bell,.workspace-header-actions>.avatar{flex-shrink:0}
+  .public-header .nav-actions>.admin-nav-button{display:inline-flex!important;font-size:8px;min-height:31px;padding:7px 9px;white-space:nowrap}
+  .public-header .nav-actions>.admin-nav-button+.workspace-nav-button{display:none!important}
   .workspace-content{padding:24px 13px 35px}
   .academic-result-year{overflow:hidden}
   .academic-result-year>header{padding:16px}
@@ -53,6 +55,7 @@
 }
 @media (max-width: 420px){
   .workspace-header-actions>.nav-start{font-size:7.5px;padding:7px 8px}
+  .public-header .nav-actions>.admin-nav-button{font-size:7.5px;padding:7px 8px}
   .workspace-header-actions{gap:5px}
   .academic-result-semester td{font-size:9px}
   .academic-result-semester td:not(:last-child)::before{font-size:6.5px}
