@@ -1,0 +1,59 @@
+/* Targeted responsive fixes only. Arena desktop styling remains unchanged. */
+@media (max-width: 1100px){
+  .workspace-header{padding-left:20px;padding-right:20px}
+  .workspace-content{padding-left:22px;padding-right:22px}
+  .academic-result-semester table{min-width:760px}
+  .academic-result-semester th,.academic-result-semester td{padding-left:10px;padding-right:10px}
+}
+@media (max-width: 767px){
+  .workspace-header{height:62px;padding:0 13px;gap:8px}
+  .workspace-breadcrumb{gap:7px;font-size:9px;min-width:0;flex:1;overflow:hidden}
+  .workspace-breadcrumb strong{overflow:hidden;text-overflow:ellipsis}
+  .workspace-header-actions{gap:6px;min-width:0;flex-shrink:0}
+  .workspace-header-actions .workspace-search{display:none}
+  .workspace-header-actions>.nav-start{display:inline-flex!important;font-size:8px;min-height:31px;padding:7px 9px;white-space:nowrap}
+  .workspace-header-actions>.theme-button,.workspace-header-actions>.notification-bell,.workspace-header-actions>.avatar{flex-shrink:0}
+  .workspace-content{padding:24px 13px 35px}
+  .academic-result-year{overflow:hidden}
+  .academic-result-year>header{padding:16px}
+  .academic-result-year>header .row-actions{display:flex;flex-wrap:wrap;gap:7px}
+  .academic-result-year>header .text-button{font-size:9px}
+  .academic-result-semester{padding:0 10px 12px}
+  .academic-result-semester+.academic-result-semester{padding-top:14px}
+  .academic-result-semester-heading{align-items:flex-start;gap:9px;padding:4px 3px 11px}
+  .academic-result-semester-heading .row-actions{display:flex;flex-wrap:wrap;gap:7px}
+  .academic-result-semester-heading .text-button{font-size:9px}
+  .academic-result-semester .table-scroll{overflow:visible;border:0;background:transparent}
+  .academic-result-semester table{width:100%;min-width:0;border-collapse:separate}
+  .academic-result-semester thead{display:none}
+  .academic-result-semester tbody{display:block}
+  .academic-result-semester tr{display:block;border:1px solid var(--border);border-radius:10px;background:var(--surface);padding:10px 12px;margin-bottom:9px}
+  .academic-result-semester td{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;width:auto!important;min-width:0!important;text-align:right!important;border:0!important;padding:7px 0;font-size:10px;line-height:1.45}
+  .academic-result-semester td:not(:last-child){border-bottom:1px solid var(--border)!important}
+  .academic-result-semester td:not(:last-child)::before{font-size:7px;letter-spacing:.55px;text-transform:uppercase;color:var(--muted);font-weight:600;text-align:left;flex:0 0 auto}
+  .academic-result-semester td:nth-child(1)::before{content:'Course'}
+  .academic-result-semester td:nth-child(2)::before{content:'Title'}
+  .academic-result-semester td:nth-child(3)::before{content:'Credits'}
+  .academic-result-semester td:nth-child(4)::before{content:'Grade'}
+  .academic-result-semester td:nth-child(5)::before{content:'Grade point'}
+  .academic-result-semester td:nth-child(6)::before{content:'Quality points'}
+  .academic-result-semester td:nth-child(7)::before{content:'Attempt'}
+  .academic-result-semester td:nth-child(1),.academic-result-semester td:nth-child(2){overflow-wrap:anywhere}
+  .academic-result-semester td:last-child{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:8px;padding-top:10px}
+  .academic-result-semester td:last-child .text-button{font-size:9px;margin:0}
+  .record-summary{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-bottom:20px;padding-bottom:16px}
+  .record-summary>div{padding:10px 11px;border:1px solid var(--border);margin:-1px 0 0 -1px;background:var(--surface)}
+  .record-summary>div>strong{font-size:20px}
+  .record-summary-links{grid-column:1/-1;display:flex!important;justify-content:center;gap:14px!important;border:0!important;margin:0!important;padding:12px 0 0!important;background:transparent!important}
+  .table-toolbar{gap:8px}
+  .table-toolbar>.input{width:100%;flex:1 1 100%}
+  .table-toolbar>.button{width:100%}
+  .table-filters{display:grid;grid-template-columns:1fr;gap:9px}
+  .table-filters>.field{width:100%;min-width:0}
+}
+@media (max-width: 420px){
+  .workspace-header-actions>.nav-start{font-size:7.5px;padding:7px 8px}
+  .workspace-header-actions{gap:5px}
+  .academic-result-semester td{font-size:9px}
+  .academic-result-semester td:not(:last-child)::before{font-size:6.5px}
+}
