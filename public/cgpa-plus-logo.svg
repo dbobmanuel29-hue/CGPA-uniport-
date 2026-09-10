@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 250" width="100%" height="100%">
+  <defs>
+    <style>
+      .navy-fill { fill: #0A192F; }
+      .navy-text { fill: #0A192F; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; font-weight: 800; }
+      .green-fill { fill: #10B981; }
+      .subtext { fill: #475569; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; font-weight: 600; letter-spacing: 0.15em; }
+    </style>
+  </defs>
+  <g transform="translate(40, 35)">
+    <rect class="navy-fill" x="20" y="110" width="22" height="50" rx="4" />
+    <rect class="navy-fill" x="50" y="80" width="22" height="80" rx="4" />
+    <rect class="navy-fill" x="80" y="40" width="22" height="120" rx="4" />
+    <path class="navy-fill" d="M 91 10 L 125 45 L 105 45 L 105 60 L 77 60 L 77 45 L 57 45 Z" />
+    <path class="navy-fill" d="M 115 110 C 115 145, 90 160, 55 160 C 25 160, 5 140, 5 110 C 5 80, 25 60, 55 60 C 65 60, 75 63, 82 68 L 72 84 C 67 81, 61 79, 55 79 C 37 79, 24 92, 24 110 C 24 128, 37 141, 55 141 C 76 141, 94 130, 95 110 Z" />
+    <g class="green-fill" transform="translate(105, 90)">
+      <rect x="12" y="0" width="12" height="36" rx="3" />
+      <rect x="0" y="12" width="36" height="12" rx="3" />
+    </g>
+  </g>
+  <text x="240" y="135" class="navy-text" font-size="82" letter-spacing="-0.02em">CGPA</text>
+  <g class="green-fill" transform="translate(485, 74)">
+    <rect x="11" y="0" width="11" height="33" rx="2.5" />
+    <rect x="0" y="11" width="33" height="11" rx="2.5" />
+  </g>
+  <text x="243" y="175" class="subtext" font-size="22">UNIPORT</text>
+</svg>
