@@ -27,6 +27,13 @@ export function initSiteQuality() {
     const setNameMeta = (name, content) => { let node = document.querySelector(`meta[name="${name}"]`); if (!node) { node = document.createElement('meta'); node.name = name; document.head.appendChild(node); } node.content = content; };
     setMeta('og:title', title); setMeta('og:description', description); setMeta('og:type', 'website'); setMeta('og:url', window.location.href); setMeta('og:image', 'https://cgpa-lovat-theta.vercel.app/social-preview.svg');
     setNameMeta('twitter:card', 'summary_large_image'); setNameMeta('twitter:title', title); setNameMeta('twitter:description', description); setNameMeta('twitter:image', 'https://cgpa-lovat-theta.vercel.app/social-preview.svg');
+    if (!document.querySelector('script[data-cgpa-schema]')) {
+      const script = document.createElement('script');
+      script.type = 'application/ld+json';
+      script.dataset.cgpaSchema = 'true';
+      script.textContent = JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebApplication', name: 'CGPA+ UniPort', url: 'https://cgpa-lovat-theta.vercel.app/', applicationCategory: 'EducationApplication', operatingSystem: 'Web', description, areaServed: { '@type': 'City', name: 'Port Harcourt' }, publisher: { '@type': 'Organization', name: 'CGPA+ UniPort', url: 'https://cgpa-lovat-theta.vercel.app/' } });
+      document.head.appendChild(script);
+    }
   };
   update();
   window.addEventListener('hashchange', update);
