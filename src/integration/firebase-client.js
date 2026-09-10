@@ -37,6 +37,15 @@ function loadScript(src) {
   });
 }
 
+async function configureAppCheck(app) {
+  const siteKey = String(import.meta.env.VITE_FIREBASE_APPCHECK_SITE_KEY || '').trim();
+  if (!siteKey || !window.firebase.appCheck) return null;
+  await loadScript(`${CDN_BASE}/firebase-app-check-compat.js`);
+  const appCheck = window.firebase.appCheck(app);
+  appCheck.activate(siteKey, true);
+  return appCheck;
+}
+
 export async function getFirebase() {
   if (!firebaseConfigured()) return null;
   if (sdkPromise) return sdkPromise;
@@ -48,7 +57,8 @@ export async function getFirebase() {
     firebaseApp = window.firebase.apps.length ? window.firebase.app() : window.firebase.initializeApp(config);
     firestore = window.firebase.firestore(firebaseApp);
     firebaseAuth = window.firebase.auth(firebaseApp);
-    return { firebase: window.firebase, app: firebaseApp, db: firestore, auth: firebaseAuth, functions: null };
+    const appCheck = await configureAppCheck(firebaseApp);
+    return { firebase: window.firebase, app: firebaseApp, db: firestore, auth: firebaseAuth, appCheck, functions: null };
   })();
   return sdkPromise;
 }
