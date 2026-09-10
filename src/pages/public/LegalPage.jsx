@@ -15,11 +15,11 @@ const legalSections = {
   ],
   privacy: [
     ['About this policy', 'This is a draft privacy notice for a frontend application. Actual production data handling depends on the backend implementation and must be documented and legally reviewed before launch. It is not a claim that a particular backend security system is already active.'],
-    ['What this frontend stores', 'Only your light, dark or system appearance preference is stored in local browser storage. Calculator inputs and temporary image previews stay in memory while the page is open. No academic record, account or payment is silently created.'],
-    ['Future account and academic data', 'A connected service may process your name, email, optional contact details and academic records to provide the features you request. The future developer must define the lawful basis, retention periods, access controls and relevant student consent processes.'],
-    ['External resources', 'This frontend loads web fonts from Google Fonts and some example photography from Pexels. These providers may receive network information such as your IP address. The deployed frontend can self-host these assets. No behavioral analytics or advertising trackers are installed here.'],
-    ['Security and service providers', 'Authentication, database access, photo uploads, email and payment processing must use properly secured providers. Secrets belong on the server. Frontend display restrictions cannot substitute for server authorization or Firestore security rules.'],
-    ['Your controls', 'You can change appearance locally. Account deletion, data export and privacy preference controls are service integration hooks and will not claim completion while disconnected. Production request handling and contact details must be provided before launch.'],
+    ['What this frontend stores', 'Only your light, dark or system appearance preference and cookie-consent choice are stored in local browser storage. Calculator inputs and temporary image previews stay in memory while the page is open. No academic record, account or payment is silently created.'],
+    ['Future account and academic data', 'A connected service may process your name, email, optional contact details and academic records to provide the features you request. The production service must define the lawful basis, retention periods, access controls and relevant student consent processes.'],
+    ['External resources and analytics', 'This frontend loads web fonts from Google Fonts and some example photography from Pexels. These providers may receive normal network information when a browser requests their resources. Optional Google Analytics is consent-gated and only loads when a measurement ID is configured and the visitor accepts analytics. No advertising tracker is intentionally installed.'],
+    ['Security and service providers', 'Authentication, database access and photo uploads must use properly secured providers. Secrets belong on the server or managed secret store. Frontend display restrictions cannot substitute for server authorization or Firestore security rules.'],
+    ['Your controls', 'You can change appearance locally and decline optional analytics. Account deletion, data export and privacy preference controls are service integration hooks and will not claim completion while disconnected. Production request handling and contact details must be provided before launch.'],
     ['Retention and updates', 'A production policy must explain how long information is retained, how deletion is handled and which jurisdictional obligations apply. Updates should carry a publication date and notice of material changes.'],
   ],
 };
@@ -29,29 +29,15 @@ export default function LegalPage({ type }) {
   const sections = legalSections[type] || legalSections.terms;
   return (
     <>
-      <PublicHeading
-        eyebrow="TRANSPARENCY MATTERS"
-        title={terms ? 'Terms of service' : 'Your privacy matters.'}
-        description={terms ? 'Clear expectations for an independent academic planning tool.' : 'A clear view of this frontend and the responsibilities of a future connected service.'}
-        meta={[['file', `${sections.length} sections`], ['alert', 'Draft content'], ['shield', 'Pending legal review']]}
-      />
+      <PublicHeading eyebrow="TRANSPARENCY MATTERS" title={terms ? 'Terms of service' : 'Your privacy matters.'} description={terms ? 'Clear expectations for an independent academic planning tool.' : 'A clear view of this frontend and the responsibilities of a future connected service.'} meta={[['file', `${sections.length} sections`], ['alert', 'Draft content'], ['shield', 'Pending legal review']]} />
       <div className="container public-content">
         <Notice tone="warning">Draft legal content. Review and finalize this document before accepting production users.</Notice>
         <div className="legal-layout">
           <nav className="legal-index" aria-label="On this page">
-            {sections.map(([title], i) => (
-              <a href={`#legal-${type}-${i}`} key={title} onClick={e => { e.preventDefault(); document.getElementById(`legal-${type}-${i}`)?.scrollIntoView({ behavior: 'smooth' }); }}>
-                {String(i + 1).padStart(2, '0')}. {title}
-              </a>
-            ))}
+            {sections.map(([title], i) => <a href={`#legal-${type}-${i}`} key={title} onClick={e => { e.preventDefault(); document.getElementById(`legal-${type}-${i}`)?.scrollIntoView({ behavior: 'smooth' }); }}>{String(i + 1).padStart(2, '0')}. {title}</a>)}
           </nav>
           <div className="legal-prose">
-            {sections.map(([title, body], i) => (
-              <section id={`legal-${type}-${i}`} key={title} data-reveal="fade">
-                <h2>{i + 1}. {title}</h2>
-                <p>{body}</p>
-              </section>
-            ))}
+            {sections.map(([title, body], i) => <section id={`legal-${type}-${i}`} key={title} data-reveal="fade"><h2>{i + 1}. {title}</h2><p>{body}</p></section>)}
           </div>
         </div>
       </div>
