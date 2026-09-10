@@ -3,10 +3,10 @@ import { PageHeader, Button, Badge } from '../../components/ui';
 import { Modal } from '../../components/feedback';
 import { DataTable, SearchBox, StatusFilter } from '../../components/table';
 import { TicketConversation, TICKET_STATUSES, ticketTone } from '../../components/tickets';
-import { Icon } from '../../components/Icon';
 import { useResource } from '../../hooks/useResource';
 import { adminService } from '../../services/admin-service';
 import { supportService } from '../../services/support-service';
+import { friendlyError } from '../../services/adapter';
 import { date, dateTime, titleCase } from '../../utils/formatting';
 
 export function AdminSupport() {
@@ -15,8 +15,23 @@ export function AdminSupport() {
   const [priority, setPriority] = useState('');
   const [ticket, setTicket] = useState(null);
   const resource = useResource(() => supportService.getTickets({ status, priority, scope: 'admin' }), [status, priority]);
+
+  const handleDelete = async row => {
+    const subject = row.subject || 'this support request';
+    const confirmed = window.confirm(`Delete "${subject}" permanently?\n\nThis removes the entire support request and conversation from both the admin support desk and the student's support page. This cannot be undone.`);
+    if (!confirmed) return;
+
+    try {
+      await supportService.deleteTicket(row.id);
+      if (ticket === row.id) setTicket(null);
+      await resource.refresh();
+    } catch (error) {
+      window.alert(friendlyError(error));
+    }
+  };
+
   const columns = [{ key: 'id', label: 'Ticket ID' }, { key: 'studentName', label: 'Student' }, { key: 'subject', label: 'Subject' }, { key: 'category', label: 'Category', render: titleCase }, { key: 'status', label: 'Status', render: s => <Badge tone={ticketTone(s)}>{titleCase(s)}</Badge> }, { key: 'priority', label: 'Priority', render: p => <Badge tone={p === 'high' ? 'warning' : 'neutral'}>{titleCase(p)}</Badge> }, { key: 'createdAt', label: 'Date', render: date }];
-  return <><PageHeader eyebrow="PEOPLE FIRST" title="The support desk." description="Listen, understand and help students move forward. Every conversation in context." actions={<Button variant="outline" icon="refresh" onClick={resource.refresh}>Refresh inbox</Button>} /><div className="table-toolbar"><SearchBox value={search} onChange={setSearch} placeholder="Search ticket, student or subject..." /><StatusFilter value={status} onChange={setStatus} options={TICKET_STATUSES.map(s => ({ value: s, label: titleCase(s) }))} /><StatusFilter value={priority} onChange={setPriority} options={['low', 'normal', 'high']} label="All priorities" /></div><DataTable resource={resource} columns={columns} search={search} emptyTitle="No support requests loaded." emptyDescription="Open a request to reply, change its status, assign an agent or add an internal note." onView={r => setTicket(r.id)} /><TicketConversation ticketId={ticket} onClose={() => setTicket(null)} admin onUpdated={resource.refresh} /></>;
+  return <><PageHeader eyebrow="PEOPLE FIRST" title="The support desk." description="Listen, understand and help students move forward. Every conversation in context." actions={<Button variant="outline" icon="refresh" onClick={resource.refresh}>Refresh inbox</Button>} /><div className="table-toolbar"><SearchBox value={search} onChange={setSearch} placeholder="Search ticket, student or subject..." /><StatusFilter value={status} onChange={setStatus} options={TICKET_STATUSES.map(s => ({ value: s, label: titleCase(s) }))} /><StatusFilter value={priority} onChange={setPriority} options={['low', 'normal', 'high']} label="All priorities" /></div><DataTable resource={resource} columns={columns} search={search} emptyTitle="No support requests loaded." emptyDescription="Open a request to reply, change its status, assign an agent or add an internal note." onView={r => setTicket(r.id)} onDelete={handleDelete} /><TicketConversation ticketId={ticket} onClose={() => setTicket(null)} admin onUpdated={resource.refresh} /></>;
 }
 
 export function AuditLogs() {
