@@ -1,13 +1,12 @@
 const descriptions = {
   '/': 'Calculate, understand and plan your University of Port Harcourt academic journey with CGPA+ UniPort.',
   '/about': 'Learn what CGPA+ UniPort is, what it is not, and why it is built as an independent student planning tool.',
-  '/features': 'Explore CGPA+, GPA and CGPA calculators, academic records, analytics, planning and reporting tools.',
+  '/features': 'Explore GPA and CGPA calculators, academic records, analytics, planning and reporting tools.',
   '/how-it-works': 'See how to set up a UniPort profile, record results and use CGPA+ to plan ahead.',
   '/support': 'Get help with CGPA+, calculations, your student workspace and technical issues.',
   '/terms': 'Terms of service for the independent CGPA+ UniPort academic planning platform.',
-  '/privacy': 'Privacy information for CGPA+ UniPort, including account, academic data and third-party resources.',
+  '/privacy': 'Privacy information for CGPA+ UniPort, including account, academic data and consent-based analytics.',
   '/cookies': 'Cookie and optional analytics policy for CGPA+ UniPort.',
-  '/refunds': 'Refund policy for CGPA+ UniPort. This release does not accept paid subscriptions or payments.',
   '/login': 'Sign in to your CGPA+ UniPort student workspace.',
   '/register': 'Create a CGPA+ UniPort account and start organizing your academic journey.',
 };
