@@ -2,6 +2,7 @@ let configured = false;
 const adapters = new Map();
 export class BackendNotConnectedError extends Error { constructor(operation) { super('This feature needs a connected backend. No information has been saved or sent.'); this.name = 'BackendNotConnectedError'; this.code = 'BACKEND_NOT_CONNECTED'; this.operation = operation; } }
 export function configureServices(configuration) { configured = true; for (const [namespace, methods] of Object.entries(configuration)) for (const [name, implementation] of Object.entries(methods)) { if (typeof implementation !== 'function') throw new TypeError(`Expected a function for ${namespace}.${name}`); adapters.set(`${namespace}.${name}`, implementation); } }
+export function getServiceAdapter(namespace, name) { return adapters.get(`${namespace}.${name}`); }
 export function createService(namespace, methods) { return Object.freeze(Object.fromEntries(methods.map(method => [method, async (...args) => { const key = `${namespace}.${method}`; const fn = adapters.get(key); if (!fn) throw new BackendNotConnectedError(key); return await fn(...args); }]))); }
 export function friendlyError(error) {
   if (error?.code === 'BACKEND_NOT_CONNECTED') return 'The backend is not connected yet. Nothing has been saved, sent, or changed.';
@@ -16,6 +17,7 @@ export function friendlyError(error) {
   if (error?.code === 'not-found/report') return 'That saved report could not be found.';
   if (error?.code === 'validation/student-id') return 'Enter the student Firebase ID first.';
   if (error?.code === 'report/lookup-failed' || error?.code === 'report/results-failed') return error.message || 'The report data could not be loaded.';
+  if (error?.code === 'support/rate-limited') return error.message || 'Please wait before sending another support request.';
   if (error?.code === 'network-request-failed') return 'Check your internet connection and try again.';
   return 'We could not complete this request. Please try again.';
 }
