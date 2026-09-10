@@ -23,6 +23,15 @@ export default function Auth({ mode = 'login' }) {
   const authenticated = async user => {
     session.accept(user);
     if (!user) return;
+    let hasPendingSupport = false;
+    try {
+      const draft = JSON.parse(sessionStorage.getItem('cgpa_public_support_draft') || 'null');
+      hasPendingSupport = !!(draft?.subject && draft?.description);
+    } catch {}
+    if (hasPendingSupport) {
+      navigate('/support');
+      return;
+    }
     try {
       const profile = await academicService.getProfile();
       const profileComplete = PROFILE_FIELDS.every(key => !!profile?.[key]);
