@@ -1,0 +1,58 @@
+name: Generate social preview image
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'public/favicon.svg'
+      - '.github/workflows/generate-og-image.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate 1200x630 PNG
+        run: |
+          npm install --no-save sharp@0.34.5
+          node <<'NODE'
+          import sharp from 'sharp';
+          import fs from 'fs';
+
+          const logo = fs.readFileSync('public/favicon.svg', 'utf8');
+          const overlay = Buffer.from(`
+            <svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+              <rect width="1200" height="630" fill="#ffffff"/>
+              <g transform="translate(480 55)">
+                <svg width="240" height="240" viewBox="0 0 64 64">${logo.match(/<svg[^>]*>([\\s\\S]*)<\\/svg>/)?.[1] ?? ''}</svg>
+              </g>
+              <text x="600" y="390" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="700" fill="#0A192F">CGPA+ UniPort</text>
+              <text x="600" y="455" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="30" fill="#193a32">Your Academic Journey, Simplified.</text>
+              <text x="600" y="515" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="24" fill="#52606d">GPA • CGPA • Academic Progress • Target Planning</text>
+            </svg>
+          `);
+
+          await sharp(overlay)
+            .png({ compressionLevel: 9 })
+            .toFile('public/og-image.png');
+          NODE
+
+      - name: Commit generated image
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/og-image.png
+          if git diff --cached --quiet; then
+            echo "No image changes to commit."
+          else
+            git commit -m "chore: update social preview image"
+            git push
+          fi
