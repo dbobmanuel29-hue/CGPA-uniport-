@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin
 Disallow: /app
 Disallow: /onboarding
-Sitemap: https://cgpa-lovat-theta.vercel.app/sitemap.xml
+Sitemap: https://cgpaplus.name.ng/sitemap.xml
