@@ -25,8 +25,7 @@ async function uploadImage(file, uid) {
   body.append('file', file);
   body.append('upload_preset', uploadPreset);
   body.append('folder', `cgpa-uniport/users/${uid}/profile`);
-  body.append('public_id', 'avatar');
-  body.append('overwrite', 'true');
+  body.append('public_id', `avatar-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
 
   const response = await fetch(`https://api.cloudinary.com/v1_1/${encodeURIComponent(cloudName)}/image/upload`, { method: 'POST', body });
   const data = await response.json().catch(() => ({}));
@@ -34,7 +33,7 @@ async function uploadImage(file, uid) {
     const error = data?.error?.message || 'Cloudinary could not upload the image.';
     throw invalid(error, 'cloudinary/upload-failed');
   }
-  return `${data.secure_url}?v=${Date.now()}`;
+  return data.secure_url;
 }
 
 export async function registerCloudinaryAdapter() {
