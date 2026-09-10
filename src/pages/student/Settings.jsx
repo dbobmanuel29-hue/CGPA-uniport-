@@ -11,6 +11,21 @@ import { authService } from '../../services/auth-service';
 import { academicService } from '../../services/academic-service';
 import { navigate } from '../../utils/routing';
 import { dateTime } from '../../utils/formatting';
+import { validatePassword } from '../../utils/validation';
+
+export function AppearancePicker() {
+  const { mode, setMode } = useAppearance();
+  function keyboardSelection(event) {
+    const options = ['light', 'dark', 'system'];
+    const direction = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[event.key];
+    if (!direction && !['Home', 'End'].includes(event.key)) return;
+    event.preventDefault();
+    const index = event.key === 'Home' ? 0 : event.key === 'End' ? 2 : (options.indexOf(mode) + direction + 3) % 3;
+    setMode(options[index]);
+    event.currentTarget.querySelectorAll('[role="radio"]')[index]?.focus();
+  }
+  return <div className="appearance-options" role="radiogroup" aria-label="Color theme" onKeyDown={keyboardSelection}>{[['light', 'sun', 'Light'], ['dark', 'moon', 'Dark'], ['system', 'monitor', 'System']].map(([v, icon, label]) => <button type="button" key={v} role="radio" aria-checked={mode === v} tabIndex={mode === v ? 0 : -1} className={`appearance-option ${v} ${mode === v ? 'selected' : ''}`} onClick={() => setMode(v)}><div className="theme-thumbnail"><i /><span /><span /><span /></div><span><Icon name={icon} size={16} />{label}{mode === v && <Icon name="check" size={15} />}</span></button>)}</div>;
+}
 
 function SecuritySettings() {
   const [form, setForm] = useState({ currentPassword: '', newPassword: '', confirm: '' });
