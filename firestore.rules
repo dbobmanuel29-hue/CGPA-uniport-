@@ -10,42 +10,146 @@ service cloud.firestore {
         request.auth.token.role == 'admin'
       );
     }
-    match /users/{uid} { allow read: if self(uid) || admin(); allow create: if self(uid) && request.resource.data.role == 'student'; allow update: if admin() || (self(uid) && request.resource.data.role == resource.data.role && request.resource.data.accountStatus == resource.data.accountStatus); allow delete: if self(uid) || admin(); }
-    match /academicProfiles/{uid} { allow read, create, update: if self(uid) || admin(); allow delete: if self(uid) || admin(); }
-    match /userPreferences/{uid} { allow read, create, update, delete: if self(uid) || admin(); }
-    match /results/{resultId} { allow create: if signedIn() && request.resource.data.userId == request.auth.uid && request.resource.data.credits > 0 && request.resource.data.points >= 0 && request.resource.data.qualityPoints == request.resource.data.credits * request.resource.data.points; allow read: if signedIn() && (resource.data.userId == request.auth.uid || admin()); allow update: if signedIn() && (resource.data.userId == request.auth.uid || admin()) && request.resource.data.userId == resource.data.userId && request.resource.data.credits > 0 && request.resource.data.points >= 0 && request.resource.data.qualityPoints == request.resource.data.credits * request.resource.data.points; allow delete: if signedIn() && (resource.data.userId == request.auth.uid || admin()); }
-    match /notifications/{notificationId} { allow read, update, delete: if signedIn() && (resource.data.userId == request.auth.uid || admin()); allow create: if admin(); }
+
+    match /users/{uid} {
+      allow read: if self(uid) || admin();
+      allow create: if self(uid) && request.resource.data.role == 'student';
+      allow update: if admin() || (
+        self(uid) &&
+        request.resource.data.role == resource.data.role &&
+        request.resource.data.accountStatus == resource.data.accountStatus
+      );
+      allow delete: if self(uid) || admin();
+    }
+
+    match /academicProfiles/{uid} {
+      allow read, create, update, delete: if self(uid) || admin();
+    }
+
+    match /userPreferences/{uid} {
+      allow read, create, update, delete: if self(uid) || admin();
+    }
+
+    match /results/{resultId} {
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.credits > 0
+        && request.resource.data.points >= 0
+        && request.resource.data.qualityPoints == request.resource.data.credits * request.resource.data.points;
+      allow read: if signedIn() && (resource.data.userId == request.auth.uid || admin());
+      allow update: if signedIn()
+        && (resource.data.userId == request.auth.uid || admin())
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.credits > 0
+        && request.resource.data.points >= 0
+        && request.resource.data.qualityPoints == request.resource.data.credits * request.resource.data.points;
+      allow delete: if signedIn() && (resource.data.userId == request.auth.uid || admin());
+    }
+
+    match /notifications/{notificationId} {
+      allow create: if admin();
+      allow read: if signedIn() && (resource.data.userId == request.auth.uid || admin());
+      allow update: if admin() || (
+        signedIn() &&
+        resource.data.userId == request.auth.uid &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read', 'readAt'])
+      );
+      allow delete: if signedIn() && (resource.data.userId == request.auth.uid || admin());
+    }
+
     match /supportTickets/{ticketId} {
       allow read: if signedIn() && (resource.data.userId == request.auth.uid || admin());
       allow create: if signedIn() && request.resource.data.userId == request.auth.uid;
       allow update: if admin() || (
-        signedIn() && resource.data.userId == request.auth.uid &&
+        signedIn() &&
+        resource.data.userId == request.auth.uid &&
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['messages', 'updatedAt'])
       );
       allow delete: if admin();
     }
+
     match /publicSupportRequests/{id} {
       allow create: if request.resource.data.keys().hasAll(['name','email','message','status','createdAt'])
-        && request.resource.data.name is string && request.resource.data.email is string && request.resource.data.message is string
+        && request.resource.data.name is string
+        && request.resource.data.email is string
+        && request.resource.data.message is string
         && request.resource.data.status == 'open'
-        && request.resource.data.name.size() >= 2 && request.resource.data.name.size() <= 100
-        && request.resource.data.email.size() >= 5 && request.resource.data.email.size() <= 254
-        && request.resource.data.message.size() >= 5 && request.resource.data.message.size() <= 3000;
+        && request.resource.data.name.size() >= 2
+        && request.resource.data.name.size() <= 100
+        && request.resource.data.email.size() >= 5
+        && request.resource.data.email.size() <= 254
+        && request.resource.data.message.size() >= 5
+        && request.resource.data.message.size() <= 3000;
       allow read, update, delete: if admin();
     }
-    match /reports/{id} { allow read: if signedIn() && (resource.data.userId == request.auth.uid || admin()); allow create: if signedIn() && request.resource.data.userId == request.auth.uid; allow update, delete: if signedIn() && (resource.data.userId == request.auth.uid || admin()); }
-    match /dataExportRequests/{id} { allow create: if signedIn() && request.resource.data.userId == request.auth.uid; allow read, update, delete: if signedIn() && (resource.data.userId == request.auth.uid || admin()); }
-    match /auditLogs/{id} { allow read: if admin(); allow write: if false; }
-    match /adminSettings/{id} { allow read, write: if admin(); }
-    match /notificationCampaigns/{id} { allow read, write: if admin(); }
-    match /faculties/{id} { allow read: true; allow write: if admin(); }
-    match /departments/{id} { allow read: true; allow write: if admin(); }
-    match /programmes/{id} { allow read: true; allow write: if admin(); }
-    match /academicVersions/{id} { allow read: signedIn(); allow write: if admin(); }
-    match /levels/{id} { allow read: signedIn(); allow write: if admin(); }
-    match /semesters/{id} { allow read: signedIn(); allow write: if admin(); }
-    match /academicSessions/{id} { allow read: true; allow write: if admin(); }
-    match /gradingRules/{id} { allow read: signedIn(); allow write: if admin(); }
-    match /courses/{id} { allow read: signedIn(); allow write: if admin(); }
+
+    match /reports/{id} {
+      allow read: if signedIn() && (resource.data.userId == request.auth.uid || admin());
+      allow create: if signedIn() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if signedIn() && (resource.data.userId == request.auth.uid || admin());
+    }
+
+    match /dataExportRequests/{id} {
+      allow create: if signedIn() && request.resource.data.userId == request.auth.uid;
+      allow read, update, delete: if signedIn() && (resource.data.userId == request.auth.uid || admin());
+    }
+
+    match /auditLogs/{id} {
+      allow read: if admin();
+      allow write: if false;
+    }
+
+    match /adminSettings/{id} {
+      allow read, write: if admin();
+    }
+
+    match /notificationCampaigns/{id} {
+      allow read, write: if admin();
+    }
+
+    match /faculties/{id} {
+      allow read: if true;
+      allow write: if admin();
+    }
+
+    match /departments/{id} {
+      allow read: if true;
+      allow write: if admin();
+    }
+
+    match /programmes/{id} {
+      allow read: if true;
+      allow write: if admin();
+    }
+
+    match /academicVersions/{id} {
+      allow read: if signedIn();
+      allow write: if admin();
+    }
+
+    match /levels/{id} {
+      allow read: if signedIn();
+      allow write: if admin();
+    }
+
+    match /semesters/{id} {
+      allow read: if signedIn();
+      allow write: if admin();
+    }
+
+    match /academicSessions/{id} {
+      allow read: if true;
+      allow write: if admin();
+    }
+
+    match /gradingRules/{id} {
+      allow read: if signedIn();
+      allow write: if admin();
+    }
+
+    match /courses/{id} {
+      allow read: if signedIn();
+      allow write: if admin();
+    }
   }
 }
