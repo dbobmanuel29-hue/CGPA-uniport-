@@ -44,7 +44,9 @@ async function createNotificationRecords(payload) {
     audience === 'faculty' ? db.collection('academicProfiles').get() : Promise.resolve(null)
   ]);
 
-  let students = rows(usersSnap).filter(student => (student.role || 'student') === 'student');
+  let students = rows(usersSnap).filter(student =>
+    (student.role || 'student') === 'student' && student.accountStatus === 'active'
+  );
 
   if (audience === 'faculty') {
     if (!payload.facultyId) throw Object.assign(new Error('Select a faculty before sending.'), { code: 'validation/faculty-required' });
