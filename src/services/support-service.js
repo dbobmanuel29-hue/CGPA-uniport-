@@ -1,4 +1,4 @@
-import { createService, friendlyError } from './adapter.js';
+import { createService } from './adapter.js';
 import { getFirebase } from '../integration/firebase-client.js';
 
 const OWNER_ADMIN_UID = 'lmUB6IdhuaOlHjzkqBEyoNkE7PH2';
@@ -31,6 +31,5 @@ export const supportService = Object.freeze({
 
     await db.collection('supportTickets').doc(ticketId).delete();
     return { ok: true, id: ticketId };
-  },
-  friendlyError
+  }
 });
