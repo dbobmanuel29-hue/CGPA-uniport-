@@ -10,7 +10,6 @@ export class BackendNotConnectedError extends Error {
   }
 }
 
-// Integration seam: register real Firebase/server implementations once, at startup.
 export function configureServices(configuration) {
   configured = true;
   for (const [namespace, methods] of Object.entries(configuration)) {
@@ -37,7 +36,12 @@ export function friendlyError(error) {
   if (error?.code === 'auth/popup-closed-by-user') return 'Google sign-in was closed before it finished.';
   if (error?.code === 'auth/requires-recent-login') return 'For your security, sign in again before changing this account setting.';
   if (error?.code === 'auth/terms-required') return 'Please accept the Terms and Privacy Policy to create your account.';
-  if (error?.code === 'permission-denied' || error?.code === 'unauthorized') return 'You do not have permission to access this information.';
+  if (error?.code === 'permission-denied') return 'You do not have administrator permission to load this report.';
+  if (error?.code === 'unauthorized') return 'Please sign in again before using the report center.';
+  if (error?.code === 'not-found/student') return error.message || 'No student was found with that matriculation number.';
+  if (error?.code === 'not-found/report') return 'That saved report could not be found.';
+  if (error?.code === 'validation/student-id') return 'Enter the student matriculation number first.';
+  if (error?.code === 'report/lookup-failed' || error?.code === 'report/results-failed') return error.message || 'The report data could not be loaded.';
   if (error?.code === 'network-request-failed') return 'Check your internet connection and try again.';
   return 'We could not complete this request. Please try again.';
 }
