@@ -67,7 +67,7 @@ service cloud.firestore {
         resource.data.userId == request.auth.uid &&
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['messages', 'updatedAt'])
       );
-      allow delete: if admin();
+      allow delete: if signedIn() && (resource.data.userId == request.auth.uid || admin());
     }
 
     match /publicSupportRequests/{id} {
