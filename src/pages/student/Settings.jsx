@@ -3,7 +3,6 @@ import { PageHeader, Panel, Button, Field, Input, PasswordInput, Toggle, Notice,
 import { ActionError, ConnectionState, ConfirmModal, useAction } from '../../components/feedback';
 import { AcademicFields, emptyAcademic } from '../../components/AcademicFields';
 import { Icon } from '../../components/Icon';
-import { DataTable } from '../../components/table';
 import { useAppearance } from '../../state/appearance';
 import { useSession } from '../../state/session';
 import { useResource } from '../../hooks/useResource';
@@ -11,20 +10,11 @@ import { authService } from '../../services/auth-service';
 import { academicService } from '../../services/academic-service';
 import { navigate } from '../../utils/routing';
 import { dateTime } from '../../utils/formatting';
-import { validatePassword } from '../../utils/validation';
+import { DataTable } from '../../components/table';
 
 export function AppearancePicker() {
   const { mode, setMode } = useAppearance();
-  function keyboardSelection(event) {
-    const options = ['light', 'dark', 'system'];
-    const direction = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[event.key];
-    if (!direction && !['Home', 'End'].includes(event.key)) return;
-    event.preventDefault();
-    const index = event.key === 'Home' ? 0 : event.key === 'End' ? 2 : (options.indexOf(mode) + direction + 3) % 3;
-    setMode(options[index]);
-    event.currentTarget.querySelectorAll('[role="radio"]')[index]?.focus();
-  }
-  return <div className="appearance-options" role="radiogroup" aria-label="Color theme" onKeyDown={keyboardSelection}>{[['light', 'sun', 'Light'], ['dark', 'moon', 'Dark'], ['system', 'monitor', 'System']].map(([v, icon, label]) => <button type="button" key={v} role="radio" aria-checked={mode === v} tabIndex={mode === v ? 0 : -1} className={`appearance-option ${v} ${mode === v ? 'selected' : ''}`} onClick={() => setMode(v)}><div className="theme-thumbnail"><i /><span /><span /><span /></div><span><Icon name={icon} size={16} />{label}{mode === v && <Icon name="check" size={15} />}</span></button>)}</div>;
+  return <div className="appearance-options" role="radiogroup" aria-label="Color theme">{[['light', 'sun', 'Light'], ['dark', 'moon', 'Dark']].map(([v, icon, label]) => <button type="button" key={v} role="radio" aria-checked={mode === v} tabIndex={mode === v ? 0 : -1} className={`appearance-option ${v} ${mode === v ? 'selected' : ''}`} onClick={() => setMode(v)}><div className="theme-thumbnail"><i /><span /><span /><span /></div><span><Icon name={icon} size={16} />{label}{mode === v && <Icon name="check" size={15} />}</span></button>)}</div>;
 }
 
 function SecuritySettings() {
@@ -36,15 +26,15 @@ function SecuritySettings() {
   const [revoke, setRevoke] = useState(null);
   return <div className="settings-content-stack"><Panel title="Change your password" description="The authentication backend handles reauthentication and password updates."><form className="form-stack narrow-form" onSubmit={e => { e.preventDefault(); const error = validatePassword(form.newPassword) || (form.newPassword !== form.confirm ? 'Your new passwords do not match.' : ''); setValidation(error); if (error) return; action.run(() => authService.updatePassword({ currentPassword: form.currentPassword, newPassword: form.newPassword }), () => setForm({ currentPassword: '', newPassword: '', confirm: '' }), 'Password updated.'); }}>{[['currentPassword', 'Current password'], ['newPassword', 'New password'], ['confirm', 'Confirm new password']].map(([k, label]) => <Field label={label} key={k}><PasswordInput required value={form[k]} onChange={e => setForm({ ...form, [k]: e.target.value })} autoComplete={k === 'currentPassword' ? 'current-password' : 'new-password'} minLength={k === 'currentPassword' ? undefined : 8} /></Field>)}{validation && <p className="field-error" role="alert">{validation}</p>}<ActionError error={action.error} /><Button type="submit" busy={action.busy} icon="lock">Change password</Button></form></Panel><Panel title="Sign-in methods"><ConnectionState resource={methods} title="sign-in methods" emptyTitle="No sign-in methods connected.">{data => <ul className="milestone-list">{(data.items || data).map(method => <li key={method.id}><Icon name={method.id === 'password' ? 'mail' : 'shield'} size={18} />{method.label || method.id}<span>{method.email}</span></li>)}</ul>}</ConnectionState></Panel><Panel title="Current session" description="Firebase client authentication can safely show and end the session on this device. Other-device session management requires a trusted backend and is not enabled on the Firebase free-plan setup."><DataTable resource={sessions} columns={[{ key: 'device', label: 'Device' }, { key: 'browser', label: 'Browser' }, { key: 'lastActiveAt', label: 'Last active', render: dateTime }]} onDelete={setRevoke} emptyTitle="No current session available." /></Panel><ConfirmModal open={!!revoke} onClose={() => setRevoke(null)} title="Sign out this device?" description="This will sign out the current device from your CGPA+ account." actionLabel="Sign out" dangerous onConfirm={async () => { await authService.revokeSession(revoke.id); sessions.refresh(); }} /></div>;
 }
+
 function AcademicSettings() {
   const resource = useResource(() => academicService.getProfile());
   const [form, setForm] = useState(emptyAcademic);
   const action = useAction();
-  useEffect(() => {
-    if (resource.data) setForm(Object.fromEntries(Object.keys(emptyAcademic).map(key => [key, resource.data[key] ?? emptyAcademic[key]])));
-  }, [resource.data]);
+  useEffect(() => { if (resource.data) setForm(Object.fromEntries(Object.keys(emptyAcademic).map(key => [key, resource.data[key] ?? emptyAcademic[key]]))); }, [resource.data]);
   return <Panel title="Your academic context" description="A connected hierarchy, exclusively for UniPort."><form className="form-stack" onSubmit={e => { e.preventDefault(); action.run(() => academicService.updateProfile({ ...form, universityId: 'UNIPORT' }), resource.refresh, 'Academic profile updated.'); }}><AcademicFields form={form} setForm={setForm} /><ActionError error={action.error} /><div className="form-actions"><Button type="submit" busy={action.busy} disabled={!form.facultyId || !form.departmentId || !form.programmeId || !form.currentLevelId || !form.currentSessionId || !form.currentSemesterId || !form.admissionSessionId}>Save academic profile</Button></div></form></Panel>;
 }
+
 function PreferenceSettings({ privacy = false }) {
   const resource = useResource(() => authService.getPreferences());
   const [draft, setDraft] = useState({});
@@ -55,10 +45,6 @@ function PreferenceSettings({ privacy = false }) {
 }
 
 export default function Settings() {
-  const [tab, setTab] = useState('account');
-  const [deleting, setDeleting] = useState(false);
-  const [loggingOut, setLoggingOut] = useState(false);
-  const account = useResource(() => authService.getCurrentUser());
-  const session = useSession();
-  return <><PageHeader eyebrow="MAKE YOURSELF AT HOME" title="Your preferences. Your workspace." description="Manage account details, privacy, security and the way CGPA+ feels." /><Tabs value={tab} onChange={setTab} options={['account', 'security', 'notifications', { value: 'academic', label: 'Academic profile' }, 'appearance', 'privacy']} />{tab === 'account' && <Panel title="Account details" description="Update your name, email and phone from your profile."><ConnectionState resource={account} title="account" emptyTitle="No account connected.">{data => <dl className="detail-grid"><div><dt>Full name</dt><dd>{data.fullName}</dd></div><div><dt>Email</dt><dd>{data.email}</dd></div><div><dt>Phone</dt><dd>{data.phone || 'Not provided'}</dd></div></dl>}</ConnectionState><Button variant="outline" href="#/app/profile" icon="edit">Edit profile</Button></Panel>}{tab === 'security' && <SecuritySettings />}{tab === 'notifications' && <PreferenceSettings />}{tab === 'academic' && <AcademicSettings />}{tab === 'appearance' && <Panel title="Make it feel like you" description="Light, dark or your device setting. This preference is stored only on this browser."><AppearancePicker /></Panel>}{tab === 'privacy' && <PreferenceSettings privacy />}<section className="danger-zone"><div><h2>Account controls</h2><p>Destructive actions are handled by the authentication backend. They are never simulated.</p></div><div><Button variant="outline" icon="logout" onClick={() => setLoggingOut(true)}>Sign out</Button><Button variant="danger" icon="trash" onClick={() => setDeleting(true)}>Delete account</Button></div></section><ConfirmModal open={loggingOut} onClose={() => setLoggingOut(false)} title="Sign out of your account?" description="Your session will only end once the connected authentication service confirms sign-out." actionLabel="Sign out" onConfirm={async () => { await authService.logout(); session.clear(); navigate('/login'); }} /><ConfirmModal open={deleting} onClose={() => setDeleting(false)} title="Delete your CGPA+ account?" description="This is permanent once processed. Your account and associated records will be handled according to the production deletion policy. The backend may require reauthentication. Nothing is deleted by the frontend alone." actionLabel="Delete account" dangerous onConfirm={async () => { await authService.deleteAccount(); session.clear(); navigate('/'); }} /></>;
+  const [tab, setTab] = useState('account'); const [deleting, setDeleting] = useState(false); const [loggingOut, setLoggingOut] = useState(false); const account = useResource(() => authService.getCurrentUser()); const session = useSession();
+  return <><PageHeader eyebrow="MAKE YOURSELF AT HOME" title="Your preferences. Your workspace." description="Manage account details, privacy, security and the way CGPA+ feels." /><Tabs value={tab} onChange={setTab} options={['account', 'security', 'notifications', { value: 'academic', label: 'Academic profile' }, 'appearance', 'privacy']} />{tab === 'account' && <Panel title="Account details" description="Update your name, email and phone from your profile."><ConnectionState resource={account} title="account" emptyTitle="No account connected.">{data => <dl className="detail-grid"><div><dt>Full name</dt><dd>{data.fullName}</dd></div><div><dt>Email</dt><dd>{data.email}</dd></div><div><dt>Phone</dt><dd>{data.phone || 'Not provided'}</dd></div></div>}</ConnectionState><Button variant="outline" href="#/app/profile" icon="edit">Edit profile</Button></Panel>}{tab === 'security' && <SecuritySettings />}{tab === 'notifications' && <PreferenceSettings />}{tab === 'academic' && <AcademicSettings />}{tab === 'appearance' && <Panel title="Make it feel like you" description="Choose the light or dark theme. This preference is stored only on this browser."><AppearancePicker /></Panel>}{tab === 'privacy' && <PreferenceSettings privacy />}<section className="danger-zone"><div><h2>Account controls</h2><p>Destructive actions are handled by the authentication backend. They are never simulated.</p></div><div><Button variant="outline" icon="logout" onClick={() => setLoggingOut(true)}>Sign out</Button><Button variant="danger" icon="trash" onClick={() => setDeleting(true)}>Delete account</Button></div></section><ConfirmModal open={loggingOut} onClose={() => setLoggingOut(false)} title="Sign out of your account?" description="Your session will only end once the connected authentication service confirms sign-out." actionLabel="Sign out" onConfirm={async () => { await authService.logout(); session.clear(); navigate('/login'); }} /><ConfirmModal open={deleting} onClose={() => setDeleting(false)} title="Delete your CGPA+ account?" description="This is permanent once processed. Your account and associated records will be handled according to the production deletion policy. The backend may require reauthentication. Nothing is deleted by the frontend alone." actionLabel="Delete account" dangerous onConfirm={async () => { await authService.deleteAccount(); session.clear(); navigate('/'); }} /></>;
 }
