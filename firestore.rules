@@ -98,7 +98,9 @@ service cloud.firestore {
 
     match /auditLogs/{id} {
       allow read: if admin();
-      allow write: if false;
+      allow create: if admin();
+      allow update: if false;
+      allow delete: if admin();
     }
 
     match /adminSettings/{id} {
