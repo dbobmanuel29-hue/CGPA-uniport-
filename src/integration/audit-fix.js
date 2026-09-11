@@ -62,7 +62,7 @@ function getResourceId(args) {
 export async function registerAuditFix() {
   const methods = {};
   const names = [
-    'getDashboard','getStudents','getStudent','deleteStudent','getAcademicProfile','getAuditLogs','getSettings','updateSettings',
+    'getDashboard','getStudents','getStudent','deleteStudent','getAcademicProfile','getAuditLogs','deleteAuditLog','getSettings','updateSettings',
     'getFaculties','createFaculty','updateFaculty','deleteFaculty','getDepartments','createDepartment','updateDepartment','deleteDepartment',
     'getProgrammes','createProgramme','updateProgramme','deleteProgramme','getCourses','createCourse','updateCourse','deleteCourse',
     'getAcademicVersions','createAcademicVersion','updateAcademicVersion','deleteAcademicVersion','getLevels','createLevel','updateLevel','deleteLevel',
@@ -82,8 +82,18 @@ export async function registerAuditFix() {
       .sort((a, b) => Date.parse(b.createdAt || '') - Date.parse(a.createdAt || ''));
   };
 
+  methods.deleteAuditLog = async auditId => {
+    if (!auditId) throw Object.assign(new Error('Audit event ID is required.'), { code: 'validation/audit-delete' });
+    const { db, user } = await requireAdmin();
+    const ref = db.collection('auditLogs').doc(auditId);
+    const snap = await ref.get();
+    if (!snap.exists) throw Object.assign(new Error('Audit event not found.'), { code: 'not-found/audit' });
+    await ref.delete();
+    return { ok: true, id: auditId, deletedBy: user.uid };
+  };
+
   for (const name of names) {
-    if (name === 'getAuditLogs') continue;
+    if (name === 'getAuditLogs' || name === 'deleteAuditLog') continue;
     const original = currentAdapters[name];
     if (!original || READ_ONLY.has(name)) {
       if (original) methods[name] = original;
