@@ -33,7 +33,7 @@ export default function AdminDashboard() {
     const registrations = months.map(month => students.filter(student => monthKey(student.createdAt) === month.key).length);
     const userGrowth = [];
     let cumulative = 0;
-    months.forEach((month, index) => {
+    months.forEach((month) => {
       cumulative = students.filter(student => {
         const key = monthKey(student.createdAt);
         return key && key <= month.key;
@@ -46,10 +46,11 @@ export default function AdminDashboard() {
     }).length);
     return { registrations, userGrowth, activeUsers };
   }, [students, months]);
-  // Total students is sourced from Firebase Authentication through the trusted
-  // admin endpoint, not from the Firestore users collection. This prevents the
-  // dashboard total from being lower when an Auth account is missing a profile.
-  const totalStudents = Number(stats.totalStudents || 0);
+  // The dashboard still uses the authoritative Firebase Authentication count
+  // when it arrives. While that slower verification request is running, show
+  // the already-loaded Firestore student directory count instead of leaving
+  // the card blank. This makes the Total students card appear much sooner.
+  const totalStudents = Number(stats.totalStudents ?? (students.length || 0));
   const activeStudents = students.length ? students.filter(student => student.accountStatus === 'active').length : Number(stats.activeStudents || 0);
   const newStudents = students.length ? students.filter(student => {
     const created = new Date(student.createdAt || 0);
