@@ -13,6 +13,7 @@ import { dateTime } from '../../utils/formatting';
 import { DataTable } from '../../components/table';
 import { validatePassword } from '../../utils/validation';
 
+// Appearance intentionally supports only Light and Dark; there is no System option.
 export function AppearancePicker() {
   const { mode, setMode } = useAppearance();
   return <div className="appearance-options" role="radiogroup" aria-label="Color theme">{[['light', 'sun', 'Light'], ['dark', 'moon', 'Dark']].map(([v, icon, label]) => <button type="button" key={v} role="radio" aria-checked={mode === v} tabIndex={mode === v ? 0 : -1} className={`appearance-option ${v} ${mode === v ? 'selected' : ''}`} onClick={() => setMode(v)}><div className="theme-thumbnail"><i /><span /><span /><span /></div><span><Icon name={icon} size={16} />{label}{mode === v && <Icon name="check" size={15} />}</span></button>)}</div>;
