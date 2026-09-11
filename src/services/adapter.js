@@ -21,10 +21,13 @@ export function friendlyError(error) {
   if (error?.code === 'auth/popup-closed-by-user') return 'Google sign-in was closed before it finished.';
   if (error?.friendlyCode === 'auth/google-account-link-required' || error?.code === 'auth/account-exists-with-different-credential') return 'This Google email already has a CGPA+ account using another sign-in method. Sign in with that method first, then link Google from your account settings.';
   if (error?.code === 'auth/requires-recent-login') return 'For your security, sign in again before changing this account setting.';
+  if (error?.code === 'auth/delete-reauth-required') return error.message || 'Please reauthenticate before permanently deleting your account.';
+  if (error?.code === 'auth/invalid-login-credentials') return 'The current password is incorrect.';
+  if (error?.code === 'auth/owner-account-protected') return error.message || 'The owner administrator account cannot be deleted from student settings.';
   if (error?.code === 'auth/email-already-in-use') return 'This email already has an account. Try signing in.';
   if (error?.code === 'auth/terms-required') return 'Please accept the Terms and Privacy Policy to create your account.';
-  if (error?.code === 'permission-denied') return 'You do not have administrator permission to load this report.';
-  if (error?.code === 'unauthorized') return 'Please sign in again before using the report center.';
+  if (error?.code === 'permission-denied') return 'You do not have permission to complete this action.';
+  if (error?.code === 'unauthorized') return 'Please sign in again before using this feature.';
   if (error?.code === 'not-found/student') return error.message || 'No student was found with that Firebase ID.';
   if (error?.code === 'not-found/report') return 'That saved report could not be found.';
   if (error?.code === 'validation/student-id') return 'Enter the student Firebase ID first.';
