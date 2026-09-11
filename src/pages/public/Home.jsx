@@ -116,7 +116,7 @@ export default function Home() {
         <p className="hero-eyebrow animate-in">YOUR AMBITION. YOUR NEXT CHAPTER.</p>
         <h1 className="hero-wordmark animate-in stagger-1" data-page-heading tabIndex={-1}>CGPA<span>+</span><small>UniPort</small></h1>
         <h2 className="hero-title animate-in stagger-2">Your UniPort Academic<br />Journey, Simplified.</h2>
-        <p className="hero-description animate-in stagger-2">Know your numbers. Own your progress. A smarter way to calculate, track and plan your university journey.</p>
+        <p className="hero-description animate-in stagger-2">CGPA Plus UniPort (CGPA+) is your academic companion for calculating, tracking and planning your University of Port Harcourt journey.</p>
         <div className="hero-actions animate-in stagger-3">
           <Button href="#/register" variant="lime" endIcon="diagonal">Get started</Button>
           <Button href="#/app/calculator" variant="transparent" icon="calculator">Calculate GPA</Button>
