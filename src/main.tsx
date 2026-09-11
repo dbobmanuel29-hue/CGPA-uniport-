@@ -8,6 +8,7 @@ import { registerAuditFix } from "./integration/audit-fix";
 import { registerCloudinaryAdapter } from "./integration/cloudinary-adapter";
 import { registerAccountCleanup } from "./integration/account-cleanup";
 import { registerAccountDeletionFix } from "./integration/account-deletion-fix";
+import { registerGoogleAuthRedirectFix } from "./integration/google-auth-redirect-fix";
 import { registerSupportRateLimit } from "./integration/support-rate-limit";
 import { initAnalytics } from "./integration/analytics";
 import { initSiteQuality } from "./integration/site-quality";
@@ -16,6 +17,7 @@ initAnalytics();
 initSiteQuality();
 
 registerFirebaseBackend()
+  .then(() => registerGoogleAuthRedirectFix())
   .then(() => registerCloudinaryAdapter())
   .then(() => registerAccountCleanup())
   .then(() => registerAccountDeletionFix())
