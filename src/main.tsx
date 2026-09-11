@@ -4,6 +4,7 @@ import "./index.css";
 import App from "./App";
 import { registerFirebaseBackend } from "./integration";
 import { registerReportAdminFix } from "./integration/report-admin-fix";
+import { registerAuditFix } from "./integration/audit-fix";
 import { registerCloudinaryAdapter } from "./integration/cloudinary-adapter";
 import { registerAccountCleanup } from "./integration/account-cleanup";
 import { registerSupportRateLimit } from "./integration/support-rate-limit";
@@ -18,6 +19,7 @@ registerFirebaseBackend()
   .then(() => registerAccountCleanup())
   .then(() => registerSupportRateLimit())
   .then(() => registerReportAdminFix())
+  .then(() => registerAuditFix())
   .catch(error => console.error("CGPA+ backend initialization failed", error))
   .finally(() => {
     createRoot(document.getElementById("root")!).render(
