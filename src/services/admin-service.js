@@ -32,6 +32,28 @@ async function requireAdmin() {
   throw Object.assign(new Error('Administrator access required.'), { code: 'permission-denied' });
 }
 
+async function writeAudit({ action, resource, resourceId, status, description, user }) {
+  try {
+    const { db } = await requireAdmin();
+    await db.collection('auditLogs').add({
+      actorId: user.uid,
+      actorName: user.displayName || user.email || 'Administrator',
+      actorEmail: user.email || '',
+      action,
+      resource,
+      resourceType: resource,
+      resourceId: resourceId || '',
+      status,
+      description,
+      ipAddress: 'Not collected',
+      device: typeof navigator !== 'undefined' ? navigator.userAgent.slice(0, 240) : 'Unknown browser',
+      createdAt: window.firebase.firestore.FieldValue.serverTimestamp()
+    });
+  } catch (auditError) {
+    console.warn('Audit event could not be recorded:', auditError?.message || auditError);
+  }
+}
+
 const rows = snapshot => snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 const nameOf = row => row?.name || row?.title || row?.label || '';
 const serverTimestamp = () => window.firebase.firestore.FieldValue.serverTimestamp();
@@ -181,7 +203,7 @@ export const adminService = Object.freeze({
   },
 
   async deleteStudent(studentId) {
-    const { db } = await requireAdmin();
+    const { db, user } = await requireAdmin();
     if (!studentId || studentId === OWNER_ADMIN_UID) {
       throw Object.assign(new Error('That account cannot be deleted.'), { code: 'validation/student-delete' });
     }
@@ -197,30 +219,58 @@ export const adminService = Object.freeze({
       'academicProfiles', 'userPreferences', 'notifications', 'supportTickets',
       'results', 'reports', 'dataExportRequests'
     ];
-    for (const collection of collections) {
-      const snap = await db.collection(collection).where('userId', '==', studentId).get();
-      let batch = db.batch();
-      let operations = 0;
-      for (const doc of snap.docs) {
-        batch.delete(doc.ref);
-        operations += 1;
-        if (operations >= 450) {
-          await batch.commit();
-          batch = db.batch();
-          operations = 0;
+    try {
+      for (const collection of collections) {
+        const snap = await db.collection(collection).where('userId', '==', studentId).get();
+        let batch = db.batch();
+        let operations = 0;
+        for (const doc of snap.docs) {
+          batch.delete(doc.ref);
+          operations += 1;
+          if (operations >= 450) {
+            await batch.commit();
+            batch = db.batch();
+            operations = 0;
+          }
         }
+        if (operations) await batch.commit();
       }
-      if (operations) await batch.commit();
+      await db.collection('academicProfiles').doc(studentId).delete().catch(() => {});
+      await userRef.delete();
+      await writeAudit({ action: 'deleteStudent', resource: 'student', resourceId: studentId, status: 'success', description: 'Student account deleted successfully.', user });
+      return { ok: true, id: studentId };
+    } catch (error) {
+      await writeAudit({ action: 'deleteStudent', resource: 'student', resourceId: studentId, status: 'failed', description: error?.message || 'Student account deletion failed.', user });
+      throw error;
     }
-    await db.collection('academicProfiles').doc(studentId).delete().catch(() => {});
-    await userRef.delete();
-    return { ok: true, id: studentId };
   },
 
   async sendNotification(payload) {
     const title = String(payload?.title || '').trim();
     const message = String(payload?.message || '').trim();
     if (!title || message.length < 5) throw Object.assign(new Error('Enter a title and a message of at least 5 characters.'), { code: 'validation/notification' });
-    return createNotificationRecords(payload);
+    const { user } = await requireAdmin();
+    try {
+      const result = await createNotificationRecords(payload);
+      await writeAudit({
+        action: 'sendNotification',
+        resource: 'notification',
+        resourceId: result.id,
+        status: 'success',
+        description: `Notification "${title}" sent to ${result.recipientCount} student(s).`,
+        user
+      });
+      return result;
+    } catch (error) {
+      await writeAudit({
+        action: 'sendNotification',
+        resource: 'notification',
+        resourceId: '',
+        status: 'failed',
+        description: error?.message || 'Notification send failed.',
+        user
+      });
+      throw error;
+    }
   }
 });
