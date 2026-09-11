@@ -11,9 +11,7 @@ function getAdminApp() {
   }
 
   const serviceAccount = JSON.parse(serviceAccountJson);
-  return admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-  });
+  return admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
 }
 
 function json(res, status, body) {
@@ -21,7 +19,7 @@ function json(res, status, body) {
   return res.end(JSON.stringify(body));
 }
 
-async function requireAdmin(req) {
+async function requireAuthorized(req, targetUid) {
   const authorization = req.headers.authorization || '';
   if (!authorization.startsWith('Bearer ')) {
     const error = new Error('Authentication required.');
@@ -31,21 +29,28 @@ async function requireAdmin(req) {
 
   const app = getAdminApp();
   const auth = admin.auth(app);
+  const db = admin.firestore(app);
   const token = await auth.verifyIdToken(authorization.slice(7));
 
-  if (token.uid === OWNER_ADMIN_UID || token.admin === true || token.role === 'admin') {
-    return { app, auth, db: admin.firestore(app), token };
+  const isOwner = token.uid === OWNER_ADMIN_UID;
+  const isClaimAdmin = token.admin === true || token.role === 'admin';
+  const isSelf = token.uid === targetUid;
+
+  if (isOwner || isClaimAdmin || isSelf) {
+    return { auth, db, token, isAdmin: isOwner || isClaimAdmin };
   }
 
-  const error = new Error('Administrator access required.');
+  const account = await db.collection('users').doc(token.uid).get();
+  if (account.exists && account.data()?.role === 'admin') {
+    return { auth, db, token, isAdmin: true };
+  }
+
+  const error = new Error('You do not have permission to delete this account.');
   error.code = 'permission-denied';
   throw error;
 }
 
 async function deleteUserFirestoreData(db, uid) {
-  // Discover every top-level collection so this endpoint is not limited to
-  // today's known CGPA+ collections. A user's document/subcollections and
-  // documents carrying userId are recursively removed.
   const collections = await db.listCollections();
   let deletedDocuments = 0;
 
@@ -74,14 +79,14 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { auth, db, token } = await requireAdmin(req);
     const studentId = String(req.body?.studentId || '').trim();
-
     if (!studentId || studentId === OWNER_ADMIN_UID) {
       return json(res, 400, { ok: false, code: 'validation/student-delete', error: 'That account cannot be deleted.' });
     }
 
+    const { auth, db, token, isAdmin } = await requireAuthorized(req, studentId);
     const userRecord = await auth.getUser(studentId);
+
     if (userRecord.uid === OWNER_ADMIN_UID) {
       return json(res, 400, { ok: false, code: 'validation/student-delete', error: 'The owner administrator account is protected.' });
     }
@@ -92,24 +97,27 @@ export default async function handler(req, res) {
       return json(res, 400, { ok: false, code: 'validation/student-delete', error: 'Only student accounts can be deleted here.' });
     }
 
-    const deletedDocuments = await deleteUserFirestoreData(db, studentId);
+    if (!isAdmin && token.uid !== studentId) {
+      const error = new Error('You do not have permission to delete this account.');
+      error.code = 'permission-denied';
+      throw error;
+    }
 
-    // This is the privileged operation that the browser Firebase SDK cannot
-    // perform for another user.
+    const deletedDocuments = await deleteUserFirestoreData(db, studentId);
     await auth.deleteUser(studentId);
 
     await db.collection('auditLogs').add({
       actorId: token.uid,
-      actorName: token.name || token.email || 'Administrator',
+      actorName: token.name || token.email || (isAdmin ? 'Administrator' : 'Student'),
       actorEmail: token.email || '',
-      action: 'deleteStudent',
+      action: isAdmin ? 'deleteStudent' : 'deleteOwnAccount',
       resource: 'student',
       resourceType: 'student',
       resourceId: studentId,
       status: 'success',
-      description: `Student account, Firebase Authentication identity, and ${deletedDocuments} Firestore document(s) were deleted.`,
+      description: `${isAdmin ? 'Student account' : 'User account'}, Firebase Authentication identity, and ${deletedDocuments} Firestore document(s) were deleted.`,
       ipAddress: 'Not collected',
-      device: 'Server-side admin deletion',
+      device: isAdmin ? 'Server-side admin deletion' : 'Server-side account deletion',
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
@@ -121,13 +129,9 @@ export default async function handler(req, res) {
       authenticationDeleted: true,
     });
   } catch (error) {
-    console.error('Admin user deletion failed:', error);
+    console.error('User deletion failed:', error);
     const code = error?.code || 'server/delete-user-failed';
     const status = code === 'unauthorized' ? 401 : code === 'permission-denied' ? 403 : code === 'auth/user-not-found' ? 404 : 500;
-    return json(res, status, {
-      ok: false,
-      code,
-      error: error?.message || 'The user could not be completely deleted.',
-    });
+    return json(res, status, { ok: false, code, error: error?.message || 'The user could not be completely deleted.' });
   }
 }
