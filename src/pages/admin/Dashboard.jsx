@@ -46,7 +46,10 @@ export default function AdminDashboard() {
     }).length);
     return { registrations, userGrowth, activeUsers };
   }, [students, months]);
-  const totalStudents = students.length || Number(stats.totalStudents || 0);
+  // Total students is sourced from Firebase Authentication through the trusted
+  // admin endpoint, not from the Firestore users collection. This prevents the
+  // dashboard total from being lower when an Auth account is missing a profile.
+  const totalStudents = Number(stats.totalStudents || 0);
   const activeStudents = students.length ? students.filter(student => student.accountStatus === 'active').length : Number(stats.activeStudents || 0);
   const newStudents = students.length ? students.filter(student => {
     const created = new Date(student.createdAt || 0);
