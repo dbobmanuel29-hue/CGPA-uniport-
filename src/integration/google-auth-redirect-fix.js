@@ -32,8 +32,7 @@ export async function registerGoogleAuthRedirectFix() {
 
   const { auth, db } = firebase;
 
-  // Complete a Google redirect when the browser returns to CGPA+.
-  // This avoids the popup flow that can be closed by browser COOP/popup rules.
+  // Complete a Google redirect fallback when the browser returns to CGPA+.
   try {
     const result = await auth.getRedirectResult();
     if (result?.user) await ensureGoogleUser(result, db);
@@ -48,8 +47,20 @@ export async function registerGoogleAuthRedirectFix() {
         const provider = new window.firebase.auth.GoogleAuthProvider();
         provider.setCustomParameters({ prompt: 'select_account' });
         await auth.setPersistence(window.firebase.auth.Auth.Persistence.LOCAL);
-        await auth.signInWithRedirect(provider);
-        return null;
+
+        try {
+          const result = await auth.signInWithPopup(provider);
+          await ensureGoogleUser(result, db);
+          return result.user;
+        } catch (error) {
+          // Popup failures fall back to redirect instead of showing the
+          // misleading "closed before it finished" message.
+          if (['auth/popup-closed-by-user', 'auth/popup-blocked'].includes(error?.code)) {
+            await auth.signInWithRedirect(provider);
+            return null;
+          }
+          throw error;
+        }
       }
     }
   });
