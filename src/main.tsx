@@ -7,6 +7,7 @@ import { registerReportAdminFix } from "./integration/report-admin-fix";
 import { registerAuditFix } from "./integration/audit-fix";
 import { registerCloudinaryAdapter } from "./integration/cloudinary-adapter";
 import { registerAccountCleanup } from "./integration/account-cleanup";
+import { registerAccountDeletionFix } from "./integration/account-deletion-fix";
 import { registerSupportRateLimit } from "./integration/support-rate-limit";
 import { initAnalytics } from "./integration/analytics";
 import { initSiteQuality } from "./integration/site-quality";
@@ -17,6 +18,7 @@ initSiteQuality();
 registerFirebaseBackend()
   .then(() => registerCloudinaryAdapter())
   .then(() => registerAccountCleanup())
+  .then(() => registerAccountDeletionFix())
   .then(() => registerSupportRateLimit())
   .then(() => registerReportAdminFix())
   .then(() => registerAuditFix())
