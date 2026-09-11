@@ -6,7 +6,7 @@ import { TicketConversation, TICKET_STATUSES, ticketTone } from '../../component
 import { useResource } from '../../hooks/useResource';
 import { adminService } from '../../services/admin-service';
 import { supportService } from '../../services/support-service';
-import { friendlyError } from '../../services/adapter';
+import { getServiceAdapter, friendlyError } from '../../services/adapter';
 import { date, dateTime, titleCase } from '../../utils/formatting';
 
 export function AdminSupport() {
@@ -18,7 +18,7 @@ export function AdminSupport() {
 
   const handleDelete = async row => {
     const subject = row.subject || 'this support request';
-    const confirmed = window.confirm(`Delete "${subject}" permanently?\n\nThis removes the entire support request and conversation from both the admin support desk and the student's support page. This cannot be undone.`);
+    const confirmed = window.confirm(`Delete \"${subject}\" permanently?\n\nThis removes the entire support request and conversation from both the admin support desk and the student's support page. This cannot be undone.`);
     if (!confirmed) return;
 
     try {
@@ -40,6 +40,21 @@ export function AuditLogs() {
   const [resourceType, setResourceType] = useState('');
   const [detail, setDetail] = useState(null);
   const resource = useResource(() => adminService.getAuditLogs({ status, resourceType }), [status, resourceType]);
+
+  const handleDelete = async row => {
+    const confirmed = window.confirm(`Delete this audit event permanently?\n\nAction: ${titleCase(row.action || '')}\nResource: ${row.resource || '--'}\n\nThis cannot be undone.`);
+    if (!confirmed) return;
+    try {
+      const deleteAuditLog = getServiceAdapter('admin', 'deleteAuditLog');
+      if (!deleteAuditLog) throw new Error('Audit deletion is not available yet. Please refresh after the latest deployment.');
+      await deleteAuditLog(row.id);
+      if (detail?.id === row.id) setDetail(null);
+      await resource.refresh();
+    } catch (error) {
+      window.alert(friendlyError(error));
+    }
+  };
+
   const columns = [{ key: 'createdAt', label: 'Timestamp', render: dateTime }, { key: 'actorName', label: 'User / admin' }, { key: 'action', label: 'Action', render: titleCase }, { key: 'resource', label: 'Resource' }, { key: 'status', label: 'Status', render: v => <Badge tone={v === 'success' ? 'success' : v === 'denied' ? 'danger' : 'neutral'}>{titleCase(v)}</Badge> }, { key: 'ipAddress', label: 'IP address' }, { key: 'device', label: 'Device' }];
-  return <><PageHeader eyebrow="ACCOUNTABILITY, BY DESIGN" title="The audit trail." description="A read-only view of privileged activity recorded by the backend. No browser-generated audit events." actions={<Button variant="outline" icon="refresh" onClick={resource.refresh}>Refresh logs</Button>} /><div className="table-toolbar"><SearchBox value={search} onChange={setSearch} placeholder="Search actor, action or resource..." /><StatusFilter value={status} onChange={setStatus} options={['success', 'denied', 'failed']} /><StatusFilter value={resourceType} onChange={setResourceType} options={['student', 'academic', 'support', 'notification', 'settings']} label="All resources" /></div><DataTable resource={resource} columns={columns} search={search} onView={setDetail} emptyTitle="No audit logs loaded." emptyDescription="Actor, action, resource and device details must be supplied by the secure audit service." /><Modal open={!!detail} onClose={() => setDetail(null)} title="Audit event details" wide><dl className="detail-grid">{[...columns, { key: 'id', label: 'Event ID' }, { key: 'resourceId', label: 'Resource ID' }, { key: 'description', label: 'Details' }].map(c => <div key={c.key}><dt>{c.label}</dt><dd>{String(detail?.[c.key] ?? '--')}</dd></div>)}</dl></Modal></>;
+  return <><PageHeader eyebrow="ACCOUNTABILITY, BY DESIGN" title="The audit trail." description="Privileged activity recorded by the audit service. You can remove individual events when they are no longer needed." actions={<Button variant="outline" icon="refresh" onClick={resource.refresh}>Refresh logs</Button>} /><div className="table-toolbar"><SearchBox value={search} onChange={setSearch} placeholder="Search actor, action or resource..." /><StatusFilter value={status} onChange={setStatus} options={['success', 'denied', 'failed']} /><StatusFilter value={resourceType} onChange={setResourceType} options={['student', 'academic', 'support', 'notification', 'settings']} label="All resources" /></div><DataTable resource={resource} columns={columns} search={search} onView={setDetail} onDelete={handleDelete} emptyTitle="No audit logs loaded." emptyDescription="Actor, action, resource and device details must be supplied by the secure audit service." /><Modal open={!!detail} onClose={() => setDetail(null)} title="Audit event details" wide><dl className="detail-grid">{[...columns, { key: 'id', label: 'Event ID' }, { key: 'resourceId', label: 'Resource ID' }, { key: 'description', label: 'Details' }].map(c => <div key={c.key}><dt>{c.label}</dt><dd>{String(detail?.[c.key] ?? '--')}</dd></div>)}</dl></Modal></>;
 }
