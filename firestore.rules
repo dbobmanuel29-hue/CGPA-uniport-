@@ -35,6 +35,7 @@ service cloud.firestore {
         && request.resource.data.userId == request.auth.uid
         && request.resource.data.credits > 0
         && request.resource.data.points >= 0
+        && request.resource.data.points <= 5
         && request.resource.data.qualityPoints == request.resource.data.credits * request.resource.data.points;
       allow read: if signedIn() && (resource.data.userId == request.auth.uid || admin());
       allow update: if signedIn()
@@ -42,6 +43,7 @@ service cloud.firestore {
         && request.resource.data.userId == resource.data.userId
         && request.resource.data.credits > 0
         && request.resource.data.points >= 0
+        && request.resource.data.points <= 5
         && request.resource.data.qualityPoints == request.resource.data.credits * request.resource.data.points;
       allow delete: if signedIn() && (resource.data.userId == request.auth.uid || admin());
     }
