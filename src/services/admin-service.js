@@ -125,6 +125,30 @@ async function createNotificationRecords(payload) {
   return { id: campaignRef.id, ...campaign, recipientCount: students.length };
 }
 
+async function deleteStudentThroughTrustedBackend(studentId) {
+  const sdk = await getFirebase();
+  if (!sdk?.auth?.currentUser) throw Object.assign(new Error('Authentication required.'), { code: 'unauthorized' });
+  if (!studentId || studentId === OWNER_ADMIN_UID) throw Object.assign(new Error('That account cannot be deleted.'), { code: 'validation/student-delete' });
+
+  const token = await sdk.auth.currentUser.getIdToken(true);
+  const response = await fetch('/api/admin/delete-user', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ studentId }),
+  });
+
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok || !payload.ok) {
+    throw Object.assign(new Error(payload.error || 'The student account could not be completely deleted.'), {
+      code: payload.code || `server/delete-user-${response.status}`,
+    });
+  }
+  return payload;
+}
+
 export const adminService = Object.freeze({
   ...adminReadWriteService,
 
@@ -132,9 +156,7 @@ export const adminService = Object.freeze({
     const { db } = await requireAdmin();
     const usersSnap = await db.collection('users').get();
     const ticketsSnap = await db.collection('supportTickets').get();
-    const users = rows(usersSnap).filter(user =>
-      user.id !== OWNER_ADMIN_UID && (user.role || 'student') === 'student'
-    );
+    const users = rows(usersSnap).filter(user => user.id !== OWNER_ADMIN_UID && (user.role || 'student') === 'student');
     const tickets = rows(ticketsSnap);
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - 30);
@@ -143,59 +165,29 @@ export const adminService = Object.freeze({
       const created = user.createdAt?.toDate ? user.createdAt.toDate() : new Date(user.createdAt || 0);
       return !Number.isNaN(created.getTime()) && created >= cutoff;
     });
-    const recentStudents = [...users]
-      .sort((a, b) => String(b.createdAt?.toMillis?.() || b.createdAt || '').localeCompare(String(a.createdAt?.toMillis?.() || a.createdAt || '')))
-      .slice(0, 8);
-    const recentTickets = [...tickets]
-      .sort((a, b) => String(b.createdAt?.toMillis?.() || b.createdAt || '').localeCompare(String(a.createdAt?.toMillis?.() || a.createdAt || '')))
-      .slice(0, 8);
+    const recentStudents = [...users].sort((a, b) => String(b.createdAt?.toMillis?.() || b.createdAt || '').localeCompare(String(a.createdAt?.toMillis?.() || a.createdAt || ''))).slice(0, 8);
+    const recentTickets = [...tickets].sort((a, b) => String(b.createdAt?.toMillis?.() || b.createdAt || '').localeCompare(String(a.createdAt?.toMillis?.() || a.createdAt || ''))).slice(0, 8);
     return {
-      stats: {
-        totalStudents: users.length,
-        activeStudents: activeStudents.length,
-        newStudents: newStudents.length,
-        verifiedAccounts: users.filter(user => user.emailVerified === true).length,
-        supportRequests: tickets.filter(ticket => ['open', 'in_progress'].includes(ticket.status)).length
-      },
+      stats: { totalStudents: users.length, activeStudents: activeStudents.length, newStudents: newStudents.length, verifiedAccounts: users.filter(user => user.emailVerified === true).length, supportRequests: tickets.filter(ticket => ['open', 'in_progress'].includes(ticket.status)).length },
       charts: { userGrowth: [], registrations: [], activeUsers: [] },
-      recentStudents,
-      recentTickets,
-      activity: []
+      recentStudents, recentTickets, activity: []
     };
   },
 
   async getStudents(filters = {}) {
     const { db } = await requireAdmin();
     const [usersSnap, profilesSnap, facultiesSnap, departmentsSnap, programmesSnap, levelsSnap] = await Promise.all([
-      db.collection('users').get(),
-      db.collection('academicProfiles').get(),
-      db.collection('faculties').get(),
-      db.collection('departments').get(),
-      db.collection('programmes').get(),
-      db.collection('levels').get()
+      db.collection('users').get(), db.collection('academicProfiles').get(), db.collection('faculties').get(), db.collection('departments').get(), db.collection('programmes').get(), db.collection('levels').get()
     ]);
-    const users = rows(usersSnap).filter(user =>
-      user.id !== OWNER_ADMIN_UID && (user.role || 'student') === 'student'
-    );
+    const users = rows(usersSnap).filter(user => user.id !== OWNER_ADMIN_UID && (user.role || 'student') === 'student');
     const profiles = new Map(rows(profilesSnap).map(profile => [profile.id, profile]));
     const faculties = new Map(rows(facultiesSnap).map(row => [row.id, nameOf(row)]));
     const departments = new Map(rows(departmentsSnap).map(row => [row.id, nameOf(row)]));
     const programmes = new Map(rows(programmesSnap).map(row => [row.id, nameOf(row)]));
     const levels = new Map(rows(levelsSnap).map(row => [row.id, nameOf(row)]));
-
     let result = users.map(user => {
       const profile = profiles.get(user.id) || {};
-      return {
-        ...user,
-        facultyName: profile.facultyName || faculties.get(profile.facultyId) || '',
-        departmentName: profile.departmentName || departments.get(profile.departmentId) || '',
-        programmeName: profile.programmeName || programmes.get(profile.programmeId) || '',
-        levelName: profile.currentLevelName || levels.get(profile.currentLevelId) || '',
-        facultyId: profile.facultyId || '',
-        departmentId: profile.departmentId || '',
-        programmeId: profile.programmeId || '',
-        currentLevelId: profile.currentLevelId || ''
-      };
+      return { ...user, facultyName: profile.facultyName || faculties.get(profile.facultyId) || '', departmentName: profile.departmentName || departments.get(profile.departmentId) || '', programmeName: profile.programmeName || programmes.get(profile.programmeId) || '', levelName: profile.currentLevelName || levels.get(profile.currentLevelId) || '', facultyId: profile.facultyId || '', departmentId: profile.departmentId || '', programmeId: profile.programmeId || '', currentLevelId: profile.currentLevelId || '' };
     });
     if (filters.status) result = result.filter(row => row.accountStatus === filters.status);
     if (filters.facultyId) result = result.filter(row => row.facultyId === filters.facultyId);
@@ -203,42 +195,16 @@ export const adminService = Object.freeze({
   },
 
   async deleteStudent(studentId) {
-    const { db, user } = await requireAdmin();
-    if (!studentId || studentId === OWNER_ADMIN_UID) {
-      throw Object.assign(new Error('That account cannot be deleted.'), { code: 'validation/student-delete' });
-    }
-    const userRef = db.collection('users').doc(studentId);
-    const userSnap = await userRef.get();
+    const { user, db } = await requireAdmin();
+    if (!studentId || studentId === OWNER_ADMIN_UID) throw Object.assign(new Error('That account cannot be deleted.'), { code: 'validation/student-delete' });
+    const userSnap = await db.collection('users').doc(studentId).get();
     if (!userSnap.exists) throw Object.assign(new Error('Student account not found.'), { code: 'not-found/student' });
-    const userData = userSnap.data() || {};
-    if ((userData.role || 'student') !== 'student') {
-      throw Object.assign(new Error('Only student accounts can be deleted here.'), { code: 'validation/student-delete' });
-    }
+    if ((userSnap.data()?.role || 'student') !== 'student') throw Object.assign(new Error('Only student accounts can be deleted here.'), { code: 'validation/student-delete' });
 
-    const collections = [
-      'academicProfiles', 'userPreferences', 'notifications', 'supportTickets',
-      'results', 'reports', 'dataExportRequests'
-    ];
     try {
-      for (const collection of collections) {
-        const snap = await db.collection(collection).where('userId', '==', studentId).get();
-        let batch = db.batch();
-        let operations = 0;
-        for (const doc of snap.docs) {
-          batch.delete(doc.ref);
-          operations += 1;
-          if (operations >= 450) {
-            await batch.commit();
-            batch = db.batch();
-            operations = 0;
-          }
-        }
-        if (operations) await batch.commit();
-      }
-      await db.collection('academicProfiles').doc(studentId).delete().catch(() => {});
-      await userRef.delete();
-      await writeAudit({ action: 'deleteStudent', resource: 'student', resourceId: studentId, status: 'success', description: 'Student account deleted successfully.', user });
-      return { ok: true, id: studentId };
+      const result = await deleteStudentThroughTrustedBackend(studentId);
+      // The trusted endpoint records the authoritative deletion audit entry.
+      return result;
     } catch (error) {
       await writeAudit({ action: 'deleteStudent', resource: 'student', resourceId: studentId, status: 'failed', description: error?.message || 'Student account deletion failed.', user });
       throw error;
@@ -252,24 +218,10 @@ export const adminService = Object.freeze({
     const { user } = await requireAdmin();
     try {
       const result = await createNotificationRecords(payload);
-      await writeAudit({
-        action: 'sendNotification',
-        resource: 'notification',
-        resourceId: result.id,
-        status: 'success',
-        description: `Notification "${title}" sent to ${result.recipientCount} student(s).`,
-        user
-      });
+      await writeAudit({ action: 'sendNotification', resource: 'notification', resourceId: result.id, status: 'success', description: `Notification "${title}" sent to ${result.recipientCount} student(s).`, user });
       return result;
     } catch (error) {
-      await writeAudit({
-        action: 'sendNotification',
-        resource: 'notification',
-        resourceId: '',
-        status: 'failed',
-        description: error?.message || 'Notification send failed.',
-        user
-      });
+      await writeAudit({ action: 'sendNotification', resource: 'notification', resourceId: '', status: 'failed', description: error?.message || 'Notification send failed.', user });
       throw error;
     }
   }
