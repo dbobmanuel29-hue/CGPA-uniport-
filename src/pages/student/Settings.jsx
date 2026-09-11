@@ -12,6 +12,7 @@ import { navigate } from '../../utils/routing';
 import { dateTime } from '../../utils/formatting';
 import { DataTable } from '../../components/table';
 import { validatePassword } from '../../utils/validation';
+import { deleteCurrentUserAccount } from '../../integration/account-deletion-fix';
 
 // Appearance intentionally supports only Light and Dark; there is no System option.
 export function AppearancePicker() {
@@ -65,6 +66,6 @@ export default function Settings() {
     {tab === 'privacy' && <PreferenceSettings privacy />}
     <section className="danger-zone"><div><h2>Account controls</h2><p>Destructive actions are handled by the authentication backend. They are never simulated.</p></div><div><Button variant="outline" icon="logout" onClick={() => setLoggingOut(true)}>Sign out</Button><Button variant="danger" icon="trash" onClick={() => setDeleting(true)}>Delete account</Button></div></section>
     <ConfirmModal open={loggingOut} onClose={() => setLoggingOut(false)} title="Sign out of your account?" description="Your session will only end once the connected authentication service confirms sign-out." actionLabel="Sign out" onConfirm={async () => { await authService.logout(); session.clear(); navigate('/login'); }} />
-    <Modal open={deleting} onClose={closeDeleteModal} title="Delete your CGPA+ account?" description="This is permanent. Your CGPA+ records and Firebase Authentication account will be deleted by the trusted backend."><div className="confirm-icon danger"><Icon name="trash" size={28} /></div><p className="muted">You will not be asked for your password or asked to sign in with Google again. Confirm below to permanently delete your account.</p><ActionError error={deleteAction.error} /><div className="modal-actions"><button className="button button-outline" onClick={closeDeleteModal} disabled={deleteAction.busy}>Cancel</button><button className="button button-danger" disabled={deleteAction.busy} onClick={() => deleteAction.run(() => authService.deleteAccount(), () => { session.clear(); navigate('/'); })}>{deleteAction.busy ? 'Deleting...' : 'Delete account'}</button></div></Modal>
+    <Modal open={deleting} onClose={closeDeleteModal} title="Delete your CGPA+ account?" description="This is permanent. Your CGPA+ records and Firebase Authentication account will be deleted by the trusted backend."><div className="confirm-icon danger"><Icon name="trash" size={28} /></div><p className="muted">You will not be asked for your password or asked to sign in with Google again. Confirm below to permanently delete your account.</p><ActionError error={deleteAction.error} /><div className="modal-actions"><button className="button button-outline" onClick={closeDeleteModal} disabled={deleteAction.busy}>Cancel</button><button className="button button-danger" disabled={deleteAction.busy} onClick={() => deleteAction.run(() => deleteCurrentUserAccount(), () => { session.clear(); navigate('/'); })}>{deleteAction.busy ? 'Deleting...' : 'Delete account'}</button></div></Modal>
   </>;
 }
