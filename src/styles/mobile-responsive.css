@@ -1,0 +1,99 @@
+/* Additional responsive layer for student/admin workspace screens. */
+.workspace, .workspace-main, .workspace-content, .panel, .card, .report-paper { min-width: 0; }
+.workspace-content img, .workspace-content video, .workspace-content canvas, .workspace-content svg { max-width: 100%; }
+.workspace-content table { max-width: 100%; }
+
+@media (max-width: 767px) {
+  .workspace-content { overflow-x: hidden; }
+  .workspace-preview-note { flex-wrap: wrap; gap: 6px; }
+  .workspace-preview-note span:not(.status-dot) { min-width: 0; overflow-wrap: anywhere; }
+  .page-header { flex-direction: column; align-items: stretch; gap: 14px; margin-bottom: 22px; }
+  .page-header h1 { font-size: clamp(23px, 7vw, 29px); }
+  .page-header p { max-width: none; }
+  .header-actions { width: 100%; flex-wrap: wrap; }
+  .header-actions > .button { flex: 1 1 auto; min-width: 0; }
+
+  .stats-grid, .stats-three, .stats-five,
+  .dashboard-grid, .dashboard-bottom, .two-panel-grid,
+  .planner-grid, .projection-output-grid, .detail-grid,
+  .reports-layout, .profile-layout, .admin-recent-grid,
+  .compose-grid { grid-template-columns: 1fr !important; }
+  .stats-grid { gap: 10px; }
+  .stat { min-width: 0; }
+  .quick-actions { grid-template-columns: 1fr !important; }
+  .quick-actions > a { min-width: 0; }
+
+  .calculator-layout { grid-template-columns: 1fr !important; }
+  .calculator-nav { margin-right: -13px; padding-right: 13px; }
+  .course-entry { padding: 15px; overflow: hidden; }
+  .course-grid-labels { display: none; }
+  .course-entry-row { grid-template-columns: 1fr !important; gap: 8px; padding: 12px 0; }
+  .course-entry-row .field-label { display: block; font-size: 8px; color: var(--muted); margin-bottom: 4px; }
+  .course-entry-row .input, .course-entry-row .select { width: 100%; min-width: 0; }
+  .course-entry-row .icon-button { justify-self: end; }
+  .projection-inputs { grid-template-columns: 1fr !important; }
+  .projection-inputs > .button { width: 100%; }
+
+  .table-toolbar { align-items: stretch; }
+  .table-toolbar > * { min-width: 0 !important; width: 100% !important; }
+  .table-scroll { width: 100%; max-width: 100%; overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
+  .table-scroll table { min-width: 650px; }
+
+  /* Reports: readable cards on phones instead of forcing a wide paper off-screen. */
+  .report-paper { width: 100%; max-width: 100%; padding: 18px 14px; overflow: hidden; }
+  .report-letterhead { gap: 8px; }
+  .report-heading h2 { font-size: 22px; }
+  .report-meta { grid-template-columns: 1fr !important; gap: 10px !important; }
+  .report-summary { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; }
+  .report-summary > div { min-width: 0; padding: 10px 8px; }
+  .report-summary strong { font-size: 19px; overflow-wrap: anywhere; }
+  .report-summary span { font-size: 7px; }
+  .report-year { border-radius: 10px; overflow: hidden; }
+  .report-year-heading { padding: 12px 13px; }
+  .report-year-heading h3 { font-size: 15px; }
+  .report-semester { padding: 12px; }
+  .report-semester-heading { flex-direction: column; align-items: flex-start; gap: 5px; }
+  .report-semester-heading h4 { font-size: 12px; }
+  .report-semester-heading span { font-size: 8px; }
+  .report-semester .table-scroll { overflow: visible !important; }
+  .report-semester table { min-width: 0 !important; width: 100%; border-collapse: separate; }
+  .report-semester thead { display: none; }
+  .report-semester tbody, .report-semester tr { display: block; }
+  .report-semester tr { padding: 9px 10px; margin-bottom: 9px; border: 1px solid var(--border); border-radius: 9px; background: var(--surface); }
+  .report-semester td { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; width: auto !important; min-width: 0 !important; padding: 6px 0; border: 0 !important; text-align: right; font-size: 9px; line-height: 1.45; overflow-wrap: anywhere; }
+  .report-semester td:not(:last-child) { border-bottom: 1px solid var(--border) !important; }
+  .report-semester td::before { flex: 0 0 38%; text-align: left; color: var(--muted); font-size: 7px; font-weight: 600; text-transform: uppercase; letter-spacing: .4px; }
+  .report-semester td:nth-child(1)::before { content: 'Course code'; }
+  .report-semester td:nth-child(2)::before { content: 'Course title'; }
+  .report-semester td:nth-child(3)::before { content: 'Credit units'; }
+  .report-semester td:nth-child(4)::before { content: 'Grade'; }
+  .report-semester td:nth-child(5)::before { content: 'Grade points'; }
+  .report-semester td:nth-child(6)::before { content: 'Quality points'; }
+
+  .analytics-secondary { grid-template-columns: 1fr 1fr; padding: 0; }
+  .analytics-secondary > div { padding: 12px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .analytics-secondary > div:nth-child(2n) { border-right: 0; }
+  .analytics-secondary > div:nth-last-child(-n+2) { border-bottom: 0; }
+
+  .workspace-footer { flex-direction: column; gap: 6px; }
+}
+
+@media (max-width: 420px) {
+  .workspace-header { padding-left: 10px; padding-right: 10px; }
+  .workspace-content { padding-left: 10px; padding-right: 10px; }
+  .workspace-header-actions > .nav-start { max-width: 96px; overflow: hidden; text-overflow: ellipsis; }
+  .report-paper { padding: 15px 10px; }
+  .report-summary { grid-template-columns: 1fr; }
+  .report-summary > div { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .report-semester td { font-size: 8.5px; }
+  .report-semester td::before { font-size: 6.5px; }
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+  .workspace-content { padding-left: 22px; padding-right: 22px; }
+  .stats-grid, .stats-three { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stats-five { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .dashboard-grid, .dashboard-bottom, .two-panel-grid { grid-template-columns: 1fr; }
+  .calculator-layout { grid-template-columns: minmax(0, 1fr) 260px; }
+  .report-paper { max-width: 100%; overflow-x: hidden; }
+}
