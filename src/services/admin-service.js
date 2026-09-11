@@ -58,6 +58,25 @@ const rows = snapshot => snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }
 const nameOf = row => row?.name || row?.title || row?.label || '';
 const serverTimestamp = () => window.firebase.firestore.FieldValue.serverTimestamp();
 
+async function getAuthoritativeStudentCount() {
+  const sdk = await getFirebase();
+  if (!sdk?.auth?.currentUser) throw Object.assign(new Error('Authentication required.'), { code: 'unauthorized' });
+
+  const token = await sdk.auth.currentUser.getIdToken(true);
+  const response = await fetch('/api/admin/student-count', {
+    method: 'GET',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok || !payload.ok) {
+    throw Object.assign(new Error(payload.error || 'The Firebase Authentication student count could not be loaded.'), {
+      code: payload.code || `server/student-count-${response.status}`,
+    });
+  }
+  return payload;
+}
+
 async function createNotificationRecords(payload) {
   const { db, user } = await requireAdmin();
   const audience = payload.audience || 'all_students';
@@ -154,8 +173,11 @@ export const adminService = Object.freeze({
 
   async getDashboard() {
     const { db } = await requireAdmin();
-    const usersSnap = await db.collection('users').get();
-    const ticketsSnap = await db.collection('supportTickets').get();
+    const [usersSnap, ticketsSnap, authCount] = await Promise.all([
+      db.collection('users').get(),
+      db.collection('supportTickets').get(),
+      getAuthoritativeStudentCount(),
+    ]);
     const users = rows(usersSnap).filter(user => user.id !== OWNER_ADMIN_UID && (user.role || 'student') === 'student');
     const tickets = rows(ticketsSnap);
     const cutoff = new Date();
@@ -168,7 +190,17 @@ export const adminService = Object.freeze({
     const recentStudents = [...users].sort((a, b) => String(b.createdAt?.toMillis?.() || b.createdAt || '').localeCompare(String(a.createdAt?.toMillis?.() || a.createdAt || ''))).slice(0, 8);
     const recentTickets = [...tickets].sort((a, b) => String(b.createdAt?.toMillis?.() || b.createdAt || '').localeCompare(String(a.createdAt?.toMillis?.() || a.createdAt || ''))).slice(0, 8);
     return {
-      stats: { totalStudents: users.length, activeStudents: activeStudents.length, newStudents: newStudents.length, verifiedAccounts: users.filter(user => user.emailVerified === true).length, supportRequests: tickets.filter(ticket => ['open', 'in_progress'].includes(ticket.status)).length },
+      stats: {
+        totalStudents: authCount.studentAuthCount,
+        activeStudents: activeStudents.length,
+        newStudents: newStudents.length,
+        verifiedAccounts: users.filter(user => user.emailVerified === true).length,
+        supportRequests: tickets.filter(ticket => ['open', 'in_progress'].includes(ticket.status)).length,
+        firestoreStudentCount: authCount.firestoreStudentCount,
+        matchedStudentCount: authCount.matchedStudentCount,
+        firestoreOnlyCount: authCount.firestoreOnlyCount,
+        authOnlyCount: authCount.authOnlyCount,
+      },
       charts: { userGrowth: [], registrations: [], activeUsers: [] },
       recentStudents, recentTickets, activity: []
     };
@@ -203,7 +235,6 @@ export const adminService = Object.freeze({
 
     try {
       const result = await deleteStudentThroughTrustedBackend(studentId);
-      // The trusted endpoint records the authoritative deletion audit entry.
       return result;
     } catch (error) {
       await writeAudit({ action: 'deleteStudent', resource: 'student', resourceId: studentId, status: 'failed', description: error?.message || 'Student account deletion failed.', user });
@@ -218,7 +249,7 @@ export const adminService = Object.freeze({
     const { user } = await requireAdmin();
     try {
       const result = await createNotificationRecords(payload);
-      await writeAudit({ action: 'sendNotification', resource: 'notification', resourceId: result.id, status: 'success', description: `Notification "${title}" sent to ${result.recipientCount} student(s).`, user });
+      await writeAudit({ action: 'sendNotification', resource: 'notification', resourceId: result.id, status: 'success', description: `Notification \"${title}\" sent to ${result.recipientCount} student(s).`, user });
       return result;
     } catch (error) {
       await writeAudit({ action: 'sendNotification', resource: 'notification', resourceId: '', status: 'failed', description: error?.message || 'Notification send failed.', user });
