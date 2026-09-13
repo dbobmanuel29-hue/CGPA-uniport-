@@ -6,6 +6,7 @@ import { calculateGPA, calculateProjectedCGPA } from '../../utils/calculations';
 import { number } from '../../utils/formatting';
 import { useCountUp } from '../../hooks/useReveal';
 import { FAQ } from '../../data/features';
+import { useSession } from '../../state/session';
 
 const HERO = '/images/uniport-campus-hero.jpg';
 const STUDY = 'https://images.pexels.com/photos/8199762/pexels-photo-8199762.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200';
@@ -105,6 +106,8 @@ export default function Home() {
   const [scenario, setScenario] = useState(4.5);
   const [analytics, setAnalytics] = useState('gpa');
   const [showcase, setShowcase] = useState('calculate');
+  const { user, status: sessionStatus } = useSession();
+  const loggedIn = sessionStatus !== 'loading' && Boolean(user);
   const projected = calculateProjectedCGPA(3.5, 60, scenario, 60);
   const active = SHOWCASE[showcase];
 
@@ -118,9 +121,11 @@ export default function Home() {
         <h2 className="hero-title animate-in stagger-2">Your UniPort Academic<br />Journey, Simplified.</h2>
         <p className="hero-description animate-in stagger-2">CGPA Plus UniPort (CGPA+) is your academic companion for calculating, tracking and planning your University of Port Harcourt journey.</p>
         <div className="hero-actions animate-in stagger-3">
-          <Button href="#/register" variant="lime" endIcon="diagonal">Get started</Button>
+          {loggedIn
+            ? <Button href="#/app" variant="lime" endIcon="diagonal">Open dashboard</Button>
+            : <Button href="#/register" variant="lime" endIcon="diagonal">Get started</Button>}
           <Button href="#/app/calculator" variant="transparent" icon="calculator">Calculate GPA</Button>
-          <a href="#/login" className="hero-sign-in">Sign in<Icon name="arrow" size={15} /></a>
+          {!loggedIn && <a href="#/login" className="hero-sign-in">Sign in<Icon name="arrow" size={15} /></a>}
         </div>
         <div className="hero-chips animate-in stagger-4">
           <span><Icon name="check" size={13} />No account needed to calculate</span>
