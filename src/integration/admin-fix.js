@@ -1,5 +1,6 @@
 import { configureServices } from '../services/adapter.js';
 import { getFirebase } from './firebase-client.js';
+import { FALLBACK_FACULTIES, FALLBACK_DEPARTMENTS, FALLBACK_PROGRAMMES, FALLBACK_LEVELS, FALLBACK_SEMESTERS, FALLBACK_SESSIONS } from '../data/uniport-catalogue.js';
 
 const OWNER_ADMIN_UID = 'lmUB6IdhuaOlHjzkqBEyoNkE7PH2';
 const cleanDate = value => value?.toDate ? value.toDate().toISOString() : (value || null);
@@ -42,11 +43,34 @@ async function lookupName(db, collection, id) {
   return snap.exists ? (snap.data()?.name || snap.data()?.title || snap.data()?.label || '') : '';
 }
 
+const fallbackMaps = {
+  faculties: new Map(FALLBACK_FACULTIES.map(row => [row.id, row.name])),
+  departments: new Map(FALLBACK_DEPARTMENTS.map(row => [row.id, row.name])),
+  programmes: new Map(FALLBACK_PROGRAMMES.map(row => [row.id, row.name])),
+  levels: new Map(FALLBACK_LEVELS.map(row => [row.id, row.name])),
+  semesters: new Map(FALLBACK_SEMESTERS.map(row => [row.id, row.name])),
+  academicSessions: new Map(FALLBACK_SESSIONS.map(row => [row.id, row.name])),
+};
+
+async function resolveCatalogueName(db, collection, id, storedName = '') {
+  if (storedName) return storedName;
+  if (!id) return '';
+  // First use the live Firestore catalogue, then use the same UniPort fallback
+  // catalogue used by the student-facing academic profile. This is important for
+  // older profiles or projects where the catalogue document has not been seeded.
+  const liveName = await lookupName(db, collection, id);
+  return liveName || fallbackMaps[collection]?.get(id) || '';
+}
+
 async function enrichAcademic(db, profile) {
   if (!profile) return null;
   const relations = [['facultyId','faculties','facultyName'],['departmentId','departments','departmentName'],['programmeId','programmes','programmeName'],['currentLevelId','levels','currentLevelName'],['currentSessionId','academicSessions','currentSessionName'],['currentSemesterId','semesters','currentSemesterName'],['admissionSessionId','academicSessions','admissionSessionName']];
   const output = { ...profile };
-  await Promise.all(relations.map(async ([field,collection,target]) => { if (!profile[field]) return; output[target] = await lookupName(db, collection, profile[field]); }));
+  await Promise.all(relations.map(async ([field,collection,target]) => {
+    if (profile[target]) return;
+    if (profile[field]) output[target] = await resolveCatalogueName(db, collection, profile[field]);
+  }));
+  if (!output.universityName && profile.universityId) output.universityName = 'University of Port Harcourt';
   return output;
 }
 
@@ -128,7 +152,7 @@ export async function registerAdminFixes() {
       const departmentMap = new Map(departments.map(x => [x.id, x.name || x.title || '']));
       const programmeMap = new Map(programmes.map(x => [x.id, x.name || x.title || '']));
       const levelMap = new Map(levels.map(x => [x.id, x.name || x.title || '']));
-      let output = users.filter(user => user.role !== 'admin').map(user => { const profile=profiles.get(user.id)||{}; return {...user,createdAt:cleanDate(user.createdAt),facultyName:facultyMap.get(profile.facultyId)||'',departmentName:departmentMap.get(profile.departmentId)||'',programmeName:programmeMap.get(profile.programmeId)||'',levelName:levelMap.get(profile.currentLevelId)||'',facultyId:profile.facultyId||'',departmentId:profile.departmentId||'',programmeId:profile.programmeId||'',levelId:profile.currentLevelId||''}; });
+      let output = users.filter(user => user.role !== 'admin').map(user => { const profile=profiles.get(user.id)||{}; return {...user,createdAt:cleanDate(user.createdAt),facultyName:profile.facultyName || facultyMap.get(profile.facultyId)||'',departmentName:profile.departmentName || departmentMap.get(profile.departmentId)||'',programmeName:profile.programmeName || programmeMap.get(profile.programmeId)||'',levelName:profile.currentLevelName || levelMap.get(profile.currentLevelId)||'',facultyId:profile.facultyId||'',departmentId:profile.departmentId||'',programmeId:profile.programmeId||'',levelId:profile.currentLevelId||''}; });
       if(filters.status) output=output.filter(x=>x.accountStatus===filters.status);
       if(filters.facultyId) output=output.filter(x=>x.facultyId===filters.facultyId);
       return output;
