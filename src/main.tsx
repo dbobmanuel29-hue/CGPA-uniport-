@@ -2,33 +2,17 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App";
-import { registerFirebaseBackend } from "./integration";
-import { registerReportAdminFix } from "./integration/report-admin-fix";
-import { registerAuditFix } from "./integration/audit-fix";
-import { registerCloudinaryAdapter } from "./integration/cloudinary-adapter";
-import { registerAccountCleanup } from "./integration/account-cleanup";
-import { registerAccountDeletionFix } from "./integration/account-deletion-fix";
-import { registerGoogleAuthRedirectFix } from "./integration/google-auth-redirect-fix";
-import { registerSupportRateLimit } from "./integration/support-rate-limit";
 import { initAnalytics } from "./integration/analytics";
 import { initSiteQuality } from "./integration/site-quality";
 
+// Render the UI immediately. Backend/auth integrations are initialized by
+// SessionProvider after first paint so a slow Firebase/CDN response cannot
+// block the public site from appearing.
 initAnalytics();
 initSiteQuality();
 
-registerFirebaseBackend()
-  .then(() => registerGoogleAuthRedirectFix())
-  .then(() => registerCloudinaryAdapter())
-  .then(() => registerAccountCleanup())
-  .then(() => registerAccountDeletionFix())
-  .then(() => registerSupportRateLimit())
-  .then(() => registerReportAdminFix())
-  .then(() => registerAuditFix())
-  .catch(error => console.error("CGPA+ backend initialization failed", error))
-  .finally(() => {
-    createRoot(document.getElementById("root")!).render(
-      <StrictMode>
-        <App />
-      </StrictMode>
-    );
-  });
+createRoot(document.getElementById("root")!).render(
+  <StrictMode>
+    <App />
+  </StrictMode>
+);
