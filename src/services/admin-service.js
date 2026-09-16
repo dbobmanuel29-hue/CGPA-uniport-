@@ -168,6 +168,51 @@ async function deleteStudentThroughTrustedBackend(studentId) {
   return payload;
 }
 
+// Resolve the academic IDs stored on a student profile against the same
+// catalogue collections used by the student directory. This keeps the
+// admin "View academic" modal useful even when older profiles do not have
+// denormalized *Name fields saved on the profile document.
+async function getResolvedAcademicProfile(studentId) {
+  const { db } = await requireAdmin();
+  if (!studentId) throw Object.assign(new Error('Student ID is required.'), { code: 'validation/student-id' });
+
+  const profileSnap = await db.collection('academicProfiles').doc(studentId).get();
+  if (!profileSnap.exists) throw Object.assign(new Error('Academic profile not found.'), { code: 'not-found' });
+
+  const profile = profileSnap.data() || {};
+  const [facultiesSnap, departmentsSnap, programmesSnap, sessionsSnap, levelsSnap, semestersSnap] = await Promise.all([
+    db.collection('faculties').get(),
+    db.collection('departments').get(),
+    db.collection('programmes').get(),
+    db.collection('academicSessions').get(),
+    db.collection('levels').get(),
+    db.collection('semesters').get(),
+  ]);
+
+  const faculties = new Map(rows(facultiesSnap).map(row => [row.id, nameOf(row)]));
+  const departments = new Map(rows(departmentsSnap).map(row => [row.id, nameOf(row)]));
+  const programmes = new Map(rows(programmesSnap).map(row => [row.id, nameOf(row)]));
+  const sessions = new Map(rows(sessionsSnap).map(row => [row.id, nameOf(row)]));
+  const levels = new Map(rows(levelsSnap).map(row => [row.id, nameOf(row)]));
+  const semesters = new Map(rows(semestersSnap).map(row => [row.id, nameOf(row)]));
+
+  const resolve = (storedName, storedId, map) => storedName || (storedId ? map.get(storedId) : '') || '';
+
+  return {
+    id: studentId,
+    universityId: profile.universityId || 'uniport',
+    universityName: profile.universityName || 'University of Port Harcourt',
+    ...profile,
+    facultyName: resolve(profile.facultyName, profile.facultyId, faculties),
+    departmentName: resolve(profile.departmentName, profile.departmentId, departments),
+    programmeName: resolve(profile.programmeName, profile.programmeId, programmes),
+    admissionSessionName: resolve(profile.admissionSessionName, profile.admissionSessionId, sessions),
+    currentSessionName: resolve(profile.currentSessionName, profile.currentSessionId, sessions),
+    currentLevelName: resolve(profile.currentLevelName, profile.currentLevelId, levels),
+    currentSemesterName: resolve(profile.currentSemesterName, profile.currentSemesterId, semesters),
+  };
+}
+
 export const adminService = Object.freeze({
   ...adminReadWriteService,
 
@@ -224,6 +269,10 @@ export const adminService = Object.freeze({
     if (filters.status) result = result.filter(row => row.accountStatus === filters.status);
     if (filters.facultyId) result = result.filter(row => row.facultyId === filters.facultyId);
     return result;
+  },
+
+  async getAcademicProfile(studentId) {
+    return getResolvedAcademicProfile(studentId);
   },
 
   async deleteStudent(studentId) {
