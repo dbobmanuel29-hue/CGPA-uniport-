@@ -14,20 +14,19 @@ function json(res, status, body) {
   return res.end(JSON.stringify(body));
 }
 
-async function verify(req) {
+async function verify(req, ticketId) {
   const header = req.headers.authorization || '';
   if (!header.startsWith('Bearer ')) throw Object.assign(new Error('Authentication required.'), { code: 'unauthorized' });
   const app = getAdminApp();
   const token = await admin.auth(app).verifyIdToken(header.slice(7));
   const db = admin.firestore(app);
-  if (token.uid !== OWNER_ADMIN_UID && token.admin !== true && token.role !== 'admin') {
-    const account = await db.collection('users').doc(token.uid).get();
-    if (!account.exists || account.data()?.role !== 'admin') {
-      // Students are allowed to trigger support email notifications for their own
-      // authenticated support request; the endpoint never exposes the destination.
-    }
+  const account = await db.collection('users').doc(token.uid).get();
+  const isAdmin = token.uid === OWNER_ADMIN_UID || token.admin === true || token.role === 'admin' || (account.exists && account.data()?.role === 'admin');
+  if (!isAdmin && ticketId) {
+    const ticket = await db.collection('supportTickets').doc(ticketId).get();
+    if (!ticket.exists || ticket.data()?.userId !== token.uid) throw Object.assign(new Error('You do not have permission to notify this support request.'), { code: 'permission-denied' });
   }
-  return { token, db };
+  return { token, db, isAdmin };
 }
 
 export default async function handler(req, res) {
@@ -37,7 +36,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { token, db } = await verify(req);
+    const { token, db } = await verify(req, String(req.body?.ticketId || ''));
     const body = req.body || {};
     const supportSnap = await db.collection('adminSettings').doc('support').get();
     const settings = supportSnap.exists ? (supportSnap.data()?.settings || supportSnap.data() || {}) : {};
