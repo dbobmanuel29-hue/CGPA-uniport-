@@ -1,4 +1,4 @@
-import { configureServices } from '../services/adapter.js';
+import { configureServices, getServiceAdapter } from '../services/adapter.js';
 import { getFirebase } from './firebase-client.js';
 import { academicService } from '../services/academic-service.js';
 import { notificationService } from '../services/notification-service.js';
@@ -304,8 +304,14 @@ async function adminSettingsMethods() {
   };
 }
 async function academicMethods() {
-  const originalSaveResult = academicService.saveResult;
-  const originalUpdateResult = academicService.updateResult;
+  // Capture the concrete Firebase adapters before this wrapper replaces them.
+  // Calling academicService.saveResult() here would resolve back to this wrapper
+  // through the adapter registry and recurse forever.
+  const originalSaveResult = getServiceAdapter('academic', 'saveResult');
+  const originalUpdateResult = getServiceAdapter('academic', 'updateResult');
+  if (typeof originalSaveResult !== 'function' || typeof originalUpdateResult !== 'function') {
+    throw new Error('Academic result backend is not connected.');
+  }
   return {
     async saveResult(payload) {
       const value = await sdk();
@@ -368,13 +374,19 @@ async function adminNotificationMethods() {
 }
 
 async function reportMethods() {
+  // Capture the concrete report adapters before this wrapper replaces them.
+  // Calling reportService.* from inside these wrappers would resolve to the wrapper
+  // again and cause an endless Promise/spinner.
   const original = {
-    getReports: reportService.getReports,
-    getReportPreview: reportService.getReportPreview,
-    generateReport: reportService.generateReport,
-    downloadReport: reportService.downloadReport,
-    printReport: reportService.printReport,
+    getReports: getServiceAdapter('report', 'getReports'),
+    getReportPreview: getServiceAdapter('report', 'getReportPreview'),
+    generateReport: getServiceAdapter('report', 'generateReport'),
+    downloadReport: getServiceAdapter('report', 'downloadReport'),
+    printReport: getServiceAdapter('report', 'printReport'),
   };
+  if (Object.values(original).some(fn => typeof fn !== 'function')) {
+    throw new Error('Report backend is not connected.');
+  }
   async function check(request = {}) {
     if (request.scope === 'admin') return;
     const config = await publicSettings('reports', { studentReportsEnabled: true });
