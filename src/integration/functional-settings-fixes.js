@@ -362,6 +362,44 @@ async function reportMethods() {
   };
 }
 
+let securityCleanup = null;
+function registerSecurityRuntime() {
+  if (securityCleanup) return;
+  getFirebase().then(sdk => {
+    if (!sdk?.auth) return;
+    let timer = null;
+    let activityHandler = null;
+    const clear = () => {
+      if (timer) window.clearTimeout(timer);
+      timer = null;
+      if (activityHandler) {
+        ['pointerdown','keydown','touchstart','scroll'].forEach(event => window.removeEventListener(event, activityHandler));
+        activityHandler = null;
+      }
+    };
+    const startForUser = async user => {
+      clear();
+      if (!user) return;
+      const isAdmin = user.uid === OWNER_ADMIN_UID || (await user.getIdTokenResult(true)).claims.admin === true || (await user.getIdTokenResult(true)).claims.role === 'admin';
+      if (!isAdmin) return;
+      const snap = await sdk.db.collection('adminSettings').doc('security').get().catch(() => null);
+      const minutes = Number(snap?.data()?.settings?.sessionTimeoutMinutes || 0);
+      if (!Number.isFinite(minutes) || minutes <= 0) return;
+      activityHandler = () => {
+        if (timer) window.clearTimeout(timer);
+        timer = window.setTimeout(async () => {
+          await sdk.auth.signOut().catch(() => {});
+          window.location.hash = '#/login';
+        }, minutes * 60 * 1000);
+      };
+      ['pointerdown','keydown','touchstart','scroll'].forEach(event => window.addEventListener(event, activityHandler, { passive: true }));
+      activityHandler();
+    };
+    const unsubscribe = sdk.auth.onAuthStateChanged(user => { startForUser(user).catch(() => clear()); });
+    securityCleanup = () => { clear(); unsubscribe?.(); securityCleanup = null; };
+  }).catch(() => {});
+}
+
 async function registerFunctionalSettingsFixes() {
   const admin = { ...(await adminSettingsMethods()), ...(await adminNotificationMethods()) };
   const notification = await notificationMethods();
@@ -370,5 +408,6 @@ async function registerFunctionalSettingsFixes() {
   const academic = await academicMethods();
   const report = await reportMethods();
   configureServices({ admin, notification, support, auth: preferences, academic, report });
+  registerSecurityRuntime();
 }
 export { registerFunctionalSettingsFixes };
