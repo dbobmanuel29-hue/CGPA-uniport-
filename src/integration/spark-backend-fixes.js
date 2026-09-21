@@ -94,57 +94,69 @@ export async function registerSparkBackendFixes() {
       },
       async getStudents(filters = {}) {
         const { db, auth } = await requireAdmin();
-        const usersSnap = await db.collection('users').get();
-        const profilesSnap = await db.collection('academicProfiles').get();
+        const [usersSnap, profilesSnap, facultiesSnap, departmentsSnap, programmesSnap, levelsSnap] = await Promise.all([
+          db.collection('users').get(),
+          db.collection('academicProfiles').get(),
+          db.collection('faculties').get(),
+          db.collection('departments').get(),
+          db.collection('programmes').get(),
+          db.collection('levels').get()
+        ]);
         const profiles = new Map(profilesSnap.docs.map(doc => [doc.id, doc.data()]));
-        const [faculties, departments, programmes, levels] = await Promise.all([db.collection('faculties').get(), db.collection('departments').get(), db.collection('programmes').get(), db.collection('levels').get()]);
         const names = snap => new Map(snap.docs.map(doc => [doc.id, doc.data()?.name || doc.data()?.title || '']));
-        const facultyMap = names(faculties), departmentMap = names(departments), programmeMap = names(programmes), levelMap = names(levels);
+        const facultyMap = names(facultiesSnap);
+        const departmentMap = names(departmentsSnap);
+        const programmeMap = names(programmesSnap);
+        const levelMap = names(levelsSnap);
 
         // Firebase Authentication is the authoritative source for registered accounts.
-        // A user can successfully register in Auth even if the follow-up Firestore
-        // /users write was interrupted. The old directory only read /users, which
-        // caused registered students to disappear from the admin directory.
+        // Firestore /users is profile data and may be missing if registration was
+        // interrupted after Auth creation. This prevents registered students from
+        // disappearing from the admin directory.
         const token = await auth.currentUser.getIdToken();
-        const authResponse = await fetch('/api/admin/list-users', {
+        const response = await fetch('/api/admin/list-users', {
           method: 'GET',
           headers: { Authorization: `Bearer ${token}` },
         });
-        if (!authResponse.ok) {
-          throw Object.assign(new Error('The registered student directory could not be loaded from Firebase Authentication.'), { code: 'admin/auth-users-unavailable' });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok || !payload.ok || !Array.isArray(payload.users)) {
+          throw Object.assign(new Error(payload.error || 'The registered student directory could not be loaded.'), {
+            code: payload.code || `admin/auth-users-${response.status}`,
+          });
         }
-        const authPayload = await authResponse.json();
-        const authUsers = Array.isArray(authPayload.users) ? authPayload.users : [];
 
-        let output = authUsers.map(authUser => {
-          const user = usersSnap.docs.find(doc => doc.id === authUser.id)?.data() || {};
-          const profile = profiles.get(authUser.id) || {};
-          return {
-            id: authUser.id,
-            ...user,
-            fullName: user.fullName || authUser.fullName || '',
-            email: user.email || authUser.email || '',
-            phone: user.phone || authUser.phone || '',
-            photoUrl: user.photoUrl || authUser.photoUrl || '',
-            emailVerified: authUser.emailVerified === true,
-            accountStatus: user.accountStatus || authUser.accountStatus || 'active',
-            role: user.role || authUser.role || 'student',
-            createdAt: user.createdAt || authUser.createdAt || null,
-            facultyName: profile.facultyName || facultyMap.get(profile.facultyId) || '',
-            departmentName: profile.departmentName || departmentMap.get(profile.departmentId) || '',
-            programmeName: profile.programmeName || programmeMap.get(profile.programmeId) || '',
-            levelName: profile.currentLevelName || levelMap.get(profile.currentLevelId) || '',
-            facultyId: profile.facultyId || '',
-            departmentId: profile.departmentId || '',
-            programmeId: profile.programmeId || '',
-            levelId: profile.currentLevelId || '',
-          };
-        }).filter(user => user.id !== OWNER_ADMIN_UID && user.role !== 'admin' && user.accountStatus !== 'deleted');
+        let result = payload.users
+          .filter(authUser => authUser.id !== OWNER_ADMIN_UID && authUser.role !== 'admin' && authUser.accountStatus !== 'deleted')
+          .map(authUser => {
+            const user = usersSnap.docs.find(doc => doc.id === authUser.id)?.data() || {};
+            const profile = profiles.get(authUser.id) || {};
+            return {
+              id: authUser.id,
+              ...user,
+              fullName: user.fullName || authUser.fullName || '',
+              email: user.email || authUser.email || '',
+              phone: user.phone || authUser.phone || '',
+              photoUrl: user.photoUrl || authUser.photoUrl || '',
+              emailVerified: authUser.emailVerified === true,
+              accountStatus: user.accountStatus || authUser.accountStatus || 'active',
+              role: user.role || authUser.role || 'student',
+              createdAt: user.createdAt || authUser.createdAt || null,
+              facultyName: profile.facultyName || facultyMap.get(profile.facultyId) || '',
+              departmentName: profile.departmentName || departmentMap.get(profile.departmentId) || '',
+              programmeName: profile.programmeName || programmeMap.get(profile.programmeId) || '',
+              levelName: profile.currentLevelName || levelMap.get(profile.currentLevelId) || '',
+              facultyId: profile.facultyId || '',
+              departmentId: profile.departmentId || '',
+              programmeId: profile.programmeId || '',
+              levelId: profile.currentLevelId || '',
+            };
+          });
 
-        if (filters.status) output = output.filter(x => x.accountStatus === filters.status);
-        if (filters.facultyId) output = output.filter(x => x.facultyId === filters.facultyId);
-        return output;
+        if (filters.status) result = result.filter(row => row.accountStatus === filters.status);
+        if (filters.facultyId) result = result.filter(row => row.facultyId === filters.facultyId);
+        return result;
       },
+
       async deleteStudent(studentId) {
         const { db } = await requireAdmin();
         const uid = String(studentId || '').trim();
