@@ -44,7 +44,21 @@ function PreferenceSettings({ privacy = false }) {
   const action = useAction();
   useEffect(() => { if (resource.data) setDraft(resource.data); }, [resource.data]);
   const options = privacy ? [['shareAnalytics', 'Product analytics', 'Allow optional, privacy-conscious product usage measurement when implemented.'], ['profileDiscoverable', 'Profile discoverability', 'Let other students find your profile when this feature is available.']] : [['academicNotifications', 'Academic notifications', 'Updates related to your academic records.'], ['emailNotifications', 'Email notifications', 'Receive eligible notifications by email.'], ['supportNotifications', 'Support notifications', 'Know when a support request is updated.'], ['announcements', 'Announcements', 'Important CGPA+ product updates.']];
-  return <Panel title={privacy ? 'Your privacy preferences' : 'Choose what reaches you'} description="Changes below are an unsaved draft until the backend accepts them.">{resource.error && <Notice>Preferences could not be loaded. These controls are not a representation of saved account settings.</Notice>}{options.map(([key, label, description]) => <Toggle key={key} label={label} description={description} checked={!!draft[key]} onChange={v => setDraft({ ...draft, [key]: v })} />)}<ActionError error={action.error} /><div className="form-actions"><Button busy={action.busy} onClick={() => action.run(() => authService.updatePreferences(draft), resource.refresh, 'Your preferences were saved.')}>Save preferences</Button></div>{privacy && <div className="data-controls"><h3>Your data, your control.</h3><p>Request a copy of your account information from the connected service.</p><Button variant="outline" icon="download" busy={action.busy} onClick={() => action.run(() => authService.requestDataExport(), null, 'Your data export request was accepted.')}>Request data export</Button><a href="#/privacy">Read the privacy policy</a></div>}</Panel>;
+  return <Panel title={privacy ? 'Your privacy preferences' : 'Choose what reaches you'} description="Changes below are an unsaved draft until the backend accepts them.">{resource.error && <Notice>Preferences could not be loaded. These controls are not a representation of saved account settings.</Notice>}{options.map(([key, label, description]) => <Toggle key={key} label={label} description={description} checked={!!draft[key]} onChange={v => setDraft({ ...draft, [key]: v })} />)}<ActionError error={action.error} /><div className="form-actions"><Button busy={action.busy} onClick={() => action.run(() => authService.updatePreferences(draft), resource.refresh, 'Your preferences were saved.')}>Save preferences</Button></div>{privacy && <div className="data-controls"><h3>Your data, your control.</h3><p>Request a copy of your account information from the connected service.</p><Button variant="outline" icon="download" busy={action.busy} onClick={() => action.run(
+        () => authService.requestDataExport(),
+        result => {
+          const blob = new Blob([JSON.stringify(result.exportData || result, null, 2)], { type: 'application/json;charset=utf-8' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = 'cgpa-plus-data-export.json';
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          URL.revokeObjectURL(url);
+        },
+        'Your CGPA+ data export is ready.'
+      )}>Request data export</Button><a href="#/privacy">Read the privacy policy</a></div>}</Panel>;
 }
 
 export default function Settings() {
