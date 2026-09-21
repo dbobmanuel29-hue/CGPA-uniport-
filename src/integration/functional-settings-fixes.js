@@ -54,7 +54,7 @@ function notificationTypeEnabled(preferences, type) {
 async function createNotification(db, userId, data, preferences = null) {
   if (preferences && !notificationTypeEnabled(preferences, data.type || 'system')) return null;
   const ref = db.collection('notifications').doc();
-  await ref.set({ userId, title: data.title, message: data.message, body: data.message, type: data.type || 'system', priority: data.priority || 'normal', read: false, createdAt: ts(), ...(data.campaignId ? { campaignId: data.campaignId } : {}) });
+  await ref.set({ userId, title: data.title, message: data.message, body: data.message, type: data.type || 'system', priority: data.priority || 'normal', read: false, createdAt: ts(), ...(data.campaignId ? { campaignId: data.campaignId } : {}), ...(data.ticketId ? { ticketId: data.ticketId } : {}), ...(data.studentName ? { studentName: data.studentName } : {}) });
   return ref.id;
 }
 async function ensureAutomaticReminders() {
