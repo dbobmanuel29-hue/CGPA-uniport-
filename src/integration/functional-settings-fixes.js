@@ -280,8 +280,45 @@ async function academicMethods() {
     },
   };
 }
+async function adminNotificationMethods() {
+  return {
+    async sendNotification(payload = {}) {
+      const value = await adminSdk();
+      const title = String(payload.title || '').trim();
+      const message = String(payload.message || '').trim();
+      if (!title || message.length < 5) throw Object.assign(new Error('Enter a title and a message of at least 5 characters.'), { code: 'validation/notification' });
+      const audience = payload.audience || 'all_students';
+      const usersSnap = await value.db.collection('users').get();
+      let recipients = usersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter(row => row.id !== OWNER_ADMIN_UID && row.role !== 'admin' && row.accountStatus !== 'deleted');
+      if (audience === 'faculty') {
+        if (!payload.facultyId) throw Object.assign(new Error('Select a faculty before sending.'), { code: 'validation/faculty-required' });
+        const profiles = await value.db.collection('academicProfiles').get();
+        const facultyByUser = new Map(profiles.docs.map(doc => [doc.id, doc.data()?.facultyId]));
+        recipients = recipients.filter(row => facultyByUser.get(row.id) === payload.facultyId);
+      }
+      const campaignRef = value.db.collection('notificationCampaigns').doc();
+      await campaignRef.set({ title, message, type: payload.type || 'announcement', audience, facultyId: payload.facultyId || '', priority: payload.priority || 'normal', status: 'sent', recipientCount: recipients.length, createdBy: value.auth.currentUser.uid, createdAt: ts(), sentAt: ts() });
+      const preferenceDocs = await Promise.all(recipients.map(row => value.db.collection('userPreferences').doc(row.id).get()));
+      for (let offset = 0; offset < recipients.length; offset += 450) {
+        const batch = value.db.batch();
+        recipients.slice(offset, offset + 450).forEach((row, index) => {
+          const prefSnap = preferenceDocs[offset + index];
+          const prefs = prefSnap.exists ? prefSnap.data() : {};
+          if (!notificationTypeEnabled(prefs, payload.type || 'announcement')) {
+            return;
+          }
+          const ref = value.db.collection('notifications').doc();
+          batch.set(ref, { userId: row.id, title, message, body: message, type: payload.type || 'announcement', priority: payload.priority || 'normal', read: false, campaignId: campaignRef.id, createdAt: ts() });
+        });
+        await batch.commit();
+      }
+      return { id: campaignRef.id, status: 'sent', recipientCount: recipients.length };
+    },
+  };
+}
+
 async function registerFunctionalSettingsFixes() {
-  const admin = await adminSettingsMethods();
+  const admin = { ...(await adminSettingsMethods()), ...(await adminNotificationMethods()) };
   const notification = await notificationMethods();
   const support = await supportMethods();
   const preferences = await preferenceMethods();
