@@ -192,10 +192,16 @@ async function supportMethods() {
       await ref.update(updateData);
       if (isAdmin) {
         const prefsSnap = await value.db.collection('userPreferences').doc(ticket.userId).get();
-        await createNotification(value.db, ticket.userId, { title: 'Support replied', message: `An administrator replied to your support request: ${ticket.subject}`, type: 'support', priority: 'high' }, prefsSnap.exists ? prefsSnap.data() : {});
+        await createNotification(value.db, ticket.userId, { title: 'Support replied', message: `An administrator replied to your support request: ${ticket.subject}`, type: 'support', priority: 'high', ticketId: ticket.id, studentName: ticket.studentName || '' }, prefsSnap.exists ? prefsSnap.data() : {});
         await fetch('/api/support/email', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${await value.auth.currentUser.getIdToken()}` }, body: JSON.stringify({ event: 'support_reply', ticketId: ticket.id, subject: ticket.subject, message }) }).catch(() => {});
+        const adminNotifications = await value.db.collection('notifications').where('userId', '==', OWNER_ADMIN_UID).where('type', '==', 'support').get().catch(() => null);
+        if (adminNotifications) {
+          const batch = value.db.batch();
+          adminNotifications.docs.filter(doc => doc.data()?.ticketId === ticket.id && doc.data()?.read !== true).forEach(doc => batch.update(doc.ref, { read: true, readAt: ts() }));
+          await batch.commit().catch(() => {});
+        }
       } else {
-        await createNotification(value.db, OWNER_ADMIN_UID, { title: 'Student replied', message: `${authorName} replied to support request: ${ticket.subject}`, type: 'support', priority: 'high' });
+        await createNotification(value.db, OWNER_ADMIN_UID, { title: 'Student replied', message: `${authorName} replied to support request: ${ticket.subject}`, type: 'support', priority: 'high', ticketId: ticket.id, studentName: ticket.studentName || authorName });
       }
       return { id: request.ticketId, status: isAdmin ? 'in_progress' : ticket.status };
     },
