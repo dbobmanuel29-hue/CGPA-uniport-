@@ -15,7 +15,7 @@ async function sdk() {
   if (!value?.auth?.currentUser) throw Object.assign(new Error('Authentication required.'), { code: 'unauthorized' });
   return value;
 }
-async function adminSdk() {
+async function adminSdk({ enforceMfa = true } = {}) {
   const value = await sdk();
   const user = value.auth.currentUser;
   if (user.uid !== OWNER_ADMIN_UID) {
@@ -27,7 +27,7 @@ async function adminSdk() {
   }
   const securitySnap = await value.db.collection('adminSettings').doc('security').get().catch(() => null);
   const security = securitySnap?.data()?.settings || {};
-  if (security.requireAdminMfa === true && (!Array.isArray(user.multiFactor?.enrolledFactors) || user.multiFactor.enrolledFactors.length === 0)) {
+  if (enforceMfa && security.requireAdminMfa === true && (!Array.isArray(user.multiFactor?.enrolledFactors) || user.multiFactor.enrolledFactors.length === 0)) {
     throw Object.assign(new Error('Administrator MFA is required for this workspace.'), { code: 'security/mfa-required' });
   }
   return value;
@@ -274,7 +274,7 @@ async function adminSettingsMethods() {
       return snap.exists ? (snap.data()?.settings || snap.data() || {}) : {};
     },
     async updateSettings({ section, settings: next = {} } = {}) {
-      const value = await adminSdk();
+      const value = await adminSdk({ enforceMfa: section !== 'security' });
       if (!section) throw Object.assign(new Error('A settings section is required.'), { code: 'validation/settings-section' });
       const allowedSections = ['general','academic','notifications','reports','support','security'];
       if (!allowedSections.includes(section)) throw Object.assign(new Error('Invalid settings section.'), { code: 'validation/settings-section' });
@@ -286,7 +286,12 @@ async function adminSettingsMethods() {
       if (section === 'notifications') cleanSettings.emailEnabled = cleanSettings.emailEnabled === true;
       if (section === 'reports') cleanSettings.studentReportsEnabled = cleanSettings.studentReportsEnabled !== false;
       if (section === 'support') cleanSettings.requestsEnabled = cleanSettings.requestsEnabled !== false;
-      if (section === 'security') cleanSettings.requireVerifiedEmail = cleanSettings.requireVerifiedEmail === true;
+      if (section === 'security') {
+        cleanSettings.requireVerifiedEmail = cleanSettings.requireVerifiedEmail === true;
+        cleanSettings.requireAdminMfa = cleanSettings.requireAdminMfa === true;
+        const enrolledFactors = Array.isArray(value.auth.currentUser.multiFactor?.enrolledFactors) ? value.auth.currentUser.multiFactor.enrolledFactors : [];
+        if (cleanSettings.requireAdminMfa && enrolledFactors.length === 0) throw Object.assign(new Error('Administrator MFA must be enrolled before this security policy can be enabled.'), { code: 'security/mfa-not-enrolled' });
+      }
       await value.db.collection('adminSettings').doc(section).set({ section, settings: cleanSettings, updatedBy: value.auth.currentUser.uid, updatedAt: ts() }, { merge: true });
       return cleanSettings;
     },
