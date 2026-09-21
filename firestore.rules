@@ -3,8 +3,18 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    function signedIn() { return request.auth != null; }
-    function self(uid) { return signedIn() && request.auth.uid == uid; }
+    // =========================
+    // AUTH / ROLE HELPERS
+    // =========================
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function self(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
     function admin() {
       return signedIn() && (
         request.auth.uid == 'lmUB6IdhuaOlHjzkqBEyoNkE7PH2' ||
@@ -13,30 +23,100 @@ service cloud.firestore {
       );
     }
 
+    // Reads a boolean admin setting. Missing documents, settings maps,
+    // or individual keys use the supplied default value.
     function settingBool(section, key, defaultValue) {
       let path = /databases/$(database)/documents/adminSettings/$(section);
-      return !exists(path) || get(path).data.get('settings', {}).get(key, defaultValue) == true;
+      return !exists(path) ||
+        !get(path).data.keys().hasAny(['settings']) ||
+        !get(path).data.settings.keys().hasAny([key]) ||
+        get(path).data.settings[key] == true;
     }
+
     function verifiedIfRequired() {
-      return settingBool('security', 'requireVerifiedEmail', false) == false || request.auth.token.email_verified == true;
+      return settingBool('security', 'requireVerifiedEmail', false) == false ||
+        request.auth.token.email_verified == true;
     }
+
+    function validStudentResult() {
+      return signedIn() &&
+        verifiedIfRequired() &&
+        settingBool('academic', 'allowStudentResultEntry', true) &&
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.credits is number &&
+        request.resource.data.credits > 0 &&
+        request.resource.data.points is number &&
+        request.resource.data.points >= 0 &&
+        request.resource.data.points <= 5 &&
+        request.resource.data.qualityPoints is number &&
+        request.resource.data.qualityPoints ==
+          request.resource.data.credits * request.resource.data.points;
+    }
+
+
+    // =========================
+    // USERS
+    // =========================
 
     match /users/{uid} {
       allow read: if self(uid) || admin();
-      allow create: if self(uid) && request.resource.data.role == 'student';
-      allow update: if admin() || (self(uid) && request.resource.data.role == resource.data.role && request.resource.data.accountStatus == resource.data.accountStatus);
+
+      allow create: if self(uid) &&
+        request.resource.data.role == 'student';
+
+      allow update: if admin() ||
+        (
+          self(uid) &&
+          request.resource.data.role == resource.data.role &&
+          request.resource.data.accountStatus == resource.data.accountStatus
+        );
+
       allow delete: if self(uid) || admin();
     }
 
-    match /academicProfiles/{uid} { allow read, create, update, delete: if self(uid) || admin(); }
-    match /userPreferences/{uid} { allow read, create, update, delete: if self(uid) || admin(); }
+
+    // =========================
+    // STUDENT PROFILE
+    // =========================
+
+    match /academicProfiles/{uid} {
+      allow read, create, update, delete: if self(uid) || admin();
+    }
+
+    match /userPreferences/{uid} {
+      allow read, create, update, delete: if self(uid) || admin();
+    }
+
+
+    // =========================
+    // RESULTS
+    // =========================
 
     match /results/{resultId} {
-      allow create: if admin() || (verifiedIfRequired() && settingBool('academic', 'allowStudentResultEntry', true) && request.resource.data.userId == request.auth.uid && request.resource.data.credits > 0 && request.resource.data.points >= 0 && request.resource.data.points <= 5 && request.resource.data.qualityPoints == request.resource.data.credits * request.resource.data.points);
-      allow read: if signedIn() && (resource.data.userId == request.auth.uid || admin());
-      allow update: if admin() || (verifiedIfRequired() && settingBool('academic', 'allowStudentResultEntry', true) && signedIn() && resource.data.userId == request.auth.uid && request.resource.data.userId == resource.data.userId && request.resource.data.credits > 0 && request.resource.data.points >= 0 && request.resource.data.points <= 5 && request.resource.data.qualityPoints == request.resource.data.credits * request.resource.data.points);
-      allow delete: if signedIn() && (resource.data.userId == request.auth.uid || admin());
+
+      // Admins may manage results.
+      // Students may create only their own valid results when the
+      // academic/security settings permit it.
+      allow create: if admin() || validStudentResult();
+
+      allow read: if signedIn() &&
+        (resource.data.userId == request.auth.uid || admin());
+
+      allow update: if admin() ||
+        (
+          validStudentResult() &&
+          resource.data.userId == request.auth.uid &&
+          request.resource.data.userId == resource.data.userId
+        );
+
+      allow delete: if signedIn() &&
+        (resource.data.userId == request.auth.uid || admin());
     }
+
+
+    // =========================
+    // NOTIFICATIONS
+    // =========================
 
     match /notifications/{notificationId} {
       allow create: if admin() || (
@@ -46,33 +126,117 @@ service cloud.firestore {
         request.resource.data.read == false &&
         request.resource.data.title == 'Student replied'
       );
-      allow read: if signedIn() && (resource.data.userId == request.auth.uid || admin());
-      allow update: if admin() || (signedIn() && resource.data.userId == request.auth.uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read', 'readAt']));
-      allow delete: if signedIn() && (resource.data.userId == request.auth.uid || admin());
+
+      allow read: if signedIn() &&
+        (resource.data.userId == request.auth.uid || admin());
+
+      allow update: if admin() ||
+        (
+          signedIn() &&
+          resource.data.userId == request.auth.uid &&
+          request.resource.data.diff(resource.data)
+            .affectedKeys()
+            .hasOnly(['read', 'readAt'])
+        );
+
+      allow delete: if signedIn() &&
+        (resource.data.userId == request.auth.uid || admin());
     }
+
+
+    // =========================
+    // SUPPORT TICKETS
+    // =========================
 
     match /supportTickets/{ticketId} {
-      allow read: if signedIn() && (resource.data.userId == request.auth.uid || admin());
-      allow create: if verifiedIfRequired() && settingBool('support', 'requestsEnabled', true) && signedIn() && request.resource.data.userId == request.auth.uid;
-      allow update: if admin() || (signedIn() && resource.data.userId == request.auth.uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['messages', 'updatedAt']));
-      allow delete: if signedIn() && (resource.data.userId == request.auth.uid || admin());
+      allow read: if signedIn() &&
+        (resource.data.userId == request.auth.uid || admin());
+
+      allow create: if verifiedIfRequired() &&
+        settingBool('support', 'requestsEnabled', true) &&
+        signedIn() &&
+        request.resource.data.userId == request.auth.uid;
+
+      allow update: if admin() ||
+        (
+          signedIn() &&
+          resource.data.userId == request.auth.uid &&
+          request.resource.data.diff(resource.data)
+            .affectedKeys()
+            .hasOnly(['messages', 'updatedAt'])
+        );
+
+      allow delete: if signedIn() &&
+        (resource.data.userId == request.auth.uid || admin());
     }
 
+
+    // =========================
+    // PUBLIC SUPPORT REQUESTS
+    // =========================
+
     match /publicSupportRequests/{id} {
-      allow create: if request.resource.data.keys().hasAll(['name','email','message','status','createdAt']) && request.resource.data.name is string && request.resource.data.email is string && request.resource.data.message is string && request.resource.data.status == 'open' && request.resource.data.name.size() >= 2 && request.resource.data.name.size() <= 100 && request.resource.data.email.size() >= 5 && request.resource.data.email.size() <= 254 && request.resource.data.message.size() >= 5 && request.resource.data.message.size() <= 3000;
+      allow create: if
+        request.resource.data.keys().hasAll([
+          'name',
+          'email',
+          'message',
+          'status',
+          'createdAt'
+        ]) &&
+        request.resource.data.name is string &&
+        request.resource.data.email is string &&
+        request.resource.data.message is string &&
+        request.resource.data.status == 'open' &&
+        request.resource.data.name.size() >= 2 &&
+        request.resource.data.name.size() <= 100 &&
+        request.resource.data.email.size() >= 5 &&
+        request.resource.data.email.size() <= 254 &&
+        request.resource.data.message.size() >= 5 &&
+        request.resource.data.message.size() <= 3000;
+
       allow read, update, delete: if admin();
     }
 
+
+    // =========================
+    // REPORTS
+    // =========================
+
     match /reports/{id} {
-      allow read: if signedIn() && (resource.data.userId == request.auth.uid || admin());
-      allow create: if admin() || (verifiedIfRequired() && settingBool('reports', 'studentReportsEnabled', true) && signedIn() && request.resource.data.userId == request.auth.uid);
-      allow update, delete: if signedIn() && (resource.data.userId == request.auth.uid || admin());
+      allow read: if signedIn() &&
+        (resource.data.userId == request.auth.uid || admin());
+
+      allow create: if admin() ||
+        (
+          verifiedIfRequired() &&
+          settingBool('reports', 'studentReportsEnabled', true) &&
+          signedIn() &&
+          request.resource.data.userId == request.auth.uid
+        );
+
+      allow update, delete: if signedIn() &&
+        (resource.data.userId == request.auth.uid || admin());
     }
 
+
+    // =========================
+    // DATA EXPORT
+    // =========================
+
     match /dataExportRequests/{id} {
-      allow create: if verifiedIfRequired() && signedIn() && request.resource.data.userId == request.auth.uid;
-      allow read, update, delete: if signedIn() && (resource.data.userId == request.auth.uid || admin());
+      allow create: if verifiedIfRequired() &&
+        signedIn() &&
+        request.resource.data.userId == request.auth.uid;
+
+      allow read, update, delete: if signedIn() &&
+        (resource.data.userId == request.auth.uid || admin());
     }
+
+
+    // =========================
+    // AUDIT LOGS
+    // =========================
 
     match /auditLogs/{id} {
       allow read: if admin();
@@ -81,15 +245,73 @@ service cloud.firestore {
       allow delete: if admin();
     }
 
-    match /adminSettings/{id} { allow read: if signedIn(); allow write: if admin(); }
-    match /notificationCampaigns/{id} { allow read, write: if admin(); }
-    match /faculties/{id} { allow read: if true; allow write: if admin(); }
-    match /departments/{id} { allow read: if true; allow write: if admin(); }
-    match /programmes/{id} { allow read: if true; allow write: if admin(); }
-    match /academicVersions/{id} { allow read: if signedIn(); allow write: if admin(); }
-    match /levels/{id} { allow read: if signedIn(); allow write: if admin(); }
-    match /semesters/{id} { allow read: if signedIn(); allow write: if admin(); }
-    match /gradingRules/{id} { allow read: if signedIn(); allow write: if admin(); }
-    match /courses/{id} { allow read: if signedIn(); allow write: if admin(); }
+
+    // =========================
+    // ADMIN SETTINGS
+    // =========================
+
+    match /adminSettings/{id} {
+      allow read: if signedIn();
+      allow write: if admin();
+    }
+
+
+    // =========================
+    // NOTIFICATION CAMPAIGNS
+    // =========================
+
+    match /notificationCampaigns/{id} {
+      allow read, write: if admin();
+    }
+
+
+    // =========================
+    // ACADEMIC CONFIGURATION
+    // =========================
+
+    match /faculties/{id} {
+      allow read: if true;
+      allow write: if admin();
+    }
+
+    match /departments/{id} {
+      allow read: if true;
+      allow write: if admin();
+    }
+
+    match /programmes/{id} {
+      allow read: if true;
+      allow write: if admin();
+    }
+
+    match /academicVersions/{id} {
+      allow read: if signedIn();
+      allow write: if admin();
+    }
+
+    match /levels/{id} {
+      allow read: if signedIn();
+      allow write: if admin();
+    }
+
+    match /semesters/{id} {
+      allow read: if signedIn();
+      allow write: if admin();
+    }
+
+    match /academicSessions/{id} {
+      allow read: if true;
+      allow write: if admin();
+    }
+
+    match /gradingRules/{id} {
+      allow read: if signedIn();
+      allow write: if admin();
+    }
+
+    match /courses/{id} {
+      allow read: if signedIn();
+      allow write: if admin();
+    }
   }
 }
