@@ -32,9 +32,9 @@ service cloud.firestore {
     match /userPreferences/{uid} { allow read, create, update, delete: if self(uid) || admin(); }
 
     match /results/{resultId} {
-      allow create: if verifiedIfRequired() && settingBool('academic', 'allowStudentResultEntry', true) && request.resource.data.userId == request.auth.uid && request.resource.data.credits > 0 && request.resource.data.points >= 0 && request.resource.data.points <= 5 && request.resource.data.qualityPoints == request.resource.data.credits * request.resource.data.points;
+      allow create: if admin() || (verifiedIfRequired() && settingBool('academic', 'allowStudentResultEntry', true) && request.resource.data.userId == request.auth.uid && request.resource.data.credits > 0 && request.resource.data.points >= 0 && request.resource.data.points <= 5 && request.resource.data.qualityPoints == request.resource.data.credits * request.resource.data.points);
       allow read: if signedIn() && (resource.data.userId == request.auth.uid || admin());
-      allow update: if verifiedIfRequired() && settingBool('academic', 'allowStudentResultEntry', true) && signedIn() && (resource.data.userId == request.auth.uid || admin()) && request.resource.data.userId == resource.data.userId && request.resource.data.credits > 0 && request.resource.data.points >= 0 && request.resource.data.points <= 5 && request.resource.data.qualityPoints == request.resource.data.credits * request.resource.data.points;
+      allow update: if admin() || (verifiedIfRequired() && settingBool('academic', 'allowStudentResultEntry', true) && signedIn() && resource.data.userId == request.auth.uid && request.resource.data.userId == resource.data.userId && request.resource.data.credits > 0 && request.resource.data.points >= 0 && request.resource.data.points <= 5 && request.resource.data.qualityPoints == request.resource.data.credits * request.resource.data.points);
       allow delete: if signedIn() && (resource.data.userId == request.auth.uid || admin());
     }
 
@@ -59,7 +59,7 @@ service cloud.firestore {
 
     match /reports/{id} {
       allow read: if signedIn() && (resource.data.userId == request.auth.uid || admin());
-      allow create: if verifiedIfRequired() && settingBool('reports', 'studentReportsEnabled', true) && signedIn() && request.resource.data.userId == request.auth.uid;
+      allow create: if admin() || (verifiedIfRequired() && settingBool('reports', 'studentReportsEnabled', true) && signedIn() && request.resource.data.userId == request.auth.uid);
       allow update, delete: if signedIn() && (resource.data.userId == request.auth.uid || admin());
     }
 
