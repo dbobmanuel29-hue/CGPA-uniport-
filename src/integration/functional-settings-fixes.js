@@ -187,11 +187,15 @@ async function supportMethods() {
       const authorName = isAdmin ? (user.displayName || user.email || 'Administrator') : (user.displayName || user.email || ticket.studentName || 'Student');
       const messages = Array.isArray(ticket.messages) ? ticket.messages.slice() : [];
       messages.push({ id: `${Date.now()}-${Math.random().toString(36).slice(2)}`, authorId: user.uid, authorRole, authorName, message, createdAt: new Date().toISOString() });
-      await ref.update({ messages, status: isAdmin ? 'in_progress' : ticket.status === 'closed' ? 'closed' : 'open', updatedAt: ts() });
+      const updateData = { messages, updatedAt: ts() };
+      if (isAdmin) updateData.status = 'in_progress';
+      await ref.update(updateData);
       if (isAdmin) {
         const prefsSnap = await value.db.collection('userPreferences').doc(ticket.userId).get();
         await createNotification(value.db, ticket.userId, { title: 'Support replied', message: `An administrator replied to your support request: ${ticket.subject}`, type: 'support', priority: 'high' }, prefsSnap.exists ? prefsSnap.data() : {});
         await fetch('/api/support/email', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${await value.auth.currentUser.getIdToken()}` }, body: JSON.stringify({ event: 'support_reply', ticketId: ticket.id, subject: ticket.subject, message }) }).catch(() => {});
+      } else {
+        await createNotification(value.db, OWNER_ADMIN_UID, { title: 'Student replied', message: `${authorName} replied to support request: ${ticket.subject}`, type: 'support', priority: 'high' });
       }
       return { id: request.ticketId, status: isAdmin ? 'in_progress' : ticket.status };
     },
