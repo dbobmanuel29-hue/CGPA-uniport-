@@ -47,7 +47,7 @@ service cloud.firestore {
 
     match /supportTickets/{ticketId} {
       allow read: if signedIn() && (resource.data.userId == request.auth.uid || admin());
-      allow create: if verifiedIfRequired() && signedIn() && request.resource.data.userId == request.auth.uid;
+      allow create: if verifiedIfRequired() && settingBool('support', 'requestsEnabled', true) && signedIn() && request.resource.data.userId == request.auth.uid;
       allow update: if admin() || (signedIn() && resource.data.userId == request.auth.uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['messages', 'updatedAt']));
       allow delete: if signedIn() && (resource.data.userId == request.auth.uid || admin());
     }
@@ -59,12 +59,12 @@ service cloud.firestore {
 
     match /reports/{id} {
       allow read: if signedIn() && (resource.data.userId == request.auth.uid || admin());
-      allow create: if signedIn() && request.resource.data.userId == request.auth.uid;
+      allow create: if verifiedIfRequired() && settingBool('reports', 'studentReportsEnabled', true) && signedIn() && request.resource.data.userId == request.auth.uid;
       allow update, delete: if signedIn() && (resource.data.userId == request.auth.uid || admin());
     }
 
     match /dataExportRequests/{id} {
-      allow create: if signedIn() && request.resource.data.userId == request.auth.uid;
+      allow create: if verifiedIfRequired() && signedIn() && request.resource.data.userId == request.auth.uid;
       allow read, update, delete: if signedIn() && (resource.data.userId == request.auth.uid || admin());
     }
 
