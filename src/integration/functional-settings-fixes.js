@@ -230,7 +230,30 @@ async function preferenceMethods() {
   return {
     async getPreferences() { const value = await sdk(); const snap = await value.db.collection('userPreferences').doc(value.auth.currentUser.uid).get(); const data = snap.exists ? snap.data() : {}; return { academicNotifications: true, resultNotifications: true, systemNotifications: true, supportNotifications: true, announcements: true, emailNotifications: true, shareAnalytics: false, profileDiscoverable: false, ...data }; },
     async updatePreferences(preferences) { const value = await sdk(); const next = { academicNotifications: true, resultNotifications: true, systemNotifications: true, supportNotifications: true, announcements: true, emailNotifications: true, shareAnalytics: false, profileDiscoverable: false, ...preferences, updatedAt: ts() }; await value.db.collection('userPreferences').doc(value.auth.currentUser.uid).set(next, { merge: true }); return next; },
-    async requestDataExport() { const value = await sdk(); const ref = await value.db.collection('dataExportRequests').add({ userId: value.auth.currentUser.uid, status: 'requested', createdAt: ts() }); return { id: ref.id, status: 'requested' }; },
+    async requestDataExport() {
+      const value = await sdk();
+      const uid = value.auth.currentUser.uid;
+      const [userSnap, profileSnap, prefsSnap, resultsSnap, notificationsSnap, ticketsSnap] = await Promise.all([
+        value.db.collection('users').doc(uid).get(),
+        value.db.collection('academicProfiles').doc(uid).get(),
+        value.db.collection('userPreferences').doc(uid).get(),
+        value.db.collection('results').where('userId', '==', uid).get(),
+        value.db.collection('notifications').where('userId', '==', uid).get(),
+        value.db.collection('supportTickets').where('userId', '==', uid).get(),
+      ]);
+      const cleanRows = snap => snap.docs.map(doc => ({ id: doc.id, ...doc.data() })).map(row => JSON.parse(JSON.stringify(row, (key, val) => val?.toDate ? val.toDate().toISOString() : val)));
+      const exportData = {
+        exportedAt: new Date().toISOString(),
+        account: userSnap.exists ? { id: uid, ...userSnap.data() } : { id: uid, email: value.auth.currentUser.email || '' },
+        academicProfile: profileSnap.exists ? profileSnap.data() : null,
+        preferences: prefsSnap.exists ? prefsSnap.data() : {},
+        results: cleanRows(resultsSnap),
+        notifications: cleanRows(notificationsSnap),
+        supportTickets: cleanRows(ticketsSnap),
+      };
+      const ref = await value.db.collection('dataExportRequests').add({ userId: uid, status: 'completed', createdAt: ts(), completedAt: ts() });
+      return { id: ref.id, status: 'completed', exportData };
+    },
   };
 }
 async function adminSettingsMethods() {
