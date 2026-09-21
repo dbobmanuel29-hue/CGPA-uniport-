@@ -33,6 +33,12 @@ export function friendlyError(error) {
   if (error?.code === 'validation/student-id') return 'Enter the student Firebase ID first.';
   if (error?.code === 'report/lookup-failed' || error?.code === 'report/results-failed') return error.message || 'The report data could not be loaded.';
   if (error?.code === 'support/rate-limited') return error.message || 'Please wait before sending another support request.';
+  if (error?.code === 'support/disabled') return 'Support requests are temporarily disabled by the administrator.';
+  if (error?.code === 'academic/result-entry-disabled') return 'Student result entry is currently disabled by the administrator.';
+  if (error?.code === 'academic/server-validation') return 'This result did not pass the configured validation rules.';
+  if (error?.code === 'reports/disabled') return 'Student report requests are currently disabled by the administrator.';
+  if (error?.code === 'not-found/support') return 'That support request could not be found.';
+  if (error?.code === 'validation/support-request' || error?.code === 'validation/support-reply') return error.message || 'Please check your support message and try again.';
   return 'We could not complete this request. Please try again.';
 }
 export function backendConfigured() { return configured; }
