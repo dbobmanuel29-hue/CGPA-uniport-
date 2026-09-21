@@ -141,8 +141,6 @@ async function supportMethods() {
       const user = userSnap.exists ? userSnap.data() : {};
       const ref = value.db.collection('supportTickets').doc();
       await ref.set({ userId: uid, studentName: user.fullName || value.auth.currentUser.displayName || payload.fullName || '', email: value.auth.currentUser.email || payload.email || '', subject, category: payload.category || 'general', priority: payload.priority || 'normal', status: 'open', description, messages: [], internalNotes: [], createdAt: ts(), updatedAt: ts() });
-      const admins = await value.db.collection('users').where('role', '==', 'admin').get().catch(() => ({ docs: [] }));
-      for (const adminDoc of admins.docs) await createNotification(value.db, adminDoc.id, { title: 'New support request', message: `${subject} — ${description.slice(0, 140)}`, type: 'support', priority: payload.priority || 'normal' });
       await fetch('/api/support/email', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${await value.auth.currentUser.getIdToken()}` }, body: JSON.stringify({ event: 'new_support_request', ticketId: ref.id, subject, message: description }) }).catch(() => {});
       return { id: ref.id, status: 'open' };
     },
@@ -189,9 +187,6 @@ async function supportMethods() {
         const prefsSnap = await value.db.collection('userPreferences').doc(ticket.userId).get();
         await createNotification(value.db, ticket.userId, { title: 'Support replied', message: `An administrator replied to your support request: ${ticket.subject}`, type: 'support', priority: 'high' }, prefsSnap.exists ? prefsSnap.data() : {});
         await fetch('/api/support/email', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${await value.auth.currentUser.getIdToken()}` }, body: JSON.stringify({ event: 'support_reply', ticketId: ticket.id, subject: ticket.subject, message }) }).catch(() => {});
-      } else {
-        const admins = await value.db.collection('users').where('role', '==', 'admin').get().catch(() => ({ docs: [] }));
-        for (const adminDoc of admins.docs) await createNotification(value.db, adminDoc.id, { title: 'Student replied to support', message: `${ticket.subject}: ${message.slice(0, 160)}`, type: 'support', priority: 'normal' });
       }
       return { id: request.ticketId, status: isAdmin ? 'in_progress' : ticket.status };
     },
