@@ -176,7 +176,7 @@ async function supportMethods() {
       if (!snap.exists) throw Object.assign(new Error('Support request not found.'), { code: 'not-found/support' });
       const ticket = snap.data();
       const user = value.auth.currentUser;
-      const isAdmin = user.uid === OWNER_ADMIN_UID || user.role === 'admin' || (await user.getIdTokenResult(true)).claims.role === 'admin');
+      const isAdmin = user.uid === OWNER_ADMIN_UID || user.role === 'admin' || (await user.getIdTokenResult(true)).claims.role === 'admin';
       if (!isAdmin && ticket.userId !== user.uid) throw Object.assign(new Error('You do not have permission to reply to this request.'), { code: 'permission-denied' });
       const message = String(request.message || '').trim();
       if (!message) throw Object.assign(new Error('Write a reply before sending.'), { code: 'validation/support-reply' });
@@ -238,6 +238,33 @@ async function preferenceMethods() {
     async requestDataExport() { const value = await sdk(); const ref = await value.db.collection('dataExportRequests').add({ userId: value.auth.currentUser.uid, status: 'requested', createdAt: ts() }); return { id: ref.id, status: 'requested' }; },
   };
 }
+async function adminSettingsMethods() {
+  return {
+    async getSettings({ section } = {}) {
+      const value = await adminSdk();
+      if (!section) return {};
+      const snap = await value.db.collection('adminSettings').doc(section).get();
+      return snap.exists ? (snap.data()?.settings || snap.data() || {}) : {};
+    },
+    async updateSettings({ section, settings: next = {} } = {}) {
+      const value = await adminSdk();
+      if (!section) throw Object.assign(new Error('A settings section is required.'), { code: 'validation/settings-section' });
+      const allowedSections = ['general','academic','notifications','reports','support','security'];
+      if (!allowedSections.includes(section)) throw Object.assign(new Error('Invalid settings section.'), { code: 'validation/settings-section' });
+      const cleanSettings = { ...next };
+      if (section === 'academic') {
+        cleanSettings.allowStudentResultEntry = cleanSettings.allowStudentResultEntry !== false;
+        cleanSettings.requireServerValidation = cleanSettings.requireServerValidation !== false;
+      }
+      if (section === 'notifications') cleanSettings.emailEnabled = cleanSettings.emailEnabled === true;
+      if (section === 'reports') cleanSettings.studentReportsEnabled = cleanSettings.studentReportsEnabled !== false;
+      if (section === 'support') cleanSettings.requestsEnabled = cleanSettings.requestsEnabled !== false;
+      if (section === 'security') cleanSettings.requireVerifiedEmail = cleanSettings.requireVerifiedEmail === true;
+      await value.db.collection('adminSettings').doc(section).set({ section, settings: cleanSettings, updatedBy: value.auth.currentUser.uid, updatedAt: ts() }, { merge: true });
+      return cleanSettings;
+    },
+  };
+}
 async function academicMethods() {
   const originalSaveResult = academicService.saveResult;
   const originalUpdateResult = academicService.updateResult;
@@ -259,10 +286,11 @@ async function academicMethods() {
   };
 }
 async function registerFunctionalSettingsFixes() {
+  const admin = await adminSettingsMethods();
   const notification = await notificationMethods();
   const support = await supportMethods();
   const preferences = await preferenceMethods();
   const academic = await academicMethods();
-  configureServices({ notification, support, auth: preferences, academic });
+  configureServices({ admin, notification, support, auth: preferences, academic });
 }
 export { registerFunctionalSettingsFixes };
