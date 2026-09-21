@@ -36,8 +36,21 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { token, db } = await verify(req, String(req.body?.ticketId || ''));
+    const ticketId = String(req.body?.ticketId || '').trim();
     const body = req.body || {};
+    const event = body.event === 'support_reply' ? 'support_reply' : body.event === 'new_support_request' ? 'new_support_request' : '';
+    if (!event || !ticketId) return json(res, 400, { ok: false, error: 'A valid support event and ticket ID are required.' });
+    const { token, db, isAdmin } = await verify(req, ticketId);
+    const ticketSnap = await db.collection('supportTickets').doc(ticketId).get();
+    if (!ticketSnap.exists) return json(res, 404, { ok: false, error: 'Support request not found.' });
+    const ticket = ticketSnap.data() || {};
+    if (event === 'support_reply' && !isAdmin) return json(res, 403, { ok: false, error: 'Administrator permission is required for support-reply email events.' });
+    if (event === 'new_support_request') {
+      if (ticket.userId !== token.uid) return json(res, 403, { ok: false, error: 'You do not have permission to notify this support request.' });
+      const requestedSubject = String(body.subject || '').trim();
+      const requestedMessage = String(body.message || '').trim();
+      if (requestedSubject !== String(ticket.subject || '').trim() || requestedMessage !== String(ticket.description || '').trim()) return json(res, 400, { ok: false, error: 'The support email payload does not match the stored request.' });
+    }
     const supportSnap = await db.collection('adminSettings').doc('support').get();
     const settings = supportSnap.exists ? (supportSnap.data()?.settings || supportSnap.data() || {}) : {};
     const to = String(settings.supportEmail || '').trim();
@@ -46,14 +59,13 @@ export default async function handler(req, res) {
     const apiKey = process.env.RESEND_API_KEY;
     if (!apiKey) return json(res, 200, { ok: true, emailSent: false, reason: 'RESEND_API_KEY-not-configured' });
 
-    const event = body.event === 'support_reply' ? 'Support reply' : 'New support request';
-    const subject = String(body.subject || 'CGPA+ Support request').slice(0, 180);
+    const eventLabel = event === 'support_reply' ? 'Support reply' : 'New support request';
+    const subject = String(body.subject || ticket.subject || 'CGPA+ Support request').slice(0, 180);
     const message = String(body.message || '').slice(0, 5000);
-    const ticketId = String(body.ticketId || '');
     const sender = token.email || 'Authenticated CGPA+ user';
     const html = `
       <div style="font-family:Arial,sans-serif;line-height:1.6">
-        <h2>CGPA+ ${event}</h2>
+        <h2>CGPA+ ${eventLabel}</h2>
         <p><strong>Ticket:</strong> ${ticketId || 'N/A'}</p>
         <p><strong>From:</strong> ${sender}</p>
         <p><strong>Subject:</strong> ${subject}</p>
@@ -67,7 +79,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         from: process.env.SUPPORT_EMAIL_FROM || 'CGPA+ Support <onboarding@resend.dev>',
         to: [to],
-        subject: `[CGPA+] ${event}: ${subject}`,
+        subject: `[CGPA+] ${eventLabel}: ${subject}`,
         html,
       }),
     });
