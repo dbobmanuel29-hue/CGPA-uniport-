@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { PageHeader, Button, Badge } from '../../components/ui';
 import { Modal } from '../../components/feedback';
 import { DataTable, SearchBox, StatusFilter } from '../../components/table';
@@ -14,7 +14,28 @@ export function AdminSupport() {
   const [status, setStatus] = useState('');
   const [priority, setPriority] = useState('');
   const [ticket, setTicket] = useState(null);
+  const autoOpened = useRef(false);
   const resource = useResource(() => supportService.getTickets({ status, priority, scope: 'admin' }), [status, priority]);
+
+  useEffect(() => {
+    if (autoOpened.current || !resource.data || !window.location.hash.includes('focus=notification')) return;
+    const rows = resource.data?.items || resource.data || [];
+    if (!Array.isArray(rows) || !rows.length) return;
+    autoOpened.current = true;
+    (async () => {
+      try {
+        const notifications = await (await import('../../services/notification-service')).notificationService.getNotifications({ read: false, type: 'support' });
+        const target = (notifications || []).find(n => n.ticketId && rows.some(row => row.id === n.ticketId))
+          || (notifications || []).find(n => rows.some(row => n.message && n.message.includes(row.subject || '')));
+        if (target) {
+          const targetRow = rows.find(row => row.id === target.ticketId)
+            || rows.find(row => target.message && row.subject && target.message.includes(row.subject));
+          if (targetRow) setTicket(targetRow.id);
+          await (await import('../../services/notification-service')).notificationService.markAsRead(target.id).catch(() => {});
+        }
+      } catch {}
+    })();
+  }, [resource.data]);
 
   const handleDelete = async row => {
     const subject = row.subject || 'this support request';
