@@ -13,6 +13,14 @@ service cloud.firestore {
       );
     }
 
+    function settingBool(section, key, defaultValue) {
+      let path = /databases/$(database)/documents/adminSettings/$(section);
+      return !exists(path) || get(path).data.get('settings', {}).get(key, defaultValue) == true;
+    }
+    function verifiedIfRequired() {
+      return settingBool('security', 'requireVerifiedEmail', false) == false || request.auth.token.email_verified == true;
+    }
+
     match /users/{uid} {
       allow read: if self(uid) || admin();
       allow create: if self(uid) && request.resource.data.role == 'student';
@@ -24,9 +32,9 @@ service cloud.firestore {
     match /userPreferences/{uid} { allow read, create, update, delete: if self(uid) || admin(); }
 
     match /results/{resultId} {
-      allow create: if signedIn() && request.resource.data.userId == request.auth.uid && request.resource.data.credits > 0 && request.resource.data.points >= 0 && request.resource.data.points <= 5 && request.resource.data.qualityPoints == request.resource.data.credits * request.resource.data.points;
+      allow create: if verifiedIfRequired() && settingBool('academic', 'allowStudentResultEntry', true) && request.resource.data.userId == request.auth.uid && request.resource.data.credits > 0 && request.resource.data.points >= 0 && request.resource.data.points <= 5 && request.resource.data.qualityPoints == request.resource.data.credits * request.resource.data.points;
       allow read: if signedIn() && (resource.data.userId == request.auth.uid || admin());
-      allow update: if signedIn() && (resource.data.userId == request.auth.uid || admin()) && request.resource.data.userId == resource.data.userId && request.resource.data.credits > 0 && request.resource.data.points >= 0 && request.resource.data.points <= 5 && request.resource.data.qualityPoints == request.resource.data.credits * request.resource.data.points;
+      allow update: if verifiedIfRequired() && settingBool('academic', 'allowStudentResultEntry', true) && signedIn() && (resource.data.userId == request.auth.uid || admin()) && request.resource.data.userId == resource.data.userId && request.resource.data.credits > 0 && request.resource.data.points >= 0 && request.resource.data.points <= 5 && request.resource.data.qualityPoints == request.resource.data.credits * request.resource.data.points;
       allow delete: if signedIn() && (resource.data.userId == request.auth.uid || admin());
     }
 
@@ -39,7 +47,7 @@ service cloud.firestore {
 
     match /supportTickets/{ticketId} {
       allow read: if signedIn() && (resource.data.userId == request.auth.uid || admin());
-      allow create: if signedIn() && request.resource.data.userId == request.auth.uid;
+      allow create: if verifiedIfRequired() && signedIn() && request.resource.data.userId == request.auth.uid;
       allow update: if admin() || (signedIn() && resource.data.userId == request.auth.uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['messages', 'updatedAt']));
       allow delete: if signedIn() && (resource.data.userId == request.auth.uid || admin());
     }
@@ -67,7 +75,7 @@ service cloud.firestore {
       allow delete: if admin();
     }
 
-    match /adminSettings/{id} { allow read, write: if admin(); }
+    match /adminSettings/{id} { allow read: if signedIn(); allow write: if admin(); }
     match /notificationCampaigns/{id} { allow read, write: if admin(); }
     match /faculties/{id} { allow read: if true; allow write: if admin(); }
     match /departments/{id} { allow read: if true; allow write: if admin(); }
