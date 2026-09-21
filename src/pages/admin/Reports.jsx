@@ -9,13 +9,6 @@ import { useResource } from '../../hooks/useResource';
 import { downloadReportFile } from '../../utils/files';
 import { dateTime, titleCase } from '../../utils/formatting';
 
-function expiryDate(createdAt) {
-  const date = new Date(createdAt);
-  if (Number.isNaN(date.getTime())) return '--';
-  date.setMonth(date.getMonth() + 1);
-  return dateTime(date.toISOString());
-}
-
 export default function AdminReports() {
   const [request, setRequest] = useState({ type: 'academic', studentId: '', scope: 'admin' });
   const [preview, setPreview] = useState(null);
