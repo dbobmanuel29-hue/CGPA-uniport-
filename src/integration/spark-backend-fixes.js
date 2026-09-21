@@ -93,16 +93,56 @@ export async function registerSparkBackendFixes() {
         };
       },
       async getStudents(filters = {}) {
-        const { db } = await requireAdmin();
+        const { db, auth } = await requireAdmin();
         const usersSnap = await db.collection('users').get();
         const profilesSnap = await db.collection('academicProfiles').get();
         const profiles = new Map(profilesSnap.docs.map(doc => [doc.id, doc.data()]));
         const [faculties, departments, programmes, levels] = await Promise.all([db.collection('faculties').get(), db.collection('departments').get(), db.collection('programmes').get(), db.collection('levels').get()]);
         const names = snap => new Map(snap.docs.map(doc => [doc.id, doc.data()?.name || doc.data()?.title || '']));
         const facultyMap = names(faculties), departmentMap = names(departments), programmeMap = names(programmes), levelMap = names(levels);
-        let output = usersSnap.docs.map(doc => { const user = { id: doc.id, ...doc.data() }; const profile = profiles.get(doc.id) || {}; return { ...user, facultyName: facultyMap.get(profile.facultyId) || '', departmentName: departmentMap.get(profile.departmentId) || '', programmeName: programmeMap.get(profile.programmeId) || '', levelName: levelMap.get(profile.currentLevelId) || '', facultyId: profile.facultyId || '', departmentId: profile.departmentId || '', programmeId: profile.programmeId || '', levelId: profile.currentLevelId || '' }; }).filter(user => user.role !== 'admin' && user.accountStatus !== 'deleted');
-        if (filters.status) output = output.filter(user => user.accountStatus === filters.status);
-        if (filters.facultyId) output = output.filter(user => user.facultyId === filters.facultyId);
+
+        // Firebase Authentication is the authoritative source for registered accounts.
+        // A user can successfully register in Auth even if the follow-up Firestore
+        // /users write was interrupted. The old directory only read /users, which
+        // caused registered students to disappear from the admin directory.
+        const token = await auth.currentUser.getIdToken();
+        const authResponse = await fetch('/api/admin/list-users', {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!authResponse.ok) {
+          throw Object.assign(new Error('The registered student directory could not be loaded from Firebase Authentication.'), { code: 'admin/auth-users-unavailable' });
+        }
+        const authPayload = await authResponse.json();
+        const authUsers = Array.isArray(authPayload.users) ? authPayload.users : [];
+
+        let output = authUsers.map(authUser => {
+          const user = usersSnap.docs.find(doc => doc.id === authUser.id)?.data() || {};
+          const profile = profiles.get(authUser.id) || {};
+          return {
+            id: authUser.id,
+            ...user,
+            fullName: user.fullName || authUser.fullName || '',
+            email: user.email || authUser.email || '',
+            phone: user.phone || authUser.phone || '',
+            photoUrl: user.photoUrl || authUser.photoUrl || '',
+            emailVerified: authUser.emailVerified === true,
+            accountStatus: user.accountStatus || authUser.accountStatus || 'active',
+            role: user.role || authUser.role || 'student',
+            createdAt: user.createdAt || authUser.createdAt || null,
+            facultyName: profile.facultyName || facultyMap.get(profile.facultyId) || '',
+            departmentName: profile.departmentName || departmentMap.get(profile.departmentId) || '',
+            programmeName: profile.programmeName || programmeMap.get(profile.programmeId) || '',
+            levelName: profile.currentLevelName || levelMap.get(profile.currentLevelId) || '',
+            facultyId: profile.facultyId || '',
+            departmentId: profile.departmentId || '',
+            programmeId: profile.programmeId || '',
+            levelId: profile.currentLevelId || '',
+          };
+        }).filter(user => user.id !== OWNER_ADMIN_UID && user.role !== 'admin' && user.accountStatus !== 'deleted');
+
+        if (filters.status) output = output.filter(x => x.accountStatus === filters.status);
+        if (filters.facultyId) output = output.filter(x => x.facultyId === filters.facultyId);
         return output;
       },
       async deleteStudent(studentId) {
