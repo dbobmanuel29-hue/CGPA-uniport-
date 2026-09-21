@@ -25,6 +25,11 @@ async function adminSdk() {
       if (!account.exists || account.data()?.role !== 'admin') throw Object.assign(new Error('Administrator access required.'), { code: 'permission-denied' });
     }
   }
+  const securitySnap = await value.db.collection('adminSettings').doc('security').get().catch(() => null);
+  const security = securitySnap?.data()?.settings || {};
+  if (security.requireAdminMfa === true && (!Array.isArray(user.multiFactor?.enrolledFactors) || user.multiFactor.enrolledFactors.length === 0)) {
+    throw Object.assign(new Error('Administrator MFA is required for this workspace.'), { code: 'security/mfa-required' });
+  }
   return value;
 }
 async function settings(section, fallback = {}) {
