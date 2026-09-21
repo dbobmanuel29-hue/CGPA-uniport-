@@ -288,7 +288,11 @@ async function academicMethods() {
   const originalUpdateResult = academicService.updateResult;
   return {
     async saveResult(payload) {
+      const value = await sdk();
+      const user = value.auth.currentUser;
+      const isAdmin = user.uid === OWNER_ADMIN_UID || (await user.getIdTokenResult(true)).claims.admin === true || (await user.getIdTokenResult(true)).claims.role === 'admin';
       const config = await publicSettings('academic', { allowStudentResultEntry: true, requireServerValidation: true });
+      if (isAdmin) return originalSaveResult(payload);
       if (config.allowStudentResultEntry === false) throw Object.assign(new Error('Student result entry is currently disabled by the administrator.'), { code: 'academic/result-entry-disabled' });
       if (config.requireServerValidation !== false) {
         const credits = Number(payload.credits), points = Number(payload.points);
@@ -297,7 +301,11 @@ async function academicMethods() {
       return originalSaveResult(payload);
     },
     async updateResult(resultId, payload) {
+      const value = await sdk();
+      const user = value.auth.currentUser;
+      const isAdmin = user.uid === OWNER_ADMIN_UID || (await user.getIdTokenResult(true)).claims.admin === true || (await user.getIdTokenResult(true)).claims.role === 'admin';
       const config = await publicSettings('academic', { allowStudentResultEntry: true, requireServerValidation: true });
+      if (isAdmin) return originalUpdateResult(resultId, payload);
       if (config.allowStudentResultEntry === false) throw Object.assign(new Error('Student result entry is currently disabled by the administrator.'), { code: 'academic/result-entry-disabled' });
       return originalUpdateResult(resultId, payload);
     },
