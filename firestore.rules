@@ -39,7 +39,13 @@ service cloud.firestore {
     }
 
     match /notifications/{notificationId} {
-      allow create: if admin();
+      allow create: if admin() || (
+        signedIn() &&
+        request.resource.data.userId == 'lmUB6IdhuaOlHjzkqBEyoNkE7PH2' &&
+        request.resource.data.type == 'support' &&
+        request.resource.data.read == false &&
+        request.resource.data.title == 'Student replied'
+      );
       allow read: if signedIn() && (resource.data.userId == request.auth.uid || admin());
       allow update: if admin() || (signedIn() && resource.data.userId == request.auth.uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read', 'readAt']));
       allow delete: if signedIn() && (resource.data.userId == request.auth.uid || admin());
@@ -83,7 +89,6 @@ service cloud.firestore {
     match /academicVersions/{id} { allow read: if signedIn(); allow write: if admin(); }
     match /levels/{id} { allow read: if signedIn(); allow write: if admin(); }
     match /semesters/{id} { allow read: if signedIn(); allow write: if admin(); }
-    match /academicSessions/{id} { allow read: if true; allow write: if admin(); }
     match /gradingRules/{id} { allow read: if signedIn(); allow write: if admin(); }
     match /courses/{id} { allow read: if signedIn(); allow write: if admin(); }
   }
