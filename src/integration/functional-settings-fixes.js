@@ -317,12 +317,35 @@ async function adminNotificationMethods() {
   };
 }
 
+async function reportMethods() {
+  const original = {
+    getReports: reportService.getReports,
+    getReportPreview: reportService.getReportPreview,
+    generateReport: reportService.generateReport,
+    downloadReport: reportService.downloadReport,
+    printReport: reportService.printReport,
+  };
+  async function check(request = {}) {
+    if (request.scope === 'admin') return;
+    const config = await publicSettings('reports', { studentReportsEnabled: true });
+    if (config.studentReportsEnabled === false) throw Object.assign(new Error('Student report requests are currently disabled by the administrator.'), { code: 'reports/disabled' });
+  }
+  return {
+    async getReports(request = {}) { await check(request); return original.getReports(request); },
+    async getReportPreview(request = {}) { await check(request); return original.getReportPreview(request); },
+    async generateReport(request = {}) { await check(request); return original.generateReport(request); },
+    async downloadReport(request = {}) { await check(request); return original.downloadReport(request); },
+    async printReport(request = {}) { await check(request); return original.printReport(request); },
+  };
+}
+
 async function registerFunctionalSettingsFixes() {
   const admin = { ...(await adminSettingsMethods()), ...(await adminNotificationMethods()) };
   const notification = await notificationMethods();
   const support = await supportMethods();
   const preferences = await preferenceMethods();
   const academic = await academicMethods();
-  configureServices({ admin, notification, support, auth: preferences, academic });
+  const report = await reportMethods();
+  configureServices({ admin, notification, support, auth: preferences, academic, report });
 }
 export { registerFunctionalSettingsFixes };
