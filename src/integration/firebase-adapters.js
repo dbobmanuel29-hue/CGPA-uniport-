@@ -37,7 +37,24 @@ async function registerAuth() {
     async loginWithGoogle({intent}) { const provider=new window.firebase.auth.GoogleAuthProvider(); provider.setCustomParameters({prompt:'select_account'}); const result=await auth.signInWithPopup(provider); const ref=db.collection('users').doc(result.user.uid); const existing=await ref.get(); if(!existing.exists) await ref.set({fullName:result.user.displayName||'',email:result.user.email||'',accountStatus:'active',onboardingComplete:false,role:result.user.uid===OWNER_ADMIN_UID?'admin':'student',createdAt:window.firebase.firestore.FieldValue.serverTimestamp(),provider:'google'}); return userAccount(result.user,db); },
     async register({fullName,email,password,acceptedTerms}) { if(!acceptedTerms) throw Object.assign(new Error('Terms acceptance is required.'),{code:'auth/terms-required'}); const result=await auth.createUserWithEmailAndPassword(email,password); await result.user.updateProfile({displayName:fullName}); await db.collection('users').doc(result.user.uid).set({fullName,email,accountStatus:'active',onboardingComplete:false,role:result.user.uid===OWNER_ADMIN_UID?'admin':'student',acceptedTermsAt:window.firebase.firestore.FieldValue.serverTimestamp(),createdAt:window.firebase.firestore.FieldValue.serverTimestamp()}); await db.collection('academicProfiles').doc(result.user.uid).set({universityId:UNIVERSITY.id,userId:result.user.uid,createdAt:window.firebase.firestore.FieldValue.serverTimestamp()}); return userAccount(result.user,db); },
     async sendPasswordReset({email}) { await auth.sendPasswordResetEmail(email); return {accepted:true}; },
-    async logout(){await auth.signOut();return{ok:true};}, async getCurrentUser(){\n      const user = auth.currentUser;\n      if (!user) return null;\n      // Resolve the signed-in UI immediately from Firebase Auth. The full Firestore\n      // profile is hydrated by onAuthStateChanged without blocking the header.\n      return clean({\n        id: user.uid,\n        fullName: user.displayName || '',\n        email: user.email || '',\n        phone: user.phoneNumber || '',\n        photoUrl: user.photoURL || '',\n        accountStatus: 'active',\n        emailVerified: !!user.emailVerified,\n        onboardingComplete: false,\n        role: user.uid === OWNER_ADMIN_UID ? 'admin' : 'student',\n        createdAt: asDate(user.metadata?.creationTime) || now(),\n      });\n    }, async subscribeToAuthState(callback){return new Promise(resolve=>resolve(auth.onAuthStateChanged(async user=>callback(await userAccount(user,db)))));}, async getIdToken(){if(!auth.currentUser)return null;return auth.currentUser.getIdToken();},
+    async logout(){await auth.signOut();return{ok:true};}, async getCurrentUser(){
+      const user = auth.currentUser;
+      if (!user) return null;
+      // Resolve the signed-in UI immediately from Firebase Auth. The full Firestore
+      // profile is hydrated by onAuthStateChanged without blocking the header.
+      return clean({
+        id: user.uid,
+        fullName: user.displayName || '',
+        email: user.email || '',
+        phone: user.phoneNumber || '',
+        photoUrl: user.photoURL || '',
+        accountStatus: 'active',
+        emailVerified: !!user.emailVerified,
+        onboardingComplete: false,
+        role: user.uid === OWNER_ADMIN_UID ? 'admin' : 'student',
+        createdAt: asDate(user.metadata?.creationTime) || now(),
+      });
+    }, async subscribeToAuthState(callback){return new Promise(resolve=>resolve(auth.onAuthStateChanged(async user=>callback(await userAccount(user,db)))));}, async getIdToken(){if(!auth.currentUser)return null;return auth.currentUser.getIdToken();},
     async sendEmailVerification(){if(!auth.currentUser)throw Object.assign(new Error('Authentication required.'),{code:'unauthorized'});await auth.currentUser.sendEmailVerification();},
     async updatePassword({currentPassword,newPassword}){if(!auth.currentUser?.email)throw Object.assign(new Error('Authentication required.'),{code:'unauthorized'});const credential=window.firebase.auth.EmailAuthProvider.credential(auth.currentUser.email,currentPassword);await auth.currentUser.reauthenticateWithCredential(credential);await auth.currentUser.updatePassword(newPassword);},
     async updateAccount({fullName,email,phone}){if(!auth.currentUser)throw Object.assign(new Error('Authentication required.'),{code:'unauthorized'});if(email&&email!==auth.currentUser.email)await auth.currentUser.updateEmail(email);await auth.currentUser.updateProfile({displayName:fullName||auth.currentUser.displayName});await db.collection('users').doc(auth.currentUser.uid).set({fullName,email:email||auth.currentUser.email,phone:phone||'',updatedAt:window.firebase.firestore.FieldValue.serverTimestamp()},{merge:true});return userAccount(auth.currentUser,db);},
