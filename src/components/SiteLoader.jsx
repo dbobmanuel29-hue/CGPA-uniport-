@@ -5,8 +5,9 @@ export default function SiteLoader() {
   const [leaving, setLeaving] = useState(false);
 
   useEffect(() => {
-    const exitTimer = window.setTimeout(() => setLeaving(true), 900);
-    const hideTimer = window.setTimeout(() => setVisible(false), 1250);
+    // Keep the branding moment extremely short so it never delays the UI.
+    const exitTimer = window.setTimeout(() => setLeaving(true), 120);
+    const hideTimer = window.setTimeout(() => setVisible(false), 320);
     return () => {
       window.clearTimeout(exitTimer);
       window.clearTimeout(hideTimer);
