@@ -13,6 +13,7 @@ import LegalPage from './pages/public/LegalPage';
 import { CookiePolicy, ThankYou } from './pages/public/CompliancePages';
 import CookieConsent from './components/CookieConsent';
 import ExcelResultImporter from './components/ExcelResultImporter';
+import SiteLoader from './components/SiteLoader';
 
 const loadNamed = (loader, name) => lazy(() => loader().then(module => ({ default: module[name] })));
 const publicPages = () => import('./pages/public/Pages');
@@ -77,4 +78,4 @@ function Router() {
   if (['/login', '/register', '/forgot-password', '/onboarding'].includes(path)) return page;
   return <PublicLayout path={path}><ReadingProgress />{page}{path === '/' && <CreatorShowcase />}</PublicLayout>;
 }
-export default function Application() { return <AppearanceProvider><ToastProvider><SessionProvider><CalculatorProvider><CookieConsent /><Router /></CalculatorProvider></SessionProvider></ToastProvider></AppearanceProvider>; }
+export default function Application() { return <AppearanceProvider><ToastProvider><SessionProvider><CalculatorProvider><CookieConsent /><Router /><SiteLoader /></CalculatorProvider></SessionProvider></ToastProvider></AppearanceProvider>; }
