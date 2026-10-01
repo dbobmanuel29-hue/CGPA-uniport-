@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { PageHeader, Panel, Button, Field, PasswordInput, Toggle, Notice, Tabs } from '../../components/ui';
-import { ActionError, ConnectionState, ConfirmModal, Modal, useAction } from '../../components/feedback';
+import { ActionError, ConnectionState, ConfirmModal, useAction } from '../../components/feedback';
 import { AcademicFields, emptyAcademic } from '../../components/AcademicFields';
 import { Icon } from '../../components/Icon';
 import { useAppearance } from '../../state/appearance';
@@ -65,10 +65,9 @@ export default function Settings() {
   const [tab, setTab] = useState('account');
   const [deleting, setDeleting] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
-  const deleteAction = useAction();
   const account = useResource(() => authService.getCurrentUser());
   const session = useSession();
-  const closeDeleteModal = () => { if (!deleteAction.busy) { setDeleting(false); deleteAction.clear(); } };
+  const closeDeleteModal = () => setDeleting(false);
   return <>
     <PageHeader eyebrow="MAKE YOURSELF AT HOME" title="Your preferences. Your workspace." description="Manage account details, privacy, security and the way CGPA+ feels." />
     <Tabs value={tab} onChange={setTab} options={['account', 'security', 'notifications', { value: 'academic', label: 'Academic profile' }, 'appearance', 'privacy']} />
@@ -80,6 +79,24 @@ export default function Settings() {
     {tab === 'privacy' && <PreferenceSettings privacy />}
     <section className="danger-zone"><div><h2>Account controls</h2><p>Destructive actions are handled by the authentication backend. They are never simulated.</p></div><div><Button variant="outline" icon="logout" onClick={() => setLoggingOut(true)}>Sign out</Button><Button variant="danger" icon="trash" onClick={() => setDeleting(true)}>Delete account</Button></div></section>
     <ConfirmModal open={loggingOut} onClose={() => setLoggingOut(false)} title="Sign out of your account?" description="Your session will only end once the connected authentication service confirms sign-out." actionLabel="Sign out" onConfirm={async () => { await authService.logout(); session.clear(); navigate('/login'); }} />
-    <Modal open={deleting} onClose={closeDeleteModal} title="Delete your CGPA+ account?" description="This is permanent. Your CGPA+ records and Firebase Authentication account will be deleted by the trusted backend."><div className="confirm-icon danger"><Icon name="trash" size={28} /></div><p className="muted">You will not be asked for your password or asked to sign in with Google again. Confirm below to permanently delete your account.</p><ActionError error={deleteAction.error} /><div className="modal-actions"><button className="button button-outline" onClick={closeDeleteModal} disabled={deleteAction.busy}>Cancel</button><button className="button button-danger" disabled={deleteAction.busy} onClick={() => deleteAction.run(() => deleteCurrentUserAccount(), () => { session.clear(); navigate('/'); })}>{deleteAction.busy ? 'Deleting...' : 'Delete account'}</button></div></Modal>
+    <ConfirmModal
+      open={deleting}
+      onClose={closeDeleteModal}
+      title="Delete your CGPA+ account?"
+      description="This will permanently remove your CGPA+ account and the records connected to it through the trusted backend."
+      actionLabel="Delete my account"
+      dangerous
+      onConfirm={async () => {
+        await deleteCurrentUserAccount();
+        session.clear();
+        navigate('/');
+      }}
+    >
+      <div className="confirm-target">
+        <strong>Account deletion</strong>
+        <span>Your profile, academic records and stored account data</span>
+      </div>
+      <p className="confirm-detail">You will not be asked for your password or asked to sign in with Google again. Only continue if you are sure you want to permanently delete the account.</p>
+    </ConfirmModal>
   </>;
 }
