@@ -47,39 +47,56 @@ function extractDocumentContext(text, fallback = {}) {
 }
 
 function parseRows(text, context) {
-  const lines = String(text || '').split(/\\r?\\n/).map(normalize).filter(Boolean);
+  const lines = String(text || '').split(/\r?\n/).map(normalize).filter(Boolean);
   const rows = [];
-  const codePattern = /\\b[A-Z]{2,6}\\s*[-.]?\\s*\\d{3}\\b/i;
-  for (const line of lines) {
-    const codeMatch = line.match(codePattern);
-    if (!codeMatch) continue;
-    const code = codeMatch[0].replace(/[-.]?\\s*/g, ' ').replace(/\\s+/g, ' ').toUpperCase();
-    const afterCode = line.slice(codeMatch.index + codeMatch[0].length).trim();
-    const gradeMatch = afterCode.match(/(?:^|\\s)(A|B|C|D|E|F)(?:[+\\-])?(?:\\s|$)/i);
+  const codePattern = /\b[A-Z]{2,6}\s*[-.]?\s*\d{3}\b/i;
+
+  function parseCandidate(codeMatch, combined) {
+    const code = codeMatch[0].replace(/[-.]?\s*/g, ' ').replace(/\s+/g, ' ').toUpperCase();
+    const afterCode = combined.slice(codeMatch.index + codeMatch[0].length).trim();
+    const gradeMatch = afterCode.match(/(?:^|\s)(A|B|C|D|E|F)(?:[+\-])?(?=\s|$)/i);
     const grade = gradeMatch?.[1]?.toUpperCase() || '';
-    const tokens = afterCode.split(/\\s+/).filter(Boolean);
-    const gradeIndex = gradeMatch ? tokens.findIndex(token => /^([ABCDEF])[+\\-]?$/i.test(token)) : -1;
+    const tokens = afterCode.split(/\s+/).filter(Boolean);
+    const gradeIndex = gradeMatch ? tokens.findIndex(token => /^([ABCDEF])[+\-]?$/i.test(token)) : -1;
     const beforeGrade = gradeIndex >= 0 ? tokens.slice(0, gradeIndex) : tokens;
-    const unitCandidates = beforeGrade.map((token, index) => ({ token, index })).filter(item => /^[1-6](?:\\.0)?$/.test(item.token));
-    const unit = unitCandidates.length ? Number(unitCandidates[unitCandidates.length - 1].token) : null;
-    const titleTokens = unit != null ? beforeGrade.slice(0, unitCandidates[unitCandidates.length - 1].index) : beforeGrade;
+    const unitCandidates = beforeGrade.map((token, index) => ({ token, index })).filter(item => /^[1-6](?:\.0)?$/.test(item.token));
+    const unitCandidate = unitCandidates.at(-1);
+    const unit = unitCandidate ? Number(unitCandidate.token) : null;
+    const titleTokens = unitCandidate ? beforeGrade.slice(0, unitCandidate.index) : beforeGrade;
     const title = titleTokens.join(' ').replace(/^(?:[-:|])+|(?:[-:|])+$/g, '').trim();
-    if (!title || !unit || !gradeSet.has(grade)) continue;
-    const point = GRADE_OPTIONS.find(item => item.grade === grade)?.points;
-    rows.push({
+    if (!title || !unit || !gradeSet.has(grade)) return null;
+    return {
       id: `import-${rows.length}-${code}`,
       code,
       title,
       credits: unit,
       grade,
-      points: point,
+      points: GRADE_OPTIONS.find(item => item.grade === grade)?.points,
       sessionId: context.sessionId,
       semesterId: context.semesterId,
       levelId: context.levelId,
       confidence: 'review',
       source: 'document'
-    });
+    };
   }
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const codeMatch = lines[index].match(codePattern);
+    if (!codeMatch) continue;
+    let combined = lines[index];
+    let candidate = parseCandidate(codeMatch, combined);
+    if (!candidate) {
+      for (let offset = 1; offset <= 3 && index + offset < lines.length; offset += 1) {
+        const next = lines[index + offset];
+        if (codePattern.test(next) && offset > 1) break;
+        combined = `${combined} ${next}`;
+        candidate = parseCandidate(codeMatch, combined);
+        if (candidate) break;
+      }
+    }
+    if (candidate) rows.push(candidate);
+  }
+
   const unique = new Map();
   rows.forEach(row => unique.set(`${row.code}|${row.sessionId}|${row.semesterId}|${row.levelId}`, row));
   return [...unique.values()];
