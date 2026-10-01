@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { PageHeader, Button, Badge, Tabs, AsyncSelect, Stat } from '../../components/ui';
-import { ConnectionState, ConfirmModal, Modal, useAction } from '../../components/feedback';
+import { ConnectionState, ConfirmModal, Modal } from '../../components/feedback';
 import { DataTable, SearchBox, StatusFilter } from '../../components/table';
 import { LineChart } from '../../components/charts';
 import { adminService } from '../../services/admin-service';
@@ -46,19 +46,16 @@ export default function Students() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [tab, setTab] = useState('profile');
   const resource = useResource(() => adminService.getStudents({ status, facultyId: faculty }), [status, faculty]);
-  const action = useAction();
-
   const removeStudent = row => {
     setDeleteTarget(row);
   };
 
   const confirmDeleteStudent = async () => {
     if (!deleteTarget) return;
-    await action.run(
-      () => adminService.deleteStudent(deleteTarget.id),
-      () => { setStudent(null); setDeleteTarget(null); resource.refresh(); },
-      'Student account deleted.'
-    );
+    await adminService.deleteStudent(deleteTarget.id);
+    setStudent(null);
+    setDeleteTarget(null);
+    resource.refresh();
   };
 
   const columns = [
@@ -71,7 +68,7 @@ export default function Students() {
     { key: 'cgpa', label: 'CGPA', render: v => number(v) },
     { key: 'accountStatus', label: 'Status', render: v => <Badge tone={v === 'active' ? 'success' : v === 'suspended' ? 'danger' : 'neutral'}>{titleCase(v) || '--'}</Badge> },
     { key: 'academic', label: 'Academic profile', render: (_, row) => <Button variant="ghost" className="button-small" onClick={() => { setTab('academic'); setStudent(row.id); }}>View academic</Button> },
-    { key: 'delete', label: 'Delete', render: (_, row) => <Button variant="ghost" className="button-small student-delete-button" disabled={action.busy} onClick={() => removeStudent(row)}>Delete</Button> },
+    { key: 'delete', label: 'Delete', render: (_, row) => <Button variant="ghost" className="button-small student-delete-button" onClick={() => removeStudent(row)}>Delete</Button> },
   ];
 
   return <>
