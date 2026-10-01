@@ -60,10 +60,25 @@ export function Modal({ open, onClose, title, description, children, wide = fals
 
 export function ActionError({ error }) { return error ? <div className="inline-alert danger" role="alert"><Icon name="alert" /><span>{friendlyError(error)}</span></div> : null; }
 
-export function ConfirmModal({ open, title = 'Confirm action', description, actionLabel = 'Confirm', onClose, onConfirm, dangerous = false }) {
+export function ConfirmModal({ open, title = 'Confirm action', description, actionLabel = 'Confirm', onClose, onConfirm, dangerous = false, children }) {
   const action = useAction();
   useEffect(() => { if (open) action.clear(); }, [open]);
-  return <Modal open={open} onClose={onClose} title={title}><div className={`confirm-icon ${dangerous ? 'danger' : ''}`}><Icon name={dangerous ? 'trash' : 'info'} size={28} /></div><p className="muted">{description}</p><ActionError error={action.error} /><div className="modal-actions"><button className="button button-outline" onClick={onClose}>Cancel</button><button className={`button ${dangerous ? 'button-danger' : 'button-primary'}`} disabled={action.busy} onClick={() => action.run(onConfirm, onClose)}>{action.busy ? 'Working...' : actionLabel}</button></div></Modal>;
+  return <Modal open={open} onClose={() => { if (!action.busy) onClose?.(); }} title={title}>
+    <div className={`confirm-dialog ${dangerous ? 'confirm-dialog-danger' : ''}`}>
+      <div className={`confirm-icon ${dangerous ? 'danger' : ''}`} aria-hidden="true"><Icon name={dangerous ? 'trash' : 'info'} size={24} /></div>
+      <div className="confirm-copy">
+        <h3>{dangerous ? 'Please confirm this action' : 'Please confirm'}</h3>
+        <p className="muted">{description}</p>
+      </div>
+      {children}
+      {dangerous && <div className="confirm-warning"><Icon name="alert" size={17} /><span>This action is permanent and cannot be undone.</span></div>}
+    </div>
+    <ActionError error={action.error} />
+    <div className="modal-actions confirm-actions">
+      <button className="button button-outline" onClick={onClose} disabled={action.busy}>Cancel</button>
+      <button className={`button ${dangerous ? 'button-danger' : 'button-primary'}`} disabled={action.busy} onClick={() => action.run(onConfirm, onClose)}>{action.busy ? 'Working...' : actionLabel}</button>
+    </div>
+  </Modal>;
 }
 
 export function EmptyState({ title = 'Nothing here yet', description = 'Your information will appear here when available.', icon = 'file', action, compact = false }) {
