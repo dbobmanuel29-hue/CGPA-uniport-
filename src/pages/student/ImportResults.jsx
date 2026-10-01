@@ -4,6 +4,7 @@ import ExcelResultImporter from '../../components/ExcelResultImporter';
 import UniportResultImporter from '../../components/UniportResultImporter';
 import { academicService } from '../../services/academic-service';
 import { ResultEditor } from './Academic';
+import { navigate } from '../../utils/routing';
 
 export default function ImportResults() {
   const [profile, setProfile] = useState(null);
@@ -57,7 +58,7 @@ export default function ImportResults() {
             <p>Use an ARIS result PDF, downloaded academic document, or a clear screenshot. The file stays on your device while CGPA+ reads it.</p>
           </div>
         </div>
-        <UniportResultImporter context={context} />
+        <UniportResultImporter context={context} onImported={() => navigate('/app/academic')} />
       </section>
 
       <section id="excel-result" className="import-section">
@@ -68,7 +69,7 @@ export default function ImportResults() {
             <p>For students who already have their results in a spreadsheet. This existing workflow is unchanged.</p>
           </div>
         </div>
-        <ExcelResultImporter context={context} onImported={() => {}} />
+        <ExcelResultImporter context={context} onImported={() => navigate('/app/academic')} />
       </section>
 
       <section className="import-manual-card">
@@ -104,6 +105,6 @@ export default function ImportResults() {
       .import-manual-card p{margin:0;color:var(--muted);font-size:12px;line-height:1.6}
       @media(max-width:850px){.import-choice-grid{grid-template-columns:1fr}.import-choice-card p{min-height:0}.import-manual-card{align-items:flex-start;flex-direction:column}.import-manual-card>.button{width:100%}}
     `}</style>
-  <ResultEditor open={manualOpen} onClose={() => setManualOpen(false)} onSaved={() => { setManualOpen(false); }} />
+  <ResultEditor open={manualOpen} onClose={() => setManualOpen(false)} onSaved={() => { setManualOpen(false); navigate('/app/academic'); }} />
   </>;
 }
