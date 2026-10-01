@@ -131,10 +131,10 @@ async function renderPdfPagesForOcr(file, onProgress) {
   const buffer = await file.arrayBuffer();
   const pdf = await pdfjs.getDocument({ data: buffer }).promise;
   const canvases = [];
-  const limit = Math.min(pdf.numPages, 6);
+  const limit = Math.min(pdf.numPages, 4);
   for (let pageNumber = 1; pageNumber <= limit; pageNumber += 1) {
     const page = await pdf.getPage(pageNumber);
-    const viewport = page.getViewport({ scale: 1.7 });
+    const viewport = page.getViewport({ scale: 1.35 });
     const canvas = document.createElement('canvas');
     canvas.width = viewport.width;
     canvas.height = viewport.height;
@@ -239,20 +239,7 @@ export default function UniportResultImporter({ context = {}, onImported }) {
   async function importResults() {
     if (!readyRows.length) return;
     await action.run(async () => {
-      for (const row of readyRows) {
-        await academicService.saveResult({
-          code: row.code.trim().toUpperCase(),
-          title: row.title.trim(),
-          credits: Number(row.credits),
-          grade: row.grade,
-          points: Number(row.points),
-          sessionId: row.sessionId,
-          semesterId: row.semesterId,
-          levelId: row.levelId,
-          attemptType: 'regular',
-          originalCourseCode: ''
-        });
-      }
+      await Promise.all(readyRows.map(row => academicService.saveResult({ code: row.code.trim().toUpperCase(), title: row.title.trim(), credits: Number(row.credits), grade: row.grade, points: Number(row.points), sessionId: row.sessionId, semesterId: row.semesterId, levelId: row.levelId, attemptType: 'regular', originalCourseCode: '' })));
       return readyRows.length;
     }, count => {
       setRows([]);
@@ -297,6 +284,16 @@ export default function UniportResultImporter({ context = {}, onImported }) {
         <td><Select value={row.semesterId} onChange={e => updateRow(row.id, 'semesterId', e.target.value)}><option value="">Select</option>{FALLBACK_SEMESTERS.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</Select></td>
         <td><Badge tone={getStatus(row, duplicates) === 'Ready' ? 'success' : getStatus(row, duplicates) === 'Already saved' ? 'neutral' : 'danger'}>{getStatus(row, duplicates)}</Badge></td>
       </tr>)}</tbody></table></div>
+      <div className="uniport-mobile-review">{rows.map(row => <article className="uniport-mobile-row" key={row.id}>
+        <div className="uniport-mobile-field"><span>Course</span><Input value={row.code} onChange={e => updateRow(row.id, 'code', e.target.value.toUpperCase())} /></div>
+        <div className="uniport-mobile-field"><span>Units</span><Input value={row.credits} type="number" min="1" max="6" onChange={e => updateRow(row.id, 'credits', e.target.value)} /></div>
+        <div className="uniport-mobile-field wide"><span>Title</span><Input value={row.title} onChange={e => updateRow(row.id, 'title', e.target.value)} /></div>
+        <div className="uniport-mobile-field"><span>Grade</span><Select value={row.grade} onChange={e => updateGrade(row.id, e.target.value)}><option value="">Select</option>{GRADE_OPTIONS.map(item => <option key={item.grade} value={item.grade}>{item.grade}</option>)}</Select></div>
+        <div className="uniport-mobile-field"><span>Level</span><Select value={row.levelId} onChange={e => updateRow(row.id, 'levelId', e.target.value)}><option value="">Select</option>{FALLBACK_LEVELS.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</Select></div>
+        <div className="uniport-mobile-field"><span>Session</span><Select value={row.sessionId} onChange={e => updateRow(row.id, 'sessionId', e.target.value)}><option value="">Select</option>{FALLBACK_SESSIONS.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</Select></div>
+        <div className="uniport-mobile-field"><span>Semester</span><Select value={row.semesterId} onChange={e => updateRow(row.id, 'semesterId', e.target.value)}><option value="">Select</option>{FALLBACK_SEMESTERS.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</Select></div>
+        <div className="uniport-mobile-field wide"><span>Status</span><Badge tone={getStatus(row, duplicates) === 'Ready' ? 'success' : getStatus(row, duplicates) === 'Already saved' ? 'neutral' : 'danger'}>{getStatus(row, duplicates)}</Badge></div>
+      </article>)}</div>
       <p className="field-hint">CGPA+ will not overwrite an existing matching result. Correct any highlighted information before importing.</p>
       <ActionError error={action.error} />
       <div className="modal-actions"><Button variant="outline" onClick={clear}>Clear</Button><Button icon="check" onClick={importResults} busy={action.busy} disabled={!readyRows.length}>Import {readyRows.length} result{readyRows.length === 1 ? '' : 's'}</Button></div>
@@ -316,9 +313,19 @@ export default function UniportResultImporter({ context = {}, onImported }) {
       .uniport-review-summary span{font-size:10px;color:var(--muted)}
       .uniport-import-review .table-scroll{max-height:540px;margin-top:16px}
       .uniport-import-review table{min-width:980px}
+      .uniport-mobile-review{display:none}
       .uniport-import-review .input,.uniport-import-review .select{min-width:100px;font-size:11px;padding:8px}
       .uniport-import-review td:nth-child(2) .input{min-width:190px}
       @media(max-width:720px){
+        .uniport-importer{padding:18px 14px}
+        .uniport-import-review .table-scroll{display:none}
+        .uniport-mobile-review{display:grid;gap:12px;margin-top:16px}
+        .uniport-mobile-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px;border:1px solid var(--border);border-radius:14px;background:var(--soft)}
+        .uniport-mobile-field{min-width:0}.uniport-mobile-field.wide{grid-column:1/-1}
+        .uniport-mobile-field span{display:block;font-size:10px;color:var(--muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em}
+        .uniport-mobile-field input,.uniport-mobile-field select{width:100%;min-width:0}
+        .uniport-mobile-field .input,.uniport-mobile-field .select{font-size:13px;padding:9px}
+
         .uniport-import-head{flex-direction:column}
         .uniport-import-head>.button{width:100%}
         .uniport-review-summary{grid-template-columns:1fr}
