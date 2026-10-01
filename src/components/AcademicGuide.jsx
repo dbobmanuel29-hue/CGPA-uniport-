@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react';
 import { useSession } from '../state/session';
 
 const STEPS = [
-  { n: '01', title: 'Create a semester', text: 'Open Academic record, choose Add semester, then enter the academic session, semester and level. Save it before adding courses.' },
-  { n: '02', title: 'Add your courses', text: 'Inside the semester, add each course using its course code, title and credit unit. Use the official details from your result or course registration.' },
-  { n: '03', title: 'Enter your grades', text: 'Select the grade you received for each course, review the credit units and save the result. CGPA+ calculates the semester GPA and updates your CGPA.' },
-  { n: '04', title: 'Check your progress', text: 'Use Analytics, Target CGPA and Graduation planning to understand your performance and what you need next.' },
+  { n: '01', title: '1. Create the semester', text: 'Go to Academic record → Add semester. Choose the academic session (for example, 2025/2026), semester (1st or 2nd) and your level (for example, 300 Level). Save it.' },
+  { n: '02', title: '2. Add each course', text: 'Inside that semester, add every course you registered. Enter the course code (CSC301), course title, and credit unit (for example, 3 units). Use your official school records.' },
+  { n: '03', title: '3. Enter your grades', text: 'Select the grade you actually received (A, B, C, D, E or F), check the credit unit, then save. CGPA+ uses the grade and units to calculate your GPA and CGPA.' },
+  { n: '04', title: '4. Review your progress', text: 'After saving, check your GPA, CGPA and academic progress. Target CGPA, Analytics and Graduation planning help you understand where you stand.' },
 ];
 
 const EXCEL_ROWS = [
@@ -64,16 +64,16 @@ export default function AcademicGuide() {
         <header className="academic-guide__header">
           <div>
             <span className="eyebrow">CGPA+ ACADEMIC GUIDE</span>
-            <h2 id="academic-guide-title">Add your results with confidence.</h2>
-            <p>Whether this is your first semester on CGPA+ or you already have a record, here is the quickest way to keep everything accurate.</p>
+            <h2 id="academic-guide-title">Your first results? Start here.</h2>
+            <p>New to CGPA+ or adding another semester? Follow these simple steps. You can enter results one by one or import many courses from a spreadsheet.</p>
           </div>
           <button className="academic-guide__close" onClick={() => setOpen(false)} aria-label="Close guide">×</button>
         </header>
 
         <div className="academic-guide__tabs" role="tablist" aria-label="Academic guide sections">
-          <button className={tab === 'manual' ? 'is-active' : ''} onClick={() => setTab('manual')}>Add manually</button>
-          <button className={tab === 'excel' ? 'is-active' : ''} onClick={() => setTab('excel')}>Excel format</button>
-          <button className={tab === 'tips' ? 'is-active' : ''} onClick={() => setTab('tips')}>Smart tips</button>
+          <button type="button" aria-selected={tab === 'manual'} className={tab === 'manual' ? 'is-active' : ''} onClick={() => setTab('manual')}>Manual entry</button>
+          <button type="button" aria-selected={tab === 'excel'} className={tab === 'excel' ? 'is-active' : ''} onClick={() => setTab('excel')}>Excel / CSV</button>
+          <button type="button" aria-selected={tab === 'tips'} className={tab === 'tips' ? 'is-active' : ''} onClick={() => setTab('tips')}>Important tips</button>
         </div>
 
         {tab === 'manual' && <div className="academic-guide__body">
@@ -81,37 +81,37 @@ export default function AcademicGuide() {
             {STEPS.map(step => <article className="academic-guide__step" key={step.n}><span>{step.n}</span><div><h3>{step.title}</h3><p>{step.text}</p></div></article>)}
           </div>
           <div className="academic-guide__actions">
-            <a href="#/app/academic" onClick={() => setOpen(false)}>Open Academic record →</a>
-            <a href="#/app/import" onClick={() => setOpen(false)}>Import with Excel →</a>
+            <a href="#/app/academic" onClick={() => setOpen(false)}>Start adding results →</a>
+            <a href="#/app/import" onClick={() => setOpen(false)}>Import a spreadsheet →</a>
           </div>
         </div>}
 
         {tab === 'excel' && <div className="academic-guide__body">
           <div className="academic-guide__excel-intro">
-            <div><strong>Use one course per row.</strong><p>Keep the first row as the column headings. Do not merge cells or add decorative rows above the headings.</p></div>
+            <div><strong>Put one course on each row.</strong><p>Your first row must contain the headings below. Do not merge cells, leave blank rows in the middle, or put a title above the headings.</p></div>
             <button onClick={downloadTemplate}>Download template</button>
           </div>
           <div className="academic-guide__table-wrap">
             <table><thead><tr>{EXCEL_ROWS[0].map(cell => <th key={cell}>{cell}</th>)}</tr></thead><tbody>{EXCEL_ROWS.slice(1).map((row, index) => <tr key={index}>{row.map((cell, cellIndex) => <td key={cellIndex}>{cell}</td>)}</tr>)}</tbody></table>
           </div>
           <ul className="academic-guide__rules">
-            <li><b>Semester:</b> use a clear value such as 1st Semester or 2nd Semester.</li>
-            <li><b>Course Code:</b> enter the official code, e.g. CSC301.</li>
-            <li><b>Course Title:</b> enter the course name.</li>
-            <li><b>Credit Unit:</b> use the actual credit unit as a number.</li>
-            <li><b>Grade:</b> use the grade you received, such as A, B, C, D, E or F.</li>
+            <li><b>Semester:</b> use 1st Semester or 2nd Semester.</li>
+            <li><b>Course Code:</b> use the official code, e.g. CSC301.</li>
+            <li><b>Course Title:</b> use the name shown on your school record.</li>
+            <li><b>Credit Unit:</b> enter the number, e.g. 1, 2, 3 or 4.</li>
+            <li><b>Grade:</b> enter the grade you received: A, B, C, D, E or F.</li>
           </ul>
-          <a className="academic-guide__primary-link" href="#/app/import" onClick={() => setOpen(false)}>Go to Excel import →</a>
+          <a className="academic-guide__primary-link" href="#/app/import" onClick={() => setOpen(false)}>Open Excel import →</a>
         </div>}
 
         {tab === 'tips' && <div className="academic-guide__body">
           <div className="academic-guide__tip-grid">
-            <article><span>01</span><h3>Keep your record complete</h3><p>Add every course from a semester. Missing courses can make your GPA and CGPA summary inaccurate.</p></article>
-            <article><span>02</span><h3>Check before saving</h3><p>Confirm course code, credit unit and grade against your official result before you save.</p></article>
-            <article><span>03</span><h3>Use the planning tools</h3><p>Target CGPA, Projection, Analytics and Graduation planning can help you understand your academic progress.</p></article>
-            <article><span>04</span><h3>Import carefully</h3><p>For Excel, fix validation errors before confirming the import. A clean spreadsheet makes bulk entry much easier.</p></article>
+            <article><span>01</span><h3>Don't leave courses out</h3><p>Add every course that belongs to that semester. Leaving out a course can make your academic summary different from your official result.</p></article>
+            <article><span>02</span><h3>Match your official result</h3><p>Before saving, compare the course code, credit unit and grade with your result sheet or school record.</p></article>
+            <article><span>03</span><h3>Use your progress tools</h3><p>After your results are saved, use Analytics, Target CGPA, Projection and Graduation planning to understand your progress.</p></article>
+            <article><span>04</span><h3>Fix spreadsheet errors first</h3><p>If the importer reports an error, correct that row in your spreadsheet and upload it again before confirming.</p></article>
           </div>
-          <div className="academic-guide__note"><strong>Premium workflow</strong><span>Enter once, then use Analytics, reports and planning tools to turn your academic record into a clear progress dashboard.</span></div>
+          <div className="academic-guide__note"><strong>A simple workflow</strong><span>Add or import your results → review them → check your GPA/CGPA → use the planning tools when you need them.</span></div>
         </div>}
       </section>
     </div>}
