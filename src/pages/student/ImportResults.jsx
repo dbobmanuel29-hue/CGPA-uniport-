@@ -1,82 +1,106 @@
 import { useEffect, useState } from 'react';
 import { PageHeader, Button, Notice, Panel } from '../../components/ui';
 import ExcelResultImporter from '../../components/ExcelResultImporter';
+import UniportResultImporter from '../../components/UniportResultImporter';
 import { academicService } from '../../services/academic-service';
 
 export default function ImportResults() {
   const [profile, setProfile] = useState(null);
   useEffect(() => { academicService.getProfile().then(setProfile).catch(() => {}); }, []);
 
+  const context = {
+    levelId: profile?.currentLevelId || '',
+    sessionId: profile?.currentSessionId || '',
+    semesterId: profile?.currentSemesterId || ''
+  };
+
   return <>
     <PageHeader
       eyebrow="ACADEMIC TOOLS"
-      title="Import results from Excel."
-      description="Already have your academic results saved in a spreadsheet? Bring them into CGPA+ without typing every course again."
-      actions={<Button variant="outline" href="#/app/academic" endIcon="arrow">Back to academic record</Button>}
+      title="Bring your results into CGPA+."
+      description="Choose the easiest way to add your academic history. UniPort result documents, Excel/CSV files and manual entry can all work together."
+      actions={<>
+        <Button variant="outline" href="#/app/academic" endIcon="arrow">Back to academic record</Button>
+        <Button href="#/app/academic?add=1" icon="plus">Add manually</Button>
+      </>}
     />
 
     <div className="import-results-page">
-      <section className="import-hero-card">
-        <div className="import-hero-icon" aria-hidden="true">↥</div>
-        <div>
-          <span className="eyebrow">QUICK IMPORT</span>
-          <h2>Move your academic history into CGPA+</h2>
-          <p>Upload an Excel file, review what CGPA+ understands, then save only the results you want. Your existing academic record is not replaced.</p>
-        </div>
+      <section className="import-choice-grid" aria-label="Result import options">
+        <a className="import-choice-card is-primary" href="#uniport-result">
+          <span className="import-choice-number">01</span>
+          <strong>UniPort result</strong>
+          <p>Upload an ARIS result PDF or a clear screenshot. CGPA+ reads the document on your device and prepares the courses for review.</p>
+          <span className="import-choice-link">Upload result →</span>
+        </a>
+        <a className="import-choice-card" href="#excel-result">
+          <span className="import-choice-number">02</span>
+          <strong>Excel / CSV</strong>
+          <p>Already have a spreadsheet? Keep using the existing importer to map columns, preview rows and add them safely.</p>
+          <span className="import-choice-link">Import spreadsheet →</span>
+        </a>
+        <a className="import-choice-card" href="#/app/academic?add=1">
+          <span className="import-choice-number">03</span>
+          <strong>Manual entry</strong>
+          <p>Add one course at a time when you only need to enter a result or correct something after an import.</p>
+          <span className="import-choice-link">Add a result →</span>
+        </a>
       </section>
 
-      <div className="import-info-grid">
-        <Panel title="How it works" description="A simple three-step process.">
-          <div className="import-steps">
-            <div><span>1</span><div><strong>Upload</strong><p>Select your .xlsx or .xls spreadsheet.</p></div></div>
-            <div><span>2</span><div><strong>Review</strong><p>CGPA+ detects course, credit, grade, level, session and semester information.</p></div></div>
-            <div><span>3</span><div><strong>Save</strong><p>Confirm the preview and add the results to your academic record.</p></div></div>
+      <section id="uniport-result" className="import-section">
+        <div className="import-section-heading">
+          <div>
+            <span className="eyebrow">OPTION 01</span>
+            <h2>Import from your UniPort result</h2>
+            <p>Use an ARIS result PDF, downloaded academic document, or a clear screenshot. The file stays on your device while CGPA+ reads it.</p>
           </div>
-        </Panel>
+        </div>
+        <UniportResultImporter context={context} />
+      </section>
 
-        <Panel title="What happens to my existing results?" description="Your manually entered results are safe.">
-          <div className="import-safe-list">
-            <div><span>✓</span> Existing results stay in your account.</div>
-            <div><span>✓</span> New spreadsheet results are added.</div>
-            <div><span>✓</span> Matching course + session + semester entries are skipped as duplicates.</div>
-            <div><span>✓</span> Nothing is deleted just because you import an Excel file.</div>
+      <section id="excel-result" className="import-section">
+        <div className="import-section-heading">
+          <div>
+            <span className="eyebrow">OPTION 02</span>
+            <h2>Import from Excel / CSV</h2>
+            <p>For students who already have their results in a spreadsheet. This existing workflow is unchanged.</p>
           </div>
-        </Panel>
-      </div>
+        </div>
+        <ExcelResultImporter context={context} onImported={() => {}} />
+      </section>
+
+      <section className="import-manual-card">
+        <div>
+          <span className="eyebrow">OPTION 03</span>
+          <h2>Need to add just one result?</h2>
+          <p>Use the existing manual result form. It is still the simplest option for individual courses and corrections.</p>
+        </div>
+        <Button href="#/app/academic?add=1" icon="plus">Add result manually</Button>
+      </section>
 
       <Notice tone="info" icon="info">
-        <strong>Tip:</strong> If your spreadsheet contains results from different semesters or sessions, include the <strong>Level</strong>, <strong>Session</strong>, and <strong>Semester</strong> columns so each result can be placed correctly.
+        <strong>Important:</strong> CGPA+ is an independent academic planning tool, not the University of Port Harcourt portal. Imported results are only saved after you review the detected information and confirm the import.
       </Notice>
-
-      <section className="import-upload-section" aria-label="Excel result importer">
-        <ExcelResultImporter
-          context={{
-            levelId: profile?.currentLevelId || '',
-            sessionId: profile?.currentSessionId || '',
-            semesterId: profile?.currentSemesterId || ''
-          }}
-          onImported={() => {}}
-        />
-      </section>
     </div>
 
     <style>{`
-      .import-results-page{display:grid;gap:18px;padding-bottom:32px}
-      .import-hero-card{display:flex;gap:18px;align-items:flex-start;padding:24px;border:1px solid var(--border,#e5e7eb);border-radius:20px;background:linear-gradient(135deg,rgba(59,130,246,.09),rgba(99,102,241,.035));}
-      .import-hero-icon{width:52px;height:52px;flex:0 0 52px;border-radius:16px;display:grid;place-items:center;background:var(--text,#111827);color:#fff;font-size:27px;font-weight:700;line-height:1}
-      .import-hero-card h2{margin:5px 0 7px;font-size:22px;letter-spacing:-.02em}
-      .import-hero-card p{margin:0;max-width:720px;line-height:1.65;color:var(--muted,#6b7280)}
-      .import-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-      .import-steps{display:grid;gap:17px;padding:4px 0}
-      .import-steps>div{display:flex;gap:12px;align-items:flex-start}
-      .import-steps>div>span{width:28px;height:28px;flex:0 0 28px;border-radius:50%;display:grid;place-items:center;background:var(--surface-2,#f3f4f6);font-weight:700}
-      .import-steps strong{display:block;margin-bottom:3px}
-      .import-steps p{margin:0;color:var(--muted,#6b7280);font-size:14px;line-height:1.5}
-      .import-safe-list{display:grid;gap:14px;padding:4px 0;color:var(--muted,#6b7280);font-size:14px;line-height:1.5}
-      .import-safe-list div{display:flex;gap:9px;align-items:flex-start}
-      .import-safe-list span{font-weight:800;color:var(--success,#15803d)}
-      .import-upload-section{min-width:0}
-      @media(max-width:760px){.import-info-grid{grid-template-columns:1fr}.import-hero-card{padding:20px}.import-hero-icon{width:46px;height:46px;flex-basis:46px}.import-hero-card h2{font-size:19px}}
+      .import-results-page{display:grid;gap:24px;padding-bottom:32px}
+      .import-choice-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+      .import-choice-card{display:flex;flex-direction:column;gap:9px;padding:21px;border:1px solid var(--border);border-radius:16px;background:var(--surface);color:inherit;text-decoration:none;transition:transform .18s,border-color .18s,background .18s}
+      .import-choice-card:hover{transform:translateY(-2px);border-color:var(--green);background:var(--soft)}
+      .import-choice-card.is-primary{border-color:var(--green);background:var(--green-light)}
+      .import-choice-number{font-size:10px;letter-spacing:.12em;color:var(--muted);font-weight:700}
+      .import-choice-card strong{font-size:17px}
+      .import-choice-card p{font-size:12px;line-height:1.7;color:var(--muted);margin:0;min-height:62px}
+      .import-choice-link{font-size:11px;color:var(--green);font-weight:700;margin-top:auto}
+      .import-section{scroll-margin-top:24px}
+      .import-section-heading{margin-bottom:12px}
+      .import-section-heading h2{font-size:23px;margin:5px 0 7px}
+      .import-section-heading p{max-width:760px;color:var(--muted);line-height:1.7;margin:0;font-size:12px}
+      .import-manual-card{display:flex;align-items:center;justify-content:space-between;gap:22px;padding:22px;border:1px solid var(--border);border-radius:16px;background:var(--surface)}
+      .import-manual-card h2{font-size:19px;margin:5px 0 7px}
+      .import-manual-card p{margin:0;color:var(--muted);font-size:12px;line-height:1.6}
+      @media(max-width:850px){.import-choice-grid{grid-template-columns:1fr}.import-choice-card p{min-height:0}.import-manual-card{align-items:flex-start;flex-direction:column}.import-manual-card>.button{width:100%}}
     `}</style>
   </>;
 }
