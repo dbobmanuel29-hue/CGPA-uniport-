@@ -71,6 +71,22 @@ function Router() {
   const path = useHashRoute(); const session = useSession(); const route = ROUTES[path]; const publicCalculator = PUBLIC_CALCULATORS.has(path); const studentProtected = path === '/app' || (path.startsWith('/app/') && !publicCalculator); const restricted = studentProtected || path.startsWith('/admin') || path === '/onboarding';
   useEffect(() => { if (session.status === 'loading') return; if (restricted) { if (!session.user) { navigate('/login'); return; } if (path.startsWith('/admin') && session.user.role !== 'admin') navigate('/app'); } }, [path, session.user, session.status, restricted]);
   useRevealObserver();
+
+  // Warm the most-used workspace chunks after authentication so navigation feels immediate.
+  useEffect(() => {
+    if (session.status !== 'connected' || !session.user) return;
+    const warm = () => {
+      if (session.user.role === 'admin') {
+        import('./pages/admin/Dashboard');
+        import('./pages/admin/Students');
+      } else {
+        import('./pages/student/Dashboard');
+        import('./pages/student/Academic');
+      }
+    };
+    const idle = window.requestIdleCallback ? window.requestIdleCallback(warm, { timeout: 1200 }) : window.setTimeout(warm, 350);
+    return () => window.requestIdleCallback ? window.cancelIdleCallback(idle) : window.clearTimeout(idle);
+  }, [session.status, session.user?.id, session.user?.role]);
   useEffect(() => { document.title = path === '/' ? 'CGPA+ UniPort | GPA & CGPA Calculator for UniPort Students' : `${route?.title || 'Page not found'} | CGPA+ UniPort`; }, [path, route]);
   if (restricted && session.status === 'loading') return <div className="route-loading"><Skeleton label="Checking your session..." rows={4} /></div>;
   const page = <PageBoundary key={path}><Suspense fallback={<div className="route-loading"><Skeleton label="Loading your next page..." rows={5} /></div>}>{route?.element || <div className="not-found"><span className="eyebrow">404 / PAGE NOT FOUND</span><h1 tabIndex={-1} data-page-heading>Let's get you back on track.</h1><p>The page you requested does not exist in CGPA+ UniPort.</p><div className="form-actions"><Button href="#/" endIcon="arrow">Return home</Button><Button variant="outline" href="#/support">Visit help center</Button></div></div>}</Suspense></PageBoundary>;
