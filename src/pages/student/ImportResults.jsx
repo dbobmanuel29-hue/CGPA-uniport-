@@ -3,10 +3,11 @@ import { PageHeader, Button, Notice, Panel } from '../../components/ui';
 import ExcelResultImporter from '../../components/ExcelResultImporter';
 import UniportResultImporter from '../../components/UniportResultImporter';
 import { academicService } from '../../services/academic-service';
-import { navigate } from '../../utils/routing';
+import { ResultEditor } from './Academic';
 
 export default function ImportResults() {
   const [profile, setProfile] = useState(null);
+  const [manualOpen, setManualOpen] = useState(false);
   useEffect(() => { academicService.getProfile().then(setProfile).catch(() => {}); }, []);
 
   const context = {
@@ -22,7 +23,7 @@ export default function ImportResults() {
       description="Choose the easiest way to add your academic history. UniPort result documents, Excel files and manual entry can all work together."
       actions={<>
         <Button variant="outline" href="#/app/academic" endIcon="arrow">Back to academic record</Button>
-        <Button href="#/app/academic?add=1" icon="plus">Add manually</Button>
+        <Button icon="plus" onClick={() => setManualOpen(true)}>Add manually</Button>
       </>}
     />
 
@@ -40,7 +41,7 @@ export default function ImportResults() {
           <p>Already have a spreadsheet? Keep using the existing importer to map columns, preview rows and add them safely.</p>
           <span className="import-choice-link">Import spreadsheet →</span>
         </button>
-        <button type="button" className="import-choice-card" onClick={() => navigate('/app/academic?add=1')}>
+        <button type="button" className="import-choice-card" onClick={() => setManualOpen(true)}>
           <span className="import-choice-number">03</span>
           <strong>Manual entry</strong>
           <p>Add one course at a time when you only need to enter a result or correct something after an import.</p>
@@ -76,7 +77,7 @@ export default function ImportResults() {
           <h2>Need to add just one result?</h2>
           <p>Use the existing manual result form. It is still the simplest option for individual courses and corrections.</p>
         </div>
-        <Button href="#/app/academic?add=1" icon="plus">Add result manually</Button>
+        <Button icon="plus" onClick={() => setManualOpen(true)}>Add result manually</Button>
       </section>
 
       <Notice tone="info" icon="info">
@@ -103,5 +104,6 @@ export default function ImportResults() {
       .import-manual-card p{margin:0;color:var(--muted);font-size:12px;line-height:1.6}
       @media(max-width:850px){.import-choice-grid{grid-template-columns:1fr}.import-choice-card p{min-height:0}.import-manual-card{align-items:flex-start;flex-direction:column}.import-manual-card>.button{width:100%}}
     `}</style>
+  <ResultEditor open={manualOpen} onClose={() => setManualOpen(false)} onSaved={() => { setManualOpen(false); }} />
   </>;
 }
