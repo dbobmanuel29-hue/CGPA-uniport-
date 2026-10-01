@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { PageHeader, Button, Badge, Tabs, AsyncSelect, Stat } from '../../components/ui';
-import { ConnectionState, Modal, useAction } from '../../components/feedback';
+import { ConnectionState, ConfirmModal, Modal, useAction } from '../../components/feedback';
 import { DataTable, SearchBox, StatusFilter } from '../../components/table';
 import { LineChart } from '../../components/charts';
 import { adminService } from '../../services/admin-service';
@@ -43,16 +43,21 @@ export default function Students() {
   const [status, setStatus] = useState('');
   const [faculty, setFaculty] = useState('');
   const [student, setStudent] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [tab, setTab] = useState('profile');
   const resource = useResource(() => adminService.getStudents({ status, facultyId: faculty }), [status, faculty]);
   const action = useAction();
 
   const removeStudent = row => {
-    const name = row.fullName || row.email || 'this student';
-    if (!window.confirm(`Delete ${name}? This permanently removes the student's UniPort profile, results, support history and other stored account data. This cannot be undone.`)) return;
-    action.run(
-      () => adminService.deleteStudent(row.id),
-      () => { setStudent(null); resource.refresh(); }
+    setDeleteTarget(row);
+  };
+
+  const confirmDeleteStudent = async () => {
+    if (!deleteTarget) return;
+    await action.run(
+      () => adminService.deleteStudent(deleteTarget.id),
+      () => { setStudent(null); setDeleteTarget(null); resource.refresh(); },
+      'Student account deleted.'
     );
   };
 
@@ -75,5 +80,20 @@ export default function Students() {
     <div className="admin-student-filters"><AsyncSelect label="Faculty" loader={() => adminService.getFaculties()} required={false} value={faculty} onChange={e => setFaculty(e.target.value)} placeholder="All faculties" /></div>
     <DataTable columns={columns} resource={resource} search={search} onView={row => { setTab('profile'); setStudent(row.id); }} emptyTitle="No students loaded." emptyDescription="Student accounts and their academic information come from the authorized admin service." />
     <StudentDetail studentId={student} initialTab={tab} onClose={() => setStudent(null)} />
+    <ConfirmModal
+      open={!!deleteTarget}
+      onClose={() => { if (!action.busy) setDeleteTarget(null); }}
+      title="Delete student account?"
+      description={`You are about to permanently remove ${deleteTarget?.fullName || deleteTarget?.email || 'this student'} and the account data connected to it.`}
+      actionLabel="Delete student"
+      dangerous
+      onConfirm={confirmDeleteStudent}
+    >
+      <div className="confirm-target">
+        <strong>{deleteTarget?.fullName || 'Student account'}</strong>
+        <span>{deleteTarget?.email || 'No email available'}</span>
+      </div>
+      <p className="confirm-detail">This removes the student's UniPort profile, academic results, support history and other stored account data through the authorized admin service.</p>
+    </ConfirmModal>
   </>;
 }
