@@ -47,8 +47,8 @@ export default function Auth({ mode = 'login' }) {
     if (register && form.password !== form.confirm) return setValidation('Your passwords do not match.');
     if (reset) return action.run(() => authService.sendPasswordReset({ email: form.email }), () => setSent(true));
     const operation = register
-      ? authService.register({ fullName: form.fullName.trim(), email: form.email.trim(), password: form.password, acceptedTerms: form.terms })
-      : authService.login({ email: form.email.trim(), password: form.password, remember: form.remember });
+      ? () => authService.register({ fullName: form.fullName.trim(), email: form.email.trim(), password: form.password, acceptedTerms: form.terms })
+      : () => authService.login({ email: form.email.trim(), password: form.password, remember: form.remember });
     action.run(operation, authenticated, undefined, error => {
       if (error?.code === 'auth/user-not-found' || error?.code === 'auth/invalid-credential') {
         setValidation('No CGPA+ account was found with these sign-in details. Don’t have an account yet? Create an account first.');
