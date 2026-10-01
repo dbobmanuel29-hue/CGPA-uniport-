@@ -19,7 +19,7 @@ export default function ImportResults() {
     <PageHeader
       eyebrow="ACADEMIC TOOLS"
       title="Bring your results into CGPA+."
-      description="Choose the easiest way to add your academic history. UniPort result documents, Excel/CSV files and manual entry can all work together."
+      description="Choose the easiest way to add your academic history. UniPort result documents, Excel files and manual entry can all work together."
       actions={<>
         <Button variant="outline" href="#/app/academic" endIcon="arrow">Back to academic record</Button>
         <Button href="#/app/academic?add=1" icon="plus">Add manually</Button>
