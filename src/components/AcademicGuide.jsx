@@ -65,14 +65,14 @@ export default function AcademicGuide() {
           <div>
             <span className="eyebrow">CGPA+ ACADEMIC GUIDE</span>
             <h2 id="academic-guide-title">Your first results? Start here.</h2>
-            <p>New to CGPA+ or adding another semester? Follow these simple steps. You can enter results one by one or import many courses from a spreadsheet.</p>
+            <p>New to CGPA+ or adding another semester? Follow these simple steps. You can enter results one by one, import an Excel spreadsheet, or upload your UniPort result.</p>
           </div>
           <button className="academic-guide__close" onClick={() => setOpen(false)} aria-label="Close guide">×</button>
         </header>
 
         <div className="academic-guide__tabs" role="tablist" aria-label="Academic guide sections">
           <button type="button" aria-selected={tab === 'manual'} className={tab === 'manual' ? 'is-active' : ''} onClick={() => setTab('manual')}>Manual entry</button>
-          <button type="button" aria-selected={tab === 'excel'} className={tab === 'excel' ? 'is-active' : ''} onClick={() => setTab('excel')}>Excel / CSV</button>
+          <button type="button" aria-selected={tab === 'uniport'} className={tab === 'uniport' ? 'is-active' : ''} onClick={() => setTab('uniport')}>UniPort result</button><button type="button" aria-selected={tab === 'excel'} className={tab === 'excel' ? 'is-active' : ''} onClick={() => setTab('excel')}>Excel</button>
           <button type="button" aria-selected={tab === 'tips'} className={tab === 'tips' ? 'is-active' : ''} onClick={() => setTab('tips')}>Important tips</button>
         </div>
 
@@ -83,6 +83,19 @@ export default function AcademicGuide() {
           <div className="academic-guide__actions">
             <a href="#/app/academic" onClick={() => setOpen(false)}>Start adding results →</a>
             <a href="#/app/import" onClick={() => setOpen(false)}>Import a spreadsheet →</a>
+          </div>
+        </div>}
+
+        {tab === 'uniport' && <div className="academic-guide__body">
+          <div className="academic-guide__excel-intro">
+            <div><strong>Already have your UniPort result?</strong><p>Download your ARIS result as a PDF or take a clear screenshot. CGPA+ can read the document on your device, detect the course details and let you correct anything before saving.</p></div>
+            <a href="#/app/import" onClick={() => setOpen(false)}>Open UniPort importer →</a>
+          </div>
+          <div className="academic-guide__steps">
+            <article className="academic-guide__step"><span>01</span><div><h3>Get your result</h3><p>Open your UniPort/ARIS academic result and use the available PDF/download option, or take a clear screenshot of the result table.</p></div></article>
+            <article className="academic-guide__step"><span>02</span><div><h3>Upload it to CGPA+</h3><p>Choose the UniPort result option and upload the PDF or screenshot. The document is processed in your browser.</p></div></article>
+            <article className="academic-guide__step"><span>03</span><div><h3>Review before saving</h3><p>Check the detected course code, title, credit units, grade, level, session and semester. Correct anything that needs attention.</p></div></article>
+            <article className="academic-guide__step"><span>04</span><div><h3>Import your results</h3><p>Only the results you confirm are saved to your academic record. Excel and manual entry remain available whenever you prefer them.</p></div></article>
           </div>
         </div>}
 
