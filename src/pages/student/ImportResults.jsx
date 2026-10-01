@@ -35,7 +35,7 @@ export default function ImportResults() {
         </a>
         <a className="import-choice-card" href="#excel-result">
           <span className="import-choice-number">02</span>
-          <strong>Excel / CSV</strong>
+          <strong>Excel</strong>
           <p>Already have a spreadsheet? Keep using the existing importer to map columns, preview rows and add them safely.</p>
           <span className="import-choice-link">Import spreadsheet →</span>
         </a>
@@ -62,7 +62,7 @@ export default function ImportResults() {
         <div className="import-section-heading">
           <div>
             <span className="eyebrow">OPTION 02</span>
-            <h2>Import from Excel / CSV</h2>
+            <h2>Import from Excel</h2>
             <p>For students who already have their results in a spreadsheet. This existing workflow is unchanged.</p>
           </div>
         </div>
