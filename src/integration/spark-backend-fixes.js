@@ -1,5 +1,6 @@
 import { configureServices } from '../services/adapter.js';
 import { getFirebase } from './firebase-client.js';
+import { FALLBACK_FACULTIES, FALLBACK_DEPARTMENTS, FALLBACK_PROGRAMMES, FALLBACK_LEVELS } from '../data/uniport-catalogue.js';
 
 const OWNER_ADMIN_UID = 'lmUB6IdhuaOlHjzkqBEyoNkE7PH2';
 const USER_DATA_COLLECTIONS = ['academicProfiles', 'results', 'notifications', 'supportTickets', 'reports', 'dataExportRequests', 'publicSupportRequests'];
@@ -28,6 +29,14 @@ async function deleteDocs(db, collection, uid) {
   }
 }
 function rows(snapshot) { return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })); }
+function fallbackMap(items) { return new Map(items.map(row => [row.id, row.name || row.title || row.label || ''])); }
+
+const FALLBACK_MAPS = {
+  faculties: fallbackMap(FALLBACK_FACULTIES),
+  departments: fallbackMap(FALLBACK_DEPARTMENTS),
+  programmes: fallbackMap(FALLBACK_PROGRAMMES),
+  levels: fallbackMap(FALLBACK_LEVELS),
+};
 
 async function sendNotification(payload) {
   const { db, auth } = await requireAdmin();
@@ -92,6 +101,7 @@ export async function registerSparkBackendFixes() {
           activity: [],
         };
       },
+
       async getStudents(filters = {}) {
         const { db, auth } = await requireAdmin();
         const [usersSnap, profilesSnap, facultiesSnap, departmentsSnap, programmesSnap, levelsSnap] = await Promise.all([
@@ -109,10 +119,6 @@ export async function registerSparkBackendFixes() {
         const programmeMap = names(programmesSnap);
         const levelMap = names(levelsSnap);
 
-        // Firebase Authentication is the authoritative source for registered accounts.
-        // Firestore /users is profile data and may be missing if registration was
-        // interrupted after Auth creation. This prevents registered students from
-        // disappearing from the admin directory.
         const token = await auth.currentUser.getIdToken();
         const response = await fetch('/api/admin/list-users', {
           method: 'GET',
@@ -141,10 +147,10 @@ export async function registerSparkBackendFixes() {
               accountStatus: user.accountStatus || authUser.accountStatus || 'active',
               role: user.role || authUser.role || 'student',
               createdAt: user.createdAt || authUser.createdAt || null,
-              facultyName: profile.facultyName || facultyMap.get(profile.facultyId) || '',
-              departmentName: profile.departmentName || departmentMap.get(profile.departmentId) || '',
-              programmeName: profile.programmeName || programmeMap.get(profile.programmeId) || '',
-              levelName: profile.currentLevelName || levelMap.get(profile.currentLevelId) || '',
+              facultyName: profile.facultyName || facultyMap.get(profile.facultyId) || FALLBACK_MAPS.faculties.get(profile.facultyId) || '',
+              departmentName: profile.departmentName || departmentMap.get(profile.departmentId) || FALLBACK_MAPS.departments.get(profile.departmentId) || '',
+              programmeName: profile.programmeName || programmeMap.get(profile.programmeId) || FALLBACK_MAPS.programmes.get(profile.programmeId) || '',
+              levelName: profile.currentLevelName || levelMap.get(profile.currentLevelId) || FALLBACK_MAPS.levels.get(profile.currentLevelId) || '',
               facultyId: profile.facultyId || '',
               departmentId: profile.departmentId || '',
               programmeId: profile.programmeId || '',
