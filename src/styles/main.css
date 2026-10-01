@@ -61,3 +61,11 @@ button,input,select,textarea{font-size:clamp(15px,.25vw + 14px,17px)}
 @media(min-width:901px){body{font-size:16px;line-height:1.6}.container{padding-left:clamp(28px,3.2vw,44px);padding-right:clamp(28px,3.2vw,44px)}.academic-guide-backdrop{padding:20px}.academic-guide{width:min(860px,100%);max-height:min(700px,calc(100vh - 40px));border-radius:20px}.academic-guide__header{padding:26px 28px 20px}.academic-guide__body{padding:22px 28px 28px}.academic-guide__tabs{padding:11px 28px}}
 .academic-guide__tabs button{min-height:42px}.academic-guide__step p,.academic-guide__tip-grid p{max-width:62ch}
 @media(max-width:700px){.academic-guide-trigger{bottom:max(14px,env(safe-area-inset-bottom))}.academic-guide__header{gap:12px}.academic-guide__header h2{font-size:27px}.academic-guide__header p{font-size:14px}.academic-guide__tabs{scrollbar-width:none}.academic-guide__tabs::-webkit-scrollbar{display:none}.academic-guide__step{grid-template-columns:30px 1fr;padding:15px}.academic-guide__step h3,.academic-guide__tip-grid h3{font-size:16px}.academic-guide__step p,.academic-guide__tip-grid p{font-size:13.5px}.academic-guide__actions a,.academic-guide__primary-link{width:100%;justify-content:center}.academic-guide__table-wrap table{font-size:12px}}
+
+/* Contextual academic form guidance */
+.academic-form-guide{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;margin-bottom:18px;border:1px solid var(--border);border-radius:13px;background:var(--soft)}
+.academic-form-guide:before{content:'i';display:grid;place-items:center;flex:0 0 23px;width:23px;height:23px;border-radius:50%;background:var(--green);color:var(--surface);font:800 12px/1 'Manrope',sans-serif}
+.academic-form-guide strong{display:block;font-size:14px;margin-bottom:3px}
+.academic-form-guide span{display:block;color:var(--muted);font-size:13px;line-height:1.55}
+.academic-form-summary{padding:12px 14px;margin-top:4px;border-left:3px solid var(--green);background:var(--green-light);color:var(--muted);font-size:13px;line-height:1.55}
+.academic-form-summary strong{color:var(--text)}
