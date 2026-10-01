@@ -106,3 +106,14 @@
   .float-soft,.pulse-soft,.value-animate{animation:none}
   .read-progress{display:none}
 }
+
+
+/* Premium interaction layer: subtle, responsive, and intentionally lightweight. */
+html{scroll-behavior:smooth}
+button,a,.input,select,textarea{transition:color .16s ease,background-color .16s ease,border-color .16s ease,box-shadow .16s ease,transform .16s ease,opacity .16s ease}
+.button:not(:disabled):hover{transform:translateY(-1px)}
+.button:not(:disabled):active{transform:translateY(0)}
+.panel,.stat,.workspace-card,.import-choice-card,.import-manual-card,.notice,.auth-card{transition:box-shadow .22s ease,border-color .22s ease,transform .22s ease}
+.panel:hover,.stat:hover,.workspace-card:hover{box-shadow:0 12px 34px rgba(25,58,50,.07)}
+.route-loading{min-height:55vh;display:grid;align-content:center}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}button,a,.input,select,textarea,.button,.panel,.stat,.workspace-card,.import-choice-card,.import-manual-card,.notice,.auth-card{transition:none}.button:not(:disabled):hover,.button:not(:disabled):active{transform:none}.panel:hover,.stat:hover,.workspace-card:hover{box-shadow:none}}
