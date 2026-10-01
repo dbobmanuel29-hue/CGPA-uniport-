@@ -112,5 +112,6 @@ button,input,select,textarea{font-size:clamp(15px,.25vw + 14px,17px)}
 @media(max-width:560px){.auth-inline-message{align-items:flex-start;flex-direction:column;gap:6px}.auth-inline-message a{white-space:normal}}
 
 
-/* Keep the floating guide clear of the workspace bottom navigation on tablet/desktop layouts. */
-@media (min-width:701px) and (max-width:1199px){.academic-guide-trigger{bottom:88px}}
+/* Keep the floating guide above the workspace bottom navigation at every viewport size. */
+@media (max-width:1199px){.academic-guide-trigger{bottom:84px}}
+@media (min-width:1200px){.academic-guide-trigger{bottom:28px}}
