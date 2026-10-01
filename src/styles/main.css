@@ -110,3 +110,7 @@ button,input,select,textarea{font-size:clamp(15px,.25vw + 14px,17px)}
 .auth-inline-message a{flex:0 0 auto;color:var(--green);font-weight:750;white-space:nowrap}
 .auth-inline-message a:hover{text-decoration:underline;text-underline-offset:3px}
 @media(max-width:560px){.auth-inline-message{align-items:flex-start;flex-direction:column;gap:6px}.auth-inline-message a{white-space:normal}}
+
+
+/* Keep the floating guide clear of the workspace bottom navigation on tablet/desktop layouts. */
+@media (min-width:701px) and (max-width:1199px){.academic-guide-trigger{bottom:88px}}
