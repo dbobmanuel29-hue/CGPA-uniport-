@@ -1,5 +1,6 @@
 import { createService } from './adapter.js';
 import { getFirebase } from '../integration/firebase-client.js';
+import { FALLBACK_FACULTIES } from '../data/uniport-catalogue.js';
 
 const OWNER_ADMIN_UID = 'lmUB6IdhuaOlHjzkqBEyoNkE7PH2';
 
@@ -289,6 +290,17 @@ export const adminService = Object.freeze({
       await writeAudit({ action: 'deleteStudent', resource: 'student', resourceId: studentId, status: 'failed', description: error?.message || 'Student account deletion failed.', user });
       throw error;
     }
+  },
+
+  async getFaculties(filters = {}) {
+    const { db } = await requireAdmin();
+    let faculties = rows(await db.collection('faculties').get());
+    if (filters?.status) faculties = faculties.filter(row => row.status === filters.status);
+    if (!faculties.length) {
+      faculties = FALLBACK_FACULTIES.map(row => ({ ...row }));
+      if (filters?.status) faculties = faculties.filter(row => row.status === filters.status);
+    }
+    return faculties;
   },
 
   async sendNotification(payload) {
