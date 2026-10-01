@@ -3,6 +3,7 @@ import { PageHeader, Button, Notice, Panel } from '../../components/ui';
 import ExcelResultImporter from '../../components/ExcelResultImporter';
 import UniportResultImporter from '../../components/UniportResultImporter';
 import { academicService } from '../../services/academic-service';
+import { navigate } from '../../utils/routing';
 
 export default function ImportResults() {
   const [profile, setProfile] = useState(null);
@@ -27,24 +28,24 @@ export default function ImportResults() {
 
     <div className="import-results-page">
       <section className="import-choice-grid" aria-label="Result import options">
-        <a className="import-choice-card is-primary" href="#uniport-result">
+        <button type="button" className="import-choice-card is-primary" onClick={() => document.getElementById('uniport-result')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>
           <span className="import-choice-number">01</span>
           <strong>UniPort result</strong>
           <p>Upload an ARIS result PDF or a clear screenshot. CGPA+ reads the document on your device and prepares the courses for review.</p>
           <span className="import-choice-link">Upload result →</span>
-        </a>
-        <a className="import-choice-card" href="#excel-result">
+        </button>
+        <button type="button" className="import-choice-card" onClick={() => document.getElementById('excel-result')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>
           <span className="import-choice-number">02</span>
           <strong>Excel</strong>
           <p>Already have a spreadsheet? Keep using the existing importer to map columns, preview rows and add them safely.</p>
           <span className="import-choice-link">Import spreadsheet →</span>
-        </a>
-        <a className="import-choice-card" href="#/app/academic?add=1">
+        </button>
+        <button type="button" className="import-choice-card" onClick={() => navigate('/app/academic?add=1')}>
           <span className="import-choice-number">03</span>
           <strong>Manual entry</strong>
           <p>Add one course at a time when you only need to enter a result or correct something after an import.</p>
           <span className="import-choice-link">Add a result →</span>
-        </a>
+        </button>
       </section>
 
       <section id="uniport-result" className="import-section">
@@ -86,7 +87,7 @@ export default function ImportResults() {
     <style>{`
       .import-results-page{display:grid;gap:24px;padding-bottom:32px}
       .import-choice-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-      .import-choice-card{display:flex;flex-direction:column;gap:9px;padding:21px;border:1px solid var(--border);border-radius:16px;background:var(--surface);color:inherit;text-decoration:none;transition:transform .18s,border-color .18s,background .18s}
+      .import-choice-card{display:flex;width:100%;text-align:left;font:inherit;flex-direction:column;gap:9px;padding:21px;border:1px solid var(--border);border-radius:16px;background:var(--surface);color:inherit;text-decoration:none;transition:transform .18s,border-color .18s,background .18s}
       .import-choice-card:hover{transform:translateY(-2px);border-color:var(--green);background:var(--soft)}
       .import-choice-card.is-primary{border-color:var(--green);background:var(--green-light)}
       .import-choice-number{font-size:10px;letter-spacing:.12em;color:var(--muted);font-weight:700}
