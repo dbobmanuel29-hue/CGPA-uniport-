@@ -79,7 +79,7 @@ export default function Students() {
     <StudentDetail studentId={student} initialTab={tab} onClose={() => setStudent(null)} />
     <ConfirmModal
       open={!!deleteTarget}
-      onClose={() => { if (!action.busy) setDeleteTarget(null); }}
+      onClose={() => setDeleteTarget(null)}
       title="Delete student account?"
       description={`You are about to permanently remove ${deleteTarget?.fullName || deleteTarget?.email || 'this student'} and the account data connected to it.`}
       actionLabel="Delete student"
