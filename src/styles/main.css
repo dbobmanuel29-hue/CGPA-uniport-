@@ -15,3 +15,45 @@ button,input,select,textarea{font-size:clamp(15px,.25vw + 14px,17px)}
 @media(min-width:900px){h1{font-size:clamp(42px,3.7vw,64px)}h2{font-size:clamp(32px,2.7vw,48px)}h3{font-size:clamp(21px,1.35vw,28px)}}
 @media(max-width:899px){h1{font-size:clamp(34px,7vw,50px)}h2{font-size:clamp(28px,5.5vw,40px)}h3{font-size:clamp(20px,4vw,26px)}}
 @media(max-width:640px){body{font-size:16px;line-height:1.62}.container{padding-left:18px;padding-right:18px}}
+
+/* Academic onboarding guide */
+.academic-guide-trigger{position:fixed;right:24px;bottom:24px;z-index:70;display:inline-flex;align-items:center;gap:9px;padding:10px 15px;border:1px solid var(--border);border-radius:999px;background:var(--surface);color:var(--text);font:650 13px/1 'DM Sans',sans-serif;box-shadow:0 12px 34px rgba(22,44,35,.12);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+.academic-guide-trigger:hover{transform:translateY(-2px);box-shadow:0 16px 40px rgba(22,44,35,.16);border-color:color-mix(in srgb,var(--green) 30%,var(--border))}
+.academic-guide-trigger__icon{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--green);color:var(--surface);font-size:13px;font-weight:800}
+.academic-guide-backdrop{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:24px;background:rgba(13,22,18,.48);backdrop-filter:blur(8px);animation:academic-fade .2s ease both}
+.academic-guide{width:min(920px,100%);max-height:min(760px,calc(100vh - 48px));overflow:auto;background:var(--surface);border:1px solid var(--border);border-radius:24px;box-shadow:0 30px 90px rgba(0,0,0,.24);animation:academic-up .28s cubic-bezier(.2,.8,.2,1) both}
+.academic-guide__header{display:flex;justify-content:space-between;gap:24px;padding:30px 32px 24px;border-bottom:1px solid var(--border)}
+.academic-guide__header .eyebrow{margin-bottom:8px;font-size:10px}
+.academic-guide__header h2{font-size:clamp(28px,3vw,42px);line-height:1.08;margin-bottom:10px}
+.academic-guide__header p{max-width:680px;color:var(--muted);line-height:1.65;font-size:15px}
+.academic-guide__close{width:38px;height:38px;flex:0 0 38px;border:1px solid var(--border);border-radius:50%;background:transparent;font-size:25px;line-height:1}
+.academic-guide__tabs{display:flex;gap:6px;padding:14px 32px;border-bottom:1px solid var(--border);overflow:auto}
+.academic-guide__tabs button{border:0;background:transparent;padding:10px 14px;border-radius:10px;color:var(--muted);font-weight:700;white-space:nowrap}
+.academic-guide__tabs button.is-active{background:var(--soft);color:var(--green)}
+.academic-guide__body{padding:26px 32px 32px}
+.academic-guide__steps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.academic-guide__step{display:grid;grid-template-columns:38px 1fr;gap:14px;padding:18px;border:1px solid var(--border);border-radius:16px;background:var(--bg)}
+.academic-guide__step>span,.academic-guide__tip-grid article>span{font:750 11px/1 'Manrope',sans-serif;color:var(--green);letter-spacing:.08em}
+.academic-guide__step h3,.academic-guide__tip-grid h3{font-size:17px;margin-bottom:6px}
+.academic-guide__step p,.academic-guide__tip-grid p{color:var(--muted);font-size:14px;line-height:1.65}
+.academic-guide__actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+.academic-guide__actions a,.academic-guide__primary-link{display:inline-flex;align-items:center;padding:12px 15px;border-radius:11px;background:var(--green);color:var(--surface);font-weight:700;font-size:13px}
+.academic-guide__actions a:last-child{background:var(--soft);color:var(--green)}
+.academic-guide__excel-intro{display:flex;justify-content:space-between;gap:20px;align-items:center;margin-bottom:18px}
+.academic-guide__excel-intro strong{font-size:17px}.academic-guide__excel-intro p{color:var(--muted);font-size:14px;margin-top:4px}
+.academic-guide__excel-intro button{border:1px solid var(--border);background:var(--surface);border-radius:10px;padding:10px 13px;font-weight:700;white-space:nowrap}
+.academic-guide__table-wrap{overflow:auto;border:1px solid var(--border);border-radius:14px}
+.academic-guide__table-wrap table{width:100%;min-width:650px;border-collapse:collapse;font-size:13px}
+.academic-guide__table-wrap th,.academic-guide__table-wrap td{text-align:left;padding:12px 13px;border-bottom:1px solid var(--border)}
+.academic-guide__table-wrap th{background:var(--soft);font-weight:750;color:var(--green)}
+.academic-guide__table-wrap tr:last-child td{border-bottom:0}
+.academic-guide__rules{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px 22px;margin:18px 0;padding-left:18px;color:var(--muted);font-size:13px;line-height:1.55}
+.academic-guide__rules b{color:var(--text)}
+.academic-guide__primary-link{margin-top:4px}
+.academic-guide__tip-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.academic-guide__tip-grid article{padding:20px;border:1px solid var(--border);border-radius:16px;background:var(--bg)}
+.academic-guide__tip-grid article>span{display:block;margin-bottom:15px}
+.academic-guide__note{display:flex;gap:14px;align-items:flex-start;margin-top:18px;padding:17px;border-radius:14px;background:var(--green-light);color:var(--text)}
+.academic-guide__note strong{white-space:nowrap;color:var(--green)}.academic-guide__note span{font-size:13px;line-height:1.6;color:var(--muted)}
+@keyframes academic-fade{from{opacity:0}to{opacity:1}}@keyframes academic-up{from{opacity:0;transform:translateY(14px) scale(.99)}to{opacity:1;transform:none}}
+@media(max-width:700px){.academic-guide-trigger{right:14px;bottom:14px;padding:9px 12px}.academic-guide-trigger__text{display:none}.academic-guide-backdrop{padding:10px}.academic-guide{max-height:calc(100vh - 20px);border-radius:18px}.academic-guide__header{padding:22px 20px 18px}.academic-guide__body{padding:20px}.academic-guide__tabs{padding:10px 20px}.academic-guide__steps,.academic-guide__tip-grid,.academic-guide__rules{grid-template-columns:1fr}.academic-guide__excel-intro{align-items:flex-start;flex-direction:column}.academic-guide__excel-intro button{width:100%}}
