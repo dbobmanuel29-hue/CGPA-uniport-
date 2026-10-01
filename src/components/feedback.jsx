@@ -24,7 +24,7 @@ export function useAction() {
   const [error, setError] = useState(null);
   const running = useRef(false);
   const toast = useToast();
-  const run = async (task, onSuccess, message) => {
+  const run = async (task, onSuccess, message, onError) => {
     if (running.current) return;
     running.current = true; setBusy(true); setError(null);
     try {
@@ -33,6 +33,7 @@ export function useAction() {
       if (message) toast.success(message);
       return result;
     } catch (err) {
+      if (onError) onError(err);
       setError(err);
       if (err?.code === 'BACKEND_NOT_CONNECTED') toast.info(friendlyError(err));
       else toast.error(friendlyError(err));
