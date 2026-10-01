@@ -5,6 +5,7 @@ import { Button, Notice } from '../../components/ui';
 import { AcademicFields, emptyAcademic } from '../../components/AcademicFields';
 import { ResultEditor } from '../student/Academic';
 import ExcelResultImporter from '../../components/ExcelResultImporter';
+import UniportResultImporter from '../../components/UniportResultImporter';
 import { academicService } from '../../services/academic-service';
 import { navigate } from '../../utils/routing';
 import { UNIVERSITY } from '../../data/uniport';
@@ -111,44 +112,27 @@ function History({ form, onBack }) {
         className="history-choice-grid"
         style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: '12px', margin: '20px 0' }}
       >
-        <button
-          type="button"
-          onClick={() => setImporting(true)}
-          style={{ textAlign: 'left', padding: '18px', borderRadius: '14px', border: '1px solid var(--border,rgba(255,255,255,.12))', background: 'var(--panel,rgba(255,255,255,.04))', color: 'inherit', cursor: 'pointer' }}
-        >
-          <strong style={{ display: 'block', marginBottom: '6px' }}>📊 Import from Excel</strong>
-          <span style={{ opacity: .72, lineHeight: 1.5 }}>
-            Best if you already keep your results in an Excel spreadsheet. Upload it,
-            review the detected courses and grades, then save.
-          </span>
+        <button type="button" onClick={() => setImporting('uniport')} style={{ textAlign: 'left', padding: '18px', borderRadius: '14px', border: '1px solid var(--green)', background: 'var(--green-light)', color: 'inherit', cursor: 'pointer' }}>
+          <strong style={{ display: 'block', marginBottom: '6px' }}>Import from UniPort</strong>
+          <span style={{ opacity: .72, lineHeight: 1.5 }}>Upload an ARIS result PDF or clear screenshot. CGPA+ will read it and let you review the detected courses before saving.</span>
         </button>
-        <button
-          type="button"
-          onClick={() => setEditor(true)}
-          style={{ textAlign: 'left', padding: '18px', borderRadius: '14px', border: '1px solid var(--border,rgba(255,255,255,.12))', background: 'var(--panel,rgba(255,255,255,.04))', color: 'inherit', cursor: 'pointer' }}
-        >
-          <strong style={{ display: 'block', marginBottom: '6px' }}>✍️ Enter manually</strong>
-          <span style={{ opacity: .72, lineHeight: 1.5 }}>
-            Add your courses and grades one at a time if you do not have a spreadsheet.
-          </span>
+        <button type="button" onClick={() => setImporting('excel')} style={{ textAlign: 'left', padding: '18px', borderRadius: '14px', border: '1px solid var(--border,rgba(255,255,255,.12))', background: 'var(--panel,rgba(255,255,255,.04))', color: 'inherit', cursor: 'pointer' }}>
+          <strong style={{ display: 'block', marginBottom: '6px' }}>Import from Excel</strong>
+          <span style={{ opacity: .72, lineHeight: 1.5 }}>Upload your spreadsheet, review the detected courses and grades, then save.</span>
+        </button>
+        <button type="button" onClick={() => { setImporting(false); setEditor(true); }} style={{ textAlign: 'left', padding: '18px', borderRadius: '14px', border: '1px solid var(--border,rgba(255,255,255,.12))', background: 'var(--panel,rgba(255,255,255,.04))', color: 'inherit', cursor: 'pointer' }}>
+          <strong style={{ display: 'block', marginBottom: '6px' }}>Enter manually</strong>
+          <span style={{ opacity: .72, lineHeight: 1.5 }}>Add your courses and grades one at a time if you do not have a spreadsheet.</span>
         </button>
       </div>
 
       {importing && (
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', marginBottom: '10px' }}>
-            <strong>Excel import</strong>
+            <strong>{importing === 'uniport' ? 'UniPort result import' : 'Excel import'}</strong>
             <Button type="button" variant="outline" onClick={() => setImporting(false)}>Hide</Button>
           </div>
-          <ExcelResultImporter
-            compact
-            context={{
-              levelId: form.currentLevelId || '',
-              sessionId: form.currentSessionId || '',
-              semesterId: form.currentSemesterId || '',
-            }}
-            onImported={() => load().catch(() => {})}
-          />
+          {importing === 'uniport' ? <UniportResultImporter context={{ levelId: form.currentLevelId || '', sessionId: form.currentSessionId || '', semesterId: form.currentSemesterId || '' }} onImported={() => load().catch(() => {})} /> : <ExcelResultImporter compact context={{ levelId: form.currentLevelId || '', sessionId: form.currentSessionId || '', semesterId: form.currentSemesterId || '' }} onImported={() => load().catch(() => {})} />}
         </div>
       )}
 
