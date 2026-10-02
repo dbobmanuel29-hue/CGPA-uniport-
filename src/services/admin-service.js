@@ -231,28 +231,48 @@ export const adminService = Object.freeze({
 
   async getDashboard() {
     const { db } = await requireAdmin();
-    const [usersSnap, ticketsSnap, authCount] = await Promise.all([
+    const [usersSnap, ticketsSnap, authCount, auditSnap] = await Promise.all([
       db.collection('users').get(),
       db.collection('supportTickets').get(),
       getAuthoritativeStudentCount(),
+      db.collection('auditLogs').orderBy('createdAt', 'desc').limit(12).get(),
     ]);
     const users = rows(usersSnap).filter(user => user.id !== OWNER_ADMIN_UID && (user.role || 'student') === 'student');
     const tickets = rows(ticketsSnap);
+    const authStudents = Array.isArray(authCount.authStudents) ? authCount.authStudents : [];
+    const profileById = new Map(users.map(user => [user.id, user]));
+    const students = authStudents.map(authUser => ({
+      ...(profileById.get(authUser.id) || {}),
+      ...authUser,
+      accountStatus: authUser.disabled ? 'disabled' : (profileById.get(authUser.id)?.accountStatus || 'active'),
+      statusReason: authUser.disabled
+        ? 'Account is disabled in Firebase Authentication.'
+        : (profileById.get(authUser.id)?.accountStatusReason || ''),
+    }));
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - 30);
-    const activeStudents = users.filter(user => user.accountStatus === 'active');
-    const newStudents = users.filter(user => {
-      const created = user.createdAt?.toDate ? user.createdAt.toDate() : new Date(user.createdAt || 0);
+    const activeStudents = students.filter(student => student.accountStatus === 'active');
+    const nonActiveStudents = students.filter(student => student.accountStatus !== 'active');
+    const newStudents = students.filter(student => {
+      const created = new Date(student.createdAt || 0);
       return !Number.isNaN(created.getTime()) && created >= cutoff;
     });
-    const recentStudents = [...users].sort((a, b) => String(b.createdAt?.toMillis?.() || b.createdAt || '').localeCompare(String(a.createdAt?.toMillis?.() || a.createdAt || ''))).slice(0, 8);
+    const verifiedAccounts = students.filter(student => student.emailVerified === true).length;
+    const recentStudents = [...students].sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)).slice(0, 8);
     const recentTickets = [...tickets].sort((a, b) => String(b.createdAt?.toMillis?.() || b.createdAt || '').localeCompare(String(a.createdAt?.toMillis?.() || a.createdAt || ''))).slice(0, 8);
+    const activity = rows(auditSnap).map(row => ({
+      ...row,
+      fullName: row.actorName || row.actorEmail || 'Administrator',
+      email: row.actorEmail || '',
+      action: row.description || row.action || 'System activity',
+    }));
     return {
       stats: {
         totalStudents: authCount.studentAuthCount,
         activeStudents: activeStudents.length,
+        nonActiveStudents: nonActiveStudents.length,
         newStudents: newStudents.length,
-        verifiedAccounts: users.filter(user => user.emailVerified === true).length,
+        verifiedAccounts,
         supportRequests: tickets.filter(ticket => ['open', 'in_progress'].includes(ticket.status)).length,
         firestoreStudentCount: authCount.firestoreStudentCount,
         matchedStudentCount: authCount.matchedStudentCount,
@@ -260,9 +280,10 @@ export const adminService = Object.freeze({
         authOnlyCount: authCount.authOnlyCount,
       },
       charts: { userGrowth: [], registrations: [], activeUsers: [] },
-      recentStudents, recentTickets, activity: []
+      recentStudents, recentTickets, activity,
+      students,
     };
-  },
+  }
 
   async getStudents(filters = {}) {
     const { db } = await requireAdmin();
