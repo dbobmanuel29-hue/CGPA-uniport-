@@ -10,10 +10,10 @@ const clean = value => normalize(value).toLowerCase().replace(/[_-]+/g, ' ');
 
 const levelFromText = value => {
   const raw = clean(value);
-  const numeric = raw.match(/(?:level|year|class)?\s*(100|200|300|400|500|600)(?:\s*level)?/i);
+  const numeric = raw.match(/\b(?:level|year|class)\s*(100|200|300|400|500|600)\s*(?:level|year|class)?\b/i);
   if (numeric) return `level-${numeric[1]}`;
-  const year = raw.match(/\b(?:year|level)\s*(1|2|3|4|5|6)\b/i);
-  return year ? `level-${Number(year[1]) * 100}` : '';
+  const short = raw.match(/\b(?:year|level)\s*(1|2|3|4|5|6)\b/i);
+  return short ? `level-${Number(short[1]) * 100}` : '';
 };
 
 const semesterFromText = value => {
@@ -77,8 +77,8 @@ function parseRows(text, fallbackContext, sourceName) {
     if (!title || !unit || !gradeSet.has(grade)) return null;
 
     const explicitSession = sessionIdFromText(combined);
-    const explicitLevel = levelFromText(combined);
-    const explicitSemester = semesterFromText(combined);
+    const explicitLevel = '';
+    const explicitSemester = '';
     const pointsAfterGrade = gradeIndex >= 0 ? Number(tokens[gradeIndex + 1]) : NaN;
     const points = Number.isFinite(pointsAfterGrade) && pointsAfterGrade >= 0 && pointsAfterGrade <= 5
       ? pointsAfterGrade
@@ -343,6 +343,19 @@ export default function UniportResultImporter({ context = {}, onImported }) {
     // Only the reviewed academic fields are saved.
   }
 
+  function removeSource(sourceName) {
+    setFiles(prev => prev.filter(file => file.name !== sourceName));
+    setPreviews(prev => {
+      const removed = prev.filter(item => item.file.name === sourceName);
+      removed.forEach(item => {
+        URL.revokeObjectURL(item.url);
+        previewUrlsRef.current = previewUrlsRef.current.filter(url => url !== item.url);
+      });
+      return prev.filter(item => item.file.name !== sourceName);
+    });
+    setRows(prev => prev.filter(row => row.sourceName !== sourceName));
+  }
+
   function clear() {
     previewUrlsRef.current.forEach(url => URL.revokeObjectURL(url));
     previewUrlsRef.current = [];
@@ -389,12 +402,15 @@ export default function UniportResultImporter({ context = {}, onImported }) {
           <strong>{files.length} source file{files.length === 1 ? '' : 's'}</strong>
           <span>Keep the original document visible while checking the detected values below.</span>
         </div>
-        <Button variant="outline" onClick={() => inputRef.current?.click()}>Add more files</Button>
+        <div className="uniport-source-actions"><Button variant="outline" onClick={() => inputRef.current?.click()}>Add more files</Button><Button variant="outline" onClick={clear}>Cancel upload</Button></div>
       </div>
       <div className="uniport-source-grid">
         {previews.map((item, index) => (
           <article className="uniport-source-card" key={item.url}>
-            <div className="uniport-source-label"><Badge>{item.file.name}</Badge><span>{index + 1}</span></div>
+            <div className="uniport-source-label">
+              <Badge>{item.file.name}</Badge>
+              <div className="uniport-source-meta"><span>{index + 1}</span><button type="button" className="uniport-source-remove" onClick={() => removeSource(item.file.name)} aria-label={`Remove ${item.file.name}`}>Remove</button></div>
+            </div>
             <div className="uniport-source-preview">
               {item.kind === 'pdf'
                 ? <iframe title={item.file.name} src={item.url} />
@@ -476,7 +492,11 @@ export default function UniportResultImporter({ context = {}, onImported }) {
       .uniport-source-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
       .uniport-source-card{min-width:0;border:1px solid var(--border);border-radius:12px;background:var(--surface);overflow:hidden}
       .uniport-source-label{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 10px;border-bottom:1px solid var(--border)}
-      .uniport-source-label>span{font-size:10px;color:var(--muted)}
+      .uniport-source-meta{display:flex;align-items:center;gap:8px}
+      .uniport-source-meta>span{font-size:10px;color:var(--muted)}
+      .uniport-source-remove{border:0;background:transparent;color:var(--muted);font:inherit;font-size:11px;cursor:pointer;padding:4px 2px}
+      .uniport-source-remove:hover{color:var(--danger,#b42318)}
+      .uniport-source-actions{display:flex;gap:8px;flex-wrap:wrap}
       .uniport-source-preview{height:280px;background:#eee;display:grid;place-items:center;overflow:hidden}
       .uniport-source-preview img{width:100%;height:100%;object-fit:contain}
       .uniport-source-preview iframe{width:100%;height:100%;border:0;background:#fff}
@@ -491,11 +511,17 @@ export default function UniportResultImporter({ context = {}, onImported }) {
       .uniport-import-review td:nth-child(2) .input{min-width:190px}
       .uniport-mobile-review{display:none}
       .uniport-mobile-source{grid-column:1/-1}
+      @media(max-width:1100px){
+        .uniport-importer{padding:20px}
+        .uniport-source-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+      }
       @media(max-width:720px){
-        .uniport-importer{padding:18px 14px}
+        .uniport-importer{padding:16px 12px}
+        .uniport-source-actions{width:100%;display:grid;grid-template-columns:1fr 1fr}
+        .uniport-source-actions .button{width:100%}
         .uniport-import-head{flex-direction:column}.uniport-import-head>.button{width:100%}
         .uniport-source-head{align-items:flex-start;flex-direction:column}.uniport-source-head>.button{width:100%}
-        .uniport-source-grid{grid-template-columns:1fr}.uniport-source-preview{height:360px}
+        .uniport-source-grid{grid-template-columns:1fr}.uniport-source-preview{height:min(68vh,520px)}
         .uniport-import-review .table-scroll{display:none}
         .uniport-mobile-review{display:grid;gap:12px;margin-top:16px}
         .uniport-mobile-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px;border:1px solid var(--border);border-radius:14px;background:var(--soft)}
