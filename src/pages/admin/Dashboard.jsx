@@ -27,7 +27,8 @@ export default function AdminDashboard() {
   const resource = useResource(() => adminService.getDashboard());
   const studentsResource = useResource(() => adminService.getStudents({}));
   const stats = resource.data?.stats || {};
-  const students = Array.isArray(studentsResource.data) ? studentsResource.data : studentsResource.data?.items || [];
+  const dashboardStudents = Array.isArray(resource.data?.students) ? resource.data.students : [];
+  const students = dashboardStudents.length ? dashboardStudents : (Array.isArray(studentsResource.data) ? studentsResource.data : studentsResource.data?.items || []);
   const months = useMemo(() => lastSixMonths(), []);
   const analytics = useMemo(() => {
     const registrations = months.map(month => students.filter(student => monthKey(student.createdAt) === month.key).length);
