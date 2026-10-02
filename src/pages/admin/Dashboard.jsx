@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { PageHeader, Stat, Panel, Button, Badge } from '../../components/ui';
-import { ConnectionState, Modal } from '../../components/feedback';
+import { ConnectionState } from '../../components/feedback';
 import { LineChart, BarChart } from '../../components/charts';
 import { Icon } from '../../components/Icon';
 import { adminService } from '../../services/admin-service';
