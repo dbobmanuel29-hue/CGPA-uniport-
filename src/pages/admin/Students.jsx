@@ -67,13 +67,14 @@ export default function Students() {
     { key: 'levelName', label: 'Level' },
     { key: 'cgpa', label: 'CGPA', render: v => number(v) },
     { key: 'accountStatus', label: 'Status', render: v => <Badge tone={v === 'active' ? 'success' : v === 'suspended' ? 'danger' : 'neutral'}>{titleCase(v) || '--'}</Badge> },
+    { key: 'statusReason', label: 'Why not active', render: (v, row) => row.accountStatus === 'active' ? <span className="muted">—</span> : <span>{v || 'No reason recorded.'}</span> },
     { key: 'academic', label: 'Academic profile', render: (_, row) => <Button variant="ghost" className="button-small" onClick={() => { setTab('academic'); setStudent(row.id); }}>View academic</Button> },
     { key: 'delete', label: 'Delete', render: (_, row) => <Button variant="ghost" className="button-small student-delete-button" onClick={() => removeStudent(row)}>Delete</Button> },
   ];
 
   return <>
     <PageHeader eyebrow="STUDENTS AT THE CENTER" title="The student directory." description="Find an account, review academic context and understand a student's journey." actions={<Button variant="outline" icon="refresh" onClick={resource.refresh}>Refresh</Button>} />
-    <div className="table-toolbar"><SearchBox value={search} onChange={setSearch} placeholder="Search name, email or programme..." /><StatusFilter value={status} onChange={setStatus} options={['active', 'pending', 'suspended']} /></div>
+    <div className="table-toolbar"><SearchBox value={search} onChange={setSearch} placeholder="Search name, email or programme..." /><StatusFilter value={status} onChange={setStatus} options={[{ value: 'active', label: 'Active' }, { value: 'non-active', label: 'Non-active' }, { value: 'pending', label: 'Pending' }, { value: 'suspended', label: 'Suspended' }]} /></div>
     <div className="admin-student-filters"><AsyncSelect label="Faculty" loader={() => adminService.getFaculties()} required={false} value={faculty} onChange={e => setFaculty(e.target.value)} placeholder="All faculties" /></div>
     <DataTable columns={columns} resource={resource} search={search} onView={row => { setTab('profile'); setStudent(row.id); }} emptyTitle="No students loaded." emptyDescription="Student accounts and their academic information come from the authorized admin service." />
     <StudentDetail studentId={student} initialTab={tab} onClose={() => setStudent(null)} />
