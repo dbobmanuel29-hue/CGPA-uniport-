@@ -281,6 +281,7 @@ export const adminService = Object.freeze({
       },
       charts: { userGrowth: [], registrations: [], activeUsers: [] },
       recentStudents, recentTickets, activity,
+      supportRequests: tickets.filter(ticket => ['open', 'in_progress'].includes(ticket.status)).sort((a, b) => String(b.createdAt?.toMillis?.() || b.createdAt || '').localeCompare(String(a.createdAt?.toMillis?.() || a.createdAt || ''))),
       students,
     };
   },
