@@ -511,26 +511,64 @@ export default function UniportResultImporter({ context = {}, onImported }) {
       .uniport-import-review td:nth-child(2) .input{min-width:190px}
       .uniport-mobile-review{display:none}
       .uniport-mobile-source{grid-column:1/-1}
-      @media(max-width:1100px){
+      .uniport-import-review{min-width:0}
+      .uniport-import-review .modal-actions{display:flex;justify-content:flex-end;align-items:center;gap:10px;flex-wrap:wrap;margin-top:16px}
+      .uniport-import-review .modal-actions .button{min-width:150px}
+      @media(min-width:1200px){
+        .uniport-import-review table{min-width:0;width:100%;table-layout:fixed}
+        .uniport-import-review th,.uniport-import-review td{vertical-align:middle}
+        .uniport-import-review th:nth-child(1),.uniport-import-review td:nth-child(1){width:11%}
+        .uniport-import-review th:nth-child(2),.uniport-import-review td:nth-child(2){width:22%}
+        .uniport-import-review th:nth-child(3),.uniport-import-review td:nth-child(3){width:7%}
+        .uniport-import-review th:nth-child(4),.uniport-import-review td:nth-child(4){width:8%}
+        .uniport-import-review th:nth-child(5),.uniport-import-review td:nth-child(5){width:10%}
+        .uniport-import-review th:nth-child(6),.uniport-import-review td:nth-child(6){width:12%}
+        .uniport-import-review th:nth-child(7),.uniport-import-review td:nth-child(7){width:11%}
+        .uniport-import-review th:nth-child(8),.uniport-import-review td:nth-child(8){width:10%}
+        .uniport-import-review th:nth-child(9),.uniport-import-review td:nth-child(9){width:9%}
+        .uniport-import-review td:nth-child(2) .input{min-width:0}
+      }
+      @media(min-width:721px) and (max-width:1199px){
         .uniport-importer{padding:20px}
+        .uniport-import-head{align-items:center}
         .uniport-source-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+        .uniport-import-review .table-scroll{overflow-x:auto;max-width:100%;-webkit-overflow-scrolling:touch}
+        .uniport-import-review table{min-width:1120px}
+        .uniport-review-summary{grid-template-columns:repeat(3,minmax(0,1fr))}
+        .uniport-import-review .modal-actions{position:sticky;bottom:0;padding:12px 0 2px;background:linear-gradient(to bottom,transparent,var(--surface) 28%)}
       }
       @media(max-width:720px){
-        .uniport-importer{padding:16px 12px}
+        .uniport-importer{padding:16px 12px;overflow:hidden}
         .uniport-source-actions{width:100%;display:grid;grid-template-columns:1fr 1fr}
-        .uniport-source-actions .button{width:100%}
+        .uniport-source-actions .button{width:100%;min-width:0}
         .uniport-import-head{flex-direction:column}.uniport-import-head>.button{width:100%}
-        .uniport-source-head{align-items:flex-start;flex-direction:column}.uniport-source-head>.button{width:100%}
-        .uniport-source-grid{grid-template-columns:1fr}.uniport-source-preview{height:min(68vh,520px)}
+        .uniport-source-head{align-items:flex-start;flex-direction:column;width:100%}
+        .uniport-source-grid{grid-template-columns:1fr}
+        .uniport-source-preview{height:min(58vh,460px)}
         .uniport-import-review .table-scroll{display:none}
         .uniport-mobile-review{display:grid;gap:12px;margin-top:16px}
-        .uniport-mobile-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px;border:1px solid var(--border);border-radius:14px;background:var(--soft)}
-        .uniport-mobile-field{min-width:0}.uniport-mobile-field.wide{grid-column:1/-1}
+        .uniport-mobile-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;padding:14px;border:1px solid var(--border);border-radius:14px;background:var(--soft);min-width:0}
+        .uniport-mobile-field{min-width:0}
+        .uniport-mobile-field.wide{grid-column:1/-1}
         .uniport-mobile-field span{display:block;font-size:10px;color:var(--muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em}
-        .uniport-mobile-field input,.uniport-mobile-field select{width:100%;min-width:0}
+        .uniport-mobile-field input,.uniport-mobile-field select{width:100%;min-width:0;max-width:100%;box-sizing:border-box}
         .uniport-mobile-field .input,.uniport-mobile-field .select{font-size:13px;padding:9px}
-        .uniport-review-summary{grid-template-columns:1fr}.uniport-review-summary>div{border-right:0;border-bottom:1px solid var(--border)}
+        .uniport-mobile-source{min-width:0;overflow:hidden}
+        .uniport-mobile-source .badge{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .uniport-review-summary{grid-template-columns:1fr}
+        .uniport-review-summary>div{border-right:0;border-bottom:1px solid var(--border)}
         .uniport-review-summary>div:last-child{border-bottom:0}
+        .uniport-import-review .modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+        .uniport-import-review .modal-actions .button{width:100%;min-width:0}
+      }
+      @media(max-width:420px){
+        .uniport-importer{padding:14px 10px;gap:14px}
+        .uniport-source-actions{grid-template-columns:1fr}
+        .uniport-mobile-row{grid-template-columns:1fr}
+        .uniport-mobile-field.wide{grid-column:auto}
+        .uniport-import-review .modal-actions{grid-template-columns:1fr}
+        .uniport-review-title h3{font-size:17px}
+        .uniport-review-summary>div{padding:12px 14px}
       }
     `}</style>
   </section>;
