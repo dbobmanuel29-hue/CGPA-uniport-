@@ -84,10 +84,21 @@ export default async function handler(req, res) {
       .filter(user => !firestoreStudentIds.has(user.uid))
       .map(user => user.uid);
 
+    const authStudents = authStudentUsers.map(user => ({
+      id: user.uid,
+      email: user.email || '',
+      fullName: user.displayName || '',
+      disabled: !!user.disabled,
+      emailVerified: !!user.emailVerified,
+      createdAt: user.metadata?.creationTime || null,
+      accountStatus: user.disabled ? 'disabled' : 'active',
+    }));
+
     return json(res, 200, {
       ok: true,
       totalAuthUsers: authStudentUsers.length,
       studentAuthCount: authStudentUsers.length,
+      authStudents,
       firestoreStudentCount: firestoreStudents.length,
       matchedStudentCount: matchedStudentIds.length,
       firestoreOnlyCount: firestoreOnlyIds.length,
