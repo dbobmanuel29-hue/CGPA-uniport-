@@ -283,7 +283,7 @@ export const adminService = Object.freeze({
       recentStudents, recentTickets, activity,
       students,
     };
-  }
+  },
 
   async getStudents(filters = {}) {
     const { db } = await requireAdmin();
