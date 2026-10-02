@@ -10,8 +10,10 @@ const clean = value => normalize(value).toLowerCase().replace(/[_-]+/g, ' ');
 
 const levelFromText = value => {
   const raw = clean(value);
-  const match = raw.match(/(?:level|year|class)?\s*(100|200|300|400|500|600)(?:\s*level)?/i);
-  return match ? `level-${match[1]}` : '';
+  const numeric = raw.match(/(?:level|year|class)?\s*(100|200|300|400|500|600)(?:\s*level)?/i);
+  if (numeric) return `level-${numeric[1]}`;
+  const year = raw.match(/\b(?:year|level)\s*(1|2|3|4|5|6)\b/i);
+  return year ? `level-${Number(year[1]) * 100}` : '';
 };
 
 const semesterFromText = value => {
@@ -208,6 +210,7 @@ export default function UniportResultImporter({ context = {}, onImported }) {
   const action = useAction();
   const [files, setFiles] = useState([]);
   const [previews, setPreviews] = useState([]);
+  const previewUrlsRef = useRef([]);
   const [status, setStatus] = useState('');
   const [rows, setRows] = useState([]);
   const [existing, setExisting] = useState([]);
@@ -219,7 +222,10 @@ export default function UniportResultImporter({ context = {}, onImported }) {
   );
   const readyRows = rows.filter(row => getStatus(row, duplicates) === 'Ready');
 
-  useEffect(() => () => previews.forEach(item => URL.revokeObjectURL(item.url)), [previews]);
+  useEffect(() => () => {
+    previewUrlsRef.current.forEach(url => URL.revokeObjectURL(url));
+    previewUrlsRef.current = [];
+  }, []);
 
   function addPreviews(selectedFiles) {
     const next = selectedFiles.map(file => ({
@@ -227,6 +233,7 @@ export default function UniportResultImporter({ context = {}, onImported }) {
       url: URL.createObjectURL(file),
       kind: file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf') ? 'pdf' : 'image'
     }));
+    previewUrlsRef.current.push(...next.map(item => item.url));
     setPreviews(prev => [...prev, ...next]);
     setFiles(prev => [...prev, ...selectedFiles]);
     return next;
@@ -325,6 +332,8 @@ export default function UniportResultImporter({ context = {}, onImported }) {
     }, count => {
       setRows([]);
       setStatus(`${count} result${count === 1 ? '' : 's'} imported successfully.`);
+      previewUrlsRef.current.forEach(url => URL.revokeObjectURL(url));
+      previewUrlsRef.current = [];
       setFiles([]);
       setPreviews([]);
       onImported?.(count);
@@ -335,7 +344,8 @@ export default function UniportResultImporter({ context = {}, onImported }) {
   }
 
   function clear() {
-    previews.forEach(item => URL.revokeObjectURL(item.url));
+    previewUrlsRef.current.forEach(url => URL.revokeObjectURL(url));
+    previewUrlsRef.current = [];
     setRows([]);
     setFiles([]);
     setPreviews([]);
