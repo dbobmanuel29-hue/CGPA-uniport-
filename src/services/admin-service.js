@@ -59,6 +59,18 @@ const rows = snapshot => snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }
 const nameOf = row => row?.name || row?.title || row?.label || '';
 const serverTimestamp = () => window.firebase.firestore.FieldValue.serverTimestamp();
 
+const accountStatusReason = user => {
+  const status = String(user?.accountStatus || '').trim().toLowerCase();
+  if (user?.accountStatusReason) return String(user.accountStatusReason);
+  if (status === 'suspended') return 'Account has been suspended by an administrator.';
+  if (status === 'pending') return 'Account is pending activation or setup.';
+  if (status === 'inactive') return 'Account has been marked inactive.';
+  if (status === 'deletion_requested') return 'The student requested account deletion.';
+  if (status === 'blocked') return 'Account access has been blocked.';
+  if (!status) return 'No active account status is recorded for this account.';
+  return `Account status is “${status}”.`;
+};
+
 async function getAuthoritativeStudentCount() {
   const sdk = await getFirebase();
   if (!sdk?.auth?.currentUser) throw Object.assign(new Error('Authentication required.'), { code: 'unauthorized' });
@@ -265,9 +277,10 @@ export const adminService = Object.freeze({
     const levels = new Map(rows(levelsSnap).map(row => [row.id, nameOf(row)]));
     let result = users.map(user => {
       const profile = profiles.get(user.id) || {};
-      return { ...user, facultyName: profile.facultyName || faculties.get(profile.facultyId) || '', departmentName: profile.departmentName || departments.get(profile.departmentId) || '', programmeName: profile.programmeName || programmes.get(profile.programmeId) || '', levelName: profile.currentLevelName || levels.get(profile.currentLevelId) || '', facultyId: profile.facultyId || '', departmentId: profile.departmentId || '', programmeId: profile.programmeId || '', currentLevelId: profile.currentLevelId || '' };
+      return { ...user, facultyName: profile.facultyName || faculties.get(profile.facultyId) || '', departmentName: profile.departmentName || departments.get(profile.departmentId) || '', programmeName: profile.programmeName || programmes.get(profile.programmeId) || '', levelName: profile.currentLevelName || levels.get(profile.currentLevelId) || '', facultyId: profile.facultyId || '', departmentId: profile.departmentId || '', programmeId: profile.programmeId || '', currentLevelId: profile.currentLevelId || '', statusReason: accountStatusReason(user), isActive: user.accountStatus === 'active' };
     });
-    if (filters.status) result = result.filter(row => row.accountStatus === filters.status);
+    if (filters.status === 'non-active') result = result.filter(row => row.accountStatus !== 'active');
+    else if (filters.status) result = result.filter(row => row.accountStatus === filters.status);
     if (filters.facultyId) result = result.filter(row => row.facultyId === filters.facultyId);
     return result;
   },
