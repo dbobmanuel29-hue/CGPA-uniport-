@@ -91,7 +91,7 @@ export async function registerSparkBackendFixes() {
           stats: {
             totalStudents: users.length,
             activeStudents: users.filter(user => (user.accountStatus || 'active') === 'active').length,
-            newStudents: users.filter(user => { const time = user.createdAt?.toDate ? user.createdAt.toDate().getTime() : Date.parse(user.createdAt || ''); return time && Date.now() - time < 30 * 86400000; }).length,
+            newStudents: users.filter(user => { const time = user.createdAt?.toDate ? user.createdAt.toDate().getTime() : Date.parse(user.createdAt || ''); return time && Date.now() - time < 24 * 60 * 60 * 1000; }).length,
             verifiedAccounts: users.filter(user => user.emailVerified === true).length,
             supportRequests: tickets.filter(ticket => !['resolved', 'closed'].includes(ticket.status)).length,
           },
