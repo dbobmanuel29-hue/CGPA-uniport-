@@ -58,7 +58,7 @@ export default function AdminDashboard() {
   const newStudents = students.length ? students.filter(student => {
     const created = new Date(student.createdAt || 0);
     const cutoff = new Date();
-    cutoff.setDate(cutoff.getDate() - 30);
+    cutoff.setHours(cutoff.getHours() - 24);
     return !Number.isNaN(created.getTime()) && created >= cutoff;
   }).length : Number(stats.newStudents || 0);
   const labels = [['totalStudents', 'Total students', 'users', totalStudents], ['activeStudents', 'Active students', 'user', activeStudents], ['nonActiveStudents', 'Non-active', 'alert', nonActiveStudents.length], ['newStudents', 'New students', 'plus', newStudents], ['verifiedAccounts', 'Verified accounts', 'shield', stats.verifiedAccounts || 0], ['supportRequests', 'Support requests', 'message', stats.supportRequests || 0]];
@@ -67,7 +67,7 @@ export default function AdminDashboard() {
     totalStudents: { title: 'Total students', description: 'Every student account currently recognized by Firebase Authentication.', icon: 'users' },
     activeStudents: { title: 'Active students', description: 'Student accounts currently marked active.', icon: 'user' },
     nonActiveStudents: { title: 'Non-active students', description: 'Accounts that are disabled or have a non-active status.', icon: 'alert' },
-    newStudents: { title: 'New students', description: 'Student accounts created within the last 30 days.', icon: 'plus' },
+    newStudents: { title: 'New students', description: 'Student accounts created within the last 24 hours.', icon: 'plus' },
     verifiedAccounts: { title: 'Verified accounts', description: 'Student accounts whose Firebase Authentication email is verified.', icon: 'shield' },
     supportRequests: { title: 'Support requests', description: 'Support tickets currently open or in progress.', icon: 'message' },
   };
