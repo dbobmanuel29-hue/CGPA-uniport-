@@ -13,7 +13,6 @@ import LegalPage from './pages/public/LegalPage';
 import { CookiePolicy, ThankYou } from './pages/public/CompliancePages';
 import CookieConsent from './components/CookieConsent';
 import ExcelResultImporter from './components/ExcelResultImporter';
-import SiteLoader from './components/SiteLoader';
 import AcademicGuide from './components/AcademicGuide';
 
 const loadNamed = (loader, name) => lazy(() => loader().then(module => ({ default: module[name] })));
@@ -27,7 +26,7 @@ const HowItWorks = loadNamed(publicPages, 'HowItWorks');
 const PublicSupport = lazy(() => import('./pages/public/PublicSupport'));
 const Auth = lazy(() => import('./pages/auth/Auth'));
 const Onboarding = lazy(() => import('./pages/onboarding/Onboarding'));
-const Dashboard = lazy(() => import('./pages/student/Dashboard'));
+import Dashboard from './pages/student/Dashboard';
 const Academic = lazy(() => import('./pages/student/Academic'));
 const ImportResults = lazy(() => import('./pages/student/ImportResults'));
 const Gpa = loadNamed(calculators, 'GpaCalculator');
@@ -43,7 +42,7 @@ const Notifications = lazy(() => import('./pages/student/Notifications'));
 const Support = lazy(() => import('./pages/student/Support'));
 const Profile = lazy(() => import('./pages/student/Profile'));
 const Settings = lazy(() => import('./pages/student/Settings'));
-const AdminDashboard = lazy(() => import('./pages/admin/Dashboard'));
+import AdminDashboard from './pages/admin/Dashboard';
 const AdminStudents = lazy(() => import('./pages/admin/Students'));
 const AdminAcademic = lazy(() => import('./pages/admin/AcademicData'));
 const AcademicCrud = loadNamed(() => import('./pages/admin/AcademicData'), 'AcademicCrud');
@@ -95,4 +94,4 @@ function Router() {
   if (['/login', '/register', '/forgot-password', '/onboarding'].includes(path)) return page;
   return <PublicLayout path={path}><ReadingProgress />{page}{path === '/' && <CreatorShowcase />}</PublicLayout>;
 }
-export default function Application() { return <AppearanceProvider><ToastProvider><SessionProvider><CalculatorProvider><CookieConsent /><Router /><AcademicGuide /><SiteLoader /></CalculatorProvider></SessionProvider></ToastProvider></AppearanceProvider>; }
+export default function Application() { return <AppearanceProvider><ToastProvider><SessionProvider><CalculatorProvider><CookieConsent /><Router /><AcademicGuide /></CalculatorProvider></SessionProvider></ToastProvider></AppearanceProvider>; }
