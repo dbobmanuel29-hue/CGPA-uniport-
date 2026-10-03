@@ -115,3 +115,41 @@ button,input,select,textarea{font-size:clamp(15px,.25vw + 14px,17px)}
 /* Keep the floating guide above the workspace bottom navigation at every viewport size. */
 @media (max-width:1199px){.academic-guide-trigger{bottom:84px}}
 @media (min-width:1200px){.academic-guide-trigger{bottom:28px}}
+
+/* Premium dark-surface polish — keeps the interface layered and readable without changing layout. */
+[data-theme='dark'] body{background:var(--bg);color:var(--text)}
+[data-theme='dark'] .public-header,
+[data-theme='dark'] .workspace-header,
+[data-theme='dark'] .sidebar,
+[data-theme='dark'] .bottom-nav,
+[data-theme='dark'] .public-footer,
+[data-theme='dark'] .workspace-footer{background:rgba(16,27,22,.94);border-color:var(--border)}
+[data-theme='dark'] .panel,
+[data-theme='dark'] .stat,
+[data-theme='dark'] .auth-card,
+[data-theme='dark'] .workspace-card,
+[data-theme='dark'] .notice,
+[data-theme='dark'] .modal,
+[data-theme='dark'] .workspace-preview-note{background:var(--surface);border-color:var(--border)}
+[data-theme='dark'] .panel:hover,
+[data-theme='dark'] .stat:hover,
+[data-theme='dark'] .workspace-card:hover{box-shadow:0 14px 38px rgba(0,0,0,.20)}
+[data-theme='dark'] .input,
+[data-theme='dark'] select,
+[data-theme='dark'] textarea{background:#14221b;border-color:#34463d;color:var(--text)}
+[data-theme='dark'] .input:focus,
+[data-theme='dark'] select:focus,
+[data-theme='dark'] textarea:focus{box-shadow:0 0 0 3px rgba(163,205,171,.12)}
+[data-theme='dark'] .button-outline{background:transparent;border-color:#3a4c43}
+[data-theme='dark'] .button-outline:hover,
+[data-theme='dark'] .icon-button:hover{background:#24372d}
+[data-theme='dark'] .stat-accent{background:#244a3b;border-color:#315c4a}
+[data-theme='dark'] .workspace-search{background:#18271f;border-color:#35483e;color:var(--muted)}
+[data-theme='dark'] .workspace-search:hover{background:#21332a;border-color:#496055}
+[data-theme='dark'] .workspace-breadcrumb strong{color:var(--text)}
+[data-theme='dark'] .sidebar-nav a.active{background:#24382e;color:#c9e5cc}
+[data-theme='dark'] .sidebar-nav a:hover{background:#1f3028}
+[data-theme='dark'] .academic-guide,
+[data-theme='dark'] .academic-guide__step,
+[data-theme='dark'] .academic-guide__tip-grid article{background:var(--surface)}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important}}
