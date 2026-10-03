@@ -23,9 +23,25 @@ export function SessionProvider({ children }) {
     let active = true; let unsubscribe; const initialEpoch = epoch.current;
     (async () => {
       try {
-        await registerFirebaseBackend(); await registerAuthPersistenceFix(); await registerGoogleAuthFix(); await registerStudentBackendFixes(); await registerStudentResultFixes(); await registerStudentReadFix(); await registerAdminFixes(); await registerAdminDeleteFix(); await registerSparkBackendFixes(); await registerCloudinaryAdapter(); registerNotificationAdminFixes(); await registerFunctionalSettingsFixes();
+        // Firebase Auth is enough to resolve the initial signed-in UI. Start that
+        // lookup immediately while the remaining service adapters initialize in parallel.
+        await registerFirebaseBackend();
+        const currentUserPromise = authService.getCurrentUser();
+        await Promise.all([
+          registerAuthPersistenceFix(),
+          registerGoogleAuthFix(),
+          registerStudentBackendFixes(),
+          registerStudentResultFixes(),
+          registerStudentReadFix(),
+          registerAdminFixes(),
+          registerAdminDeleteFix(),
+          registerSparkBackendFixes(),
+          registerCloudinaryAdapter(),
+          registerFunctionalSettingsFixes()
+        ]);
+        registerNotificationAdminFixes();
         if (!active) return;
-        const value = await authService.getCurrentUser();
+        const value = await currentUserPromise;
         if (value?.accountStatus === 'deleted') { await authService.logout().catch(() => {}); if (active) { setUser(null); setStatus('connected'); } return; }
         if (active && epoch.current === initialEpoch) { setUser(value); setStatus('connected'); }
         const stop = await authService.subscribeToAuthState(next => { if (!active) return; if (next?.accountStatus === 'deleted') { authService.logout().catch(() => {}); epoch.current += 1; setUser(null); setStatus('connected'); return; } epoch.current += 1; setUser(next); setStatus('connected'); });
