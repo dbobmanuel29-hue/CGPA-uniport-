@@ -90,7 +90,7 @@ export function Skeleton({ label = 'Loading...', rows = 3 }) {
 }
 
 export function ConnectionState({ resource, title, emptyTitle = 'No information yet', emptyDescription, compact = false, children }) {
-  if (resource.status === 'loading') return <Skeleton label={`Loading ${title || 'information'}...`} />;
+  if (resource.status === 'loading' && resource.data == null) return <Skeleton label={`Loading ${title || 'information'}...`} />;
   if (resource.error) return <div className={`connection-state ${compact ? 'connection-compact' : ''}`} role="status"><span className="empty-icon"><Icon name={resource.error.code === 'BACKEND_NOT_CONNECTED' ? 'cloud' : 'alert'} size={22} /></span><div><h3>{resource.error.code === 'BACKEND_NOT_CONNECTED' ? 'Your data, connected when you are.' : `Unable to load ${title || 'information'}.`}</h3><p>{resource.error.code === 'BACKEND_NOT_CONNECTED' ? 'Backend integration is pending. No sample information is shown as your data.' : 'Please check your connection and try again.'}</p></div><button className="button button-small button-outline" onClick={resource.refresh}><Icon name="refresh" size={15} />Try again</button></div>;
   const isEmpty = resource.data == null || Array.isArray(resource.data) && !resource.data.length || resource.data?.items && !resource.data.items.length;
   if (isEmpty) return <EmptyState title={emptyTitle} description={emptyDescription} compact={compact} />;
