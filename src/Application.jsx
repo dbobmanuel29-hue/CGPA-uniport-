@@ -74,17 +74,18 @@ function Router() {
   // Warm the most-used workspace chunks after authentication so navigation feels immediate.
   useEffect(() => {
     if (session.status !== 'connected' || !session.user) return;
-    const warm = () => {
-      if (session.user.role === 'admin') {
-        import('./pages/admin/Dashboard');
-        import('./pages/admin/Students');
-      } else {
-        import('./pages/student/Dashboard');
-        import('./pages/student/Academic');
-      }
-    };
-    const idle = window.requestIdleCallback ? window.requestIdleCallback(warm, { timeout: 1200 }) : window.setTimeout(warm, 350);
-    return () => window.requestIdleCallback ? window.cancelIdleCallback(idle) : window.clearTimeout(idle);
+    // Start the next workspace chunks immediately after authentication rather
+    // than waiting for browser idle time. The dashboard itself is eager-loaded.
+    if (session.user.role === 'admin') {
+      import('./pages/admin/Students');
+      import('./pages/admin/SupportAndAudit');
+      import('./pages/admin/Reports');
+    } else {
+      import('./pages/student/Academic');
+      import('./pages/student/ImportResults');
+      import('./pages/student/Analytics');
+    }
+    return undefined;
   }, [session.status, session.user?.id, session.user?.role]);
   useEffect(() => { document.title = path === '/' ? 'CGPA+ UniPort | GPA & CGPA Calculator for UniPort Students' : `${route?.title || 'Page not found'} | CGPA+ UniPort`; }, [path, route]);
   if (restricted && session.status === 'loading') return <div className="route-loading"><Skeleton label="Checking your session..." rows={4} /></div>;
