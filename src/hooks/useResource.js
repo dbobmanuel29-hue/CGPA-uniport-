@@ -7,7 +7,7 @@ export function useResource(loader, dependencies = [], enabled = true) {
   useEffect(() => {
     let active = true;
     if (!enabled) { setState({ status: 'idle', data: null, error: null }); return; }
-    setState({ status: 'loading', data: null, error: null });
+    setState(prev => ({ status: 'loading', data: prev.data, error: null }));
     Promise.resolve().then(() => loaderRef.current()).then(data => {
       if (active) setState({ status: 'success', data, error: null });
     }).catch(error => { if (active) setState({ status: 'error', data: null, error }); });
