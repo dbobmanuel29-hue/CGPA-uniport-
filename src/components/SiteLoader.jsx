@@ -24,7 +24,7 @@ export default function SiteLoader() {
       <div className="site-loader__rule" aria-hidden="true">
         <span />
       </div>
-      <p className="site-loader__status">Loading your workspace</p>
+      <p className="site-loader__status">Getting things ready</p>
     </div>
   );
 }
