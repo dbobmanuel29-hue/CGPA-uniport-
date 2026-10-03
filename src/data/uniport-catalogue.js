@@ -54,7 +54,18 @@ export const FALLBACK_DEPARTMENTS = Object.freeze([
 const bscProgramme = (departmentRow) => programme(`prog-${departmentRow.id.replace(/^dept-/, '')}`, departmentRow.id, `B.Sc. ${departmentRow.name}`);
 export const FALLBACK_PROGRAMMES = Object.freeze(FALLBACK_DEPARTMENTS.map(bscProgramme));
 
-export const FALLBACK_SESSIONS = Object.freeze(Array.from({ length: 8 }, (_, index) => { const start = 2019 + index; return { id: `session-${start}-${String(start + 1).slice(-2)}`, name: `${start}/${start + 1}`, status: 'active' }; }).concat([{ id: 'session-2027-28', name: '2027/2028', status: 'active' }]));
+const currentCalendarYear = new Date().getFullYear();
+const latestAcademicSessionStart = Math.max(2027, currentCalendarYear);
+export const FALLBACK_SESSIONS = Object.freeze(
+  Array.from({ length: latestAcademicSessionStart - 2019 + 2 }, (_, index) => {
+    const start = 2019 + index;
+    return {
+      id: `session-${start}-${String(start + 1).slice(-2)}`,
+      name: `${start}/${start + 1}`,
+      status: 'active',
+    };
+  })
+);
 
 export const FALLBACK_LEVELS = Object.freeze([
   { id: 'level-100', name: '100 Level', yearName: 'Year 1', yearNumber: 1, status: 'active' },
