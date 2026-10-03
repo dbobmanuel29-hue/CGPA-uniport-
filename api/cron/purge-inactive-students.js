@@ -39,16 +39,17 @@ async function deleteUserData(db, uid) {
     for (const field of USER_ID_FIELDS) {
       let snapshot;
       try {
-        snapshot = await collection.where(field, '==', uid).limit(450).get();
+        while (true) {
+          snapshot = await collection.where(field, '==', uid).limit(450).get();
+          if (snapshot.empty) break;
+          for (const doc of snapshot.docs) {
+            if (deletedPaths.has(doc.ref.path)) continue;
+            deletedPaths.add(doc.ref.path);
+            await db.recursiveDelete(doc.ref);
+          }
+        }
       } catch (error) {
         console.warn(`Could not query ${collection.id}.${field} for ${uid}:`, error?.message || error);
-        continue;
-      }
-
-      for (const doc of snapshot.docs) {
-        if (deletedPaths.has(doc.ref.path)) continue;
-        deletedPaths.add(doc.ref.path);
-        await db.recursiveDelete(doc.ref);
       }
     }
 
