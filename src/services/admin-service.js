@@ -75,7 +75,7 @@ async function getAuthoritativeStudentCount() {
   const sdk = await getFirebase();
   if (!sdk?.auth?.currentUser) throw Object.assign(new Error('Authentication required.'), { code: 'unauthorized' });
 
-  const token = await sdk.auth.currentUser.getIdToken(true);
+  const token = await sdk.auth.currentUser.getIdToken();
   const response = await fetch('/api/admin/student-count', {
     method: 'GET',
     headers: { Authorization: `Bearer ${token}` },
