@@ -250,7 +250,7 @@ export const adminService = Object.freeze({
         : (profileById.get(authUser.id)?.accountStatusReason || ''),
     }));
     const cutoff = new Date();
-    cutoff.setDate(cutoff.getDate() - 30);
+    cutoff.setHours(cutoff.getHours() - 24);
     const activeStudents = students.filter(student => student.accountStatus === 'active');
     const nonActiveStudents = students.filter(student => student.accountStatus !== 'active');
     const newStudents = students.filter(student => {
