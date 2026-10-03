@@ -41,9 +41,13 @@ export async function getFirebase() {
   if (!firebaseConfigured()) return null;
   if (sdkPromise) return sdkPromise;
   sdkPromise = (async () => {
+    // The compat core must load first; Auth and Firestore can then download
+    // concurrently instead of making startup wait through three serial requests.
     await loadScript(`${CDN_BASE}/firebase-app-compat.js`);
-    await loadScript(`${CDN_BASE}/firebase-auth-compat.js`);
-    await loadScript(`${CDN_BASE}/firebase-firestore-compat.js`);
+    await Promise.all([
+      loadScript(`${CDN_BASE}/firebase-auth-compat.js`),
+      loadScript(`${CDN_BASE}/firebase-firestore-compat.js`)
+    ]);
     const config = configFromEnv();
     firebaseApp = window.firebase.apps.length ? window.firebase.app() : window.firebase.initializeApp(config);
     firestore = window.firebase.firestore(firebaseApp);
