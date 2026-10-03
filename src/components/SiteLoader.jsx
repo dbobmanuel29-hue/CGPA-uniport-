@@ -6,8 +6,8 @@ export default function SiteLoader() {
 
   useEffect(() => {
     // Keep the brand moment brief without delaying the first useful interaction.
-    const exitTimer = window.setTimeout(() => setLeaving(true), 650);
-    const hideTimer = window.setTimeout(() => setVisible(false), 850);
+    const exitTimer = window.setTimeout(() => setLeaving(true), 900);
+    const hideTimer = window.setTimeout(() => setVisible(false), 1100);
     return () => {
       window.clearTimeout(exitTimer);
       window.clearTimeout(hideTimer);
