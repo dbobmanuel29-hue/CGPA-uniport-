@@ -5,9 +5,16 @@ import App from "./App";
 import { initAnalytics } from "./integration/analytics";
 import { initSiteQuality } from "./integration/site-quality";
 
-// Render the UI immediately. Backend/auth integrations are initialized by
-// SessionProvider after first paint so a slow Firebase/CDN response cannot
-// block the public site from appearing.
+const initialLoader = document.getElementById("initial-loader");
+
+// Keep a tiny, dependency-free loader visible while the React bundle is being
+// downloaded and parsed. This is intentionally outside React so it can appear
+// before the application JavaScript starts.
+if (initialLoader) {
+  window.setTimeout(() => initialLoader.classList.add("is-leaving"), 900);
+  window.setTimeout(() => initialLoader.remove(), 1250);
+}
+
 initAnalytics();
 initSiteQuality();
 
