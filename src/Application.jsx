@@ -12,7 +12,6 @@ import Home from './pages/public/Home';
 import LegalPage from './pages/public/LegalPage';
 import { CookiePolicy, ThankYou } from './pages/public/CompliancePages';
 import CookieConsent from './components/CookieConsent';
-import SiteLoader from './components/SiteLoader';
 import ExcelResultImporter from './components/ExcelResultImporter';
 import AcademicGuide from './components/AcademicGuide';
 
@@ -96,4 +95,4 @@ function Router() {
   if (['/login', '/register', '/forgot-password', '/onboarding'].includes(path)) return page;
   return <PublicLayout path={path}><ReadingProgress />{page}{path === '/' && <CreatorShowcase />}</PublicLayout>;
 }
-export default function Application() { return <AppearanceProvider><ToastProvider><SessionProvider><CalculatorProvider><CookieConsent /><SiteLoader /><Router /><AcademicGuide /></CalculatorProvider></SessionProvider></ToastProvider></AppearanceProvider>; }
+export default function Application() { return <AppearanceProvider><ToastProvider><SessionProvider><CalculatorProvider><CookieConsent /><Router /><AcademicGuide /></CalculatorProvider></SessionProvider></ToastProvider></AppearanceProvider>; }
