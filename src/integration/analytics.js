@@ -1,8 +1,18 @@
 let started = false;
 
+function analyticsAllowed() {
+  try {
+    return navigator.doNotTrack !== '1' &&
+      window.doNotTrack !== '1' &&
+      navigator.globalPrivacyControl !== true;
+  } catch {
+    return true;
+  }
+}
+
 function load() {
   const id = import.meta.env.VITE_GA_MEASUREMENT_ID;
-  if (!id || started) return;
+  if (!id || started || !analyticsAllowed()) return;
   started = true;
   window.dataLayer = window.dataLayer || [];
   window.gtag = function gtag() { window.dataLayer.push(arguments); };
