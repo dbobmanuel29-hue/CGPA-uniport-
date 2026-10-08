@@ -153,3 +153,36 @@ button,input,select,textarea{font-size:clamp(15px,.25vw + 14px,17px)}
 [data-theme='dark'] .academic-guide__step,
 [data-theme='dark'] .academic-guide__tip-grid article{background:var(--surface)}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important}}
+
+
+/* Cookie consent — explicit contrast for both appearance modes. */
+.cookie-consent{position:fixed;left:20px;right:20px;bottom:20px;z-index:120;display:flex;align-items:center;justify-content:space-between;gap:22px;padding:16px 18px;border:1px solid var(--border);border-radius:16px;background:var(--surface);color:var(--text);box-shadow:0 18px 55px rgba(15,35,28,.16)}
+.cookie-consent>div:first-child{min-width:0}
+.cookie-consent strong{display:block;font-size:14px;font-weight:750;margin-bottom:4px}
+.cookie-consent p{margin:0;color:var(--muted);font-size:12px;line-height:1.55;max-width:760px}
+.cookie-consent a{color:var(--green);font-weight:750;text-decoration:underline;text-underline-offset:2px}
+.cookie-consent-actions{display:flex;align-items:center;justify-content:flex-end;gap:9px;flex:0 0 auto}
+.cookie-consent-decline,.cookie-consent-accept{min-height:40px;padding:9px 14px;border-radius:10px;border:1px solid var(--border);font:700 13px/1 system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;transition:background-color .16s ease,border-color .16s ease,color .16s ease,transform .16s ease}
+.cookie-consent-decline{background:var(--surface);color:var(--text)}
+.cookie-consent-decline:hover{background:var(--soft);border-color:var(--green)}
+.cookie-consent-accept{background:var(--green);color:var(--surface);border-color:var(--green);box-shadow:0 5px 16px rgba(25,58,50,.14)}
+.cookie-consent-accept:hover{filter:brightness(1.05);transform:translateY(-1px)}
+[data-theme='dark'] .cookie-consent{background:#18271f;border-color:#3a4c43;box-shadow:0 18px 55px rgba(0,0,0,.34)}
+[data-theme='dark'] .cookie-consent-decline{background:#14221b;color:#edf1e7;border-color:#43564c}
+[data-theme='dark'] .cookie-consent-decline:hover{background:#22332a;border-color:#a3cdab;color:#fff}
+[data-theme='dark'] .cookie-consent-accept{background:#a3cdab;color:#102019;border-color:#a3cdab;box-shadow:0 5px 18px rgba(0,0,0,.22)}
+[data-theme='dark'] .cookie-consent-accept:hover{background:#b6ddbb;color:#102019;filter:none}
+.workspace-switch-button{white-space:nowrap}
+@media(max-width:900px){
+  .cookie-consent{left:12px;right:12px;bottom:12px;align-items:flex-start;flex-direction:column;gap:13px;padding:15px}
+  .cookie-consent-actions{width:100%;display:grid;grid-template-columns:1fr 1fr}
+  .cookie-consent-decline,.cookie-consent-accept{width:100%}
+}
+@media(max-width:700px){
+  .workspace-switch-button{padding-left:10px;padding-right:10px}
+  .workspace-switch-button .icon{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+  .cookie-consent-decline,.cookie-consent-accept{transition:none}
+  .cookie-consent-accept:hover{transform:none}
+}
