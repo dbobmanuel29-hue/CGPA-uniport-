@@ -153,10 +153,30 @@ service cloud.firestore {
       allow read: if signedIn() &&
         (resource.data.userId == request.auth.uid || admin());
 
+      // Validate new ticket content at the database boundary, not just in the UI.
       allow create: if verifiedIfRequired() &&
         settingBool('support', 'requestsEnabled', true) &&
         signedIn() &&
-        request.resource.data.userId == request.auth.uid;
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.fullName is string &&
+        request.resource.data.fullName.size() >= 2 &&
+        request.resource.data.fullName.size() <= 100 &&
+        request.resource.data.email is string &&
+        request.resource.data.email.size() >= 5 &&
+        request.resource.data.email.size() <= 254 &&
+        request.resource.data.category is string &&
+        request.resource.data.category.size() <= 40 &&
+        request.resource.data.subject is string &&
+        request.resource.data.subject.size() >= 2 &&
+        request.resource.data.subject.size() <= 180 &&
+        request.resource.data.description is string &&
+        request.resource.data.description.size() >= 10 &&
+        request.resource.data.description.size() <= 5000 &&
+        request.resource.data.priority in ['low', 'normal', 'high', 'urgent'] &&
+        request.resource.data.status == 'open' &&
+        request.resource.data.messages is list &&
+        request.resource.data.messages.size() == 0 &&
+        request.resource.data.createdAt is timestamp;
 
       allow update: if admin() ||
         (
