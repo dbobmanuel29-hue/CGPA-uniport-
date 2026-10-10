@@ -16,9 +16,25 @@ async function requireUser() { const { auth, db } = await ctx(); const user = au
 
 async function userAccount(user, db) {
   if (!user) return null;
+  // The owner administrator's role is established by the authenticated UID.
+  // Do not wait for an unnecessary Firestore profile read before showing admin navigation.
+  if (user.uid === OWNER_ADMIN_UID) {
+    return clean({
+      id: user.uid,
+      fullName: user.displayName || '',
+      email: user.email || '',
+      phone: user.phoneNumber || '',
+      photoUrl: user.photoURL || '',
+      accountStatus: 'active',
+      emailVerified: !!user.emailVerified,
+      onboardingComplete: true,
+      role: 'admin',
+      createdAt: asDate(user.metadata?.creationTime) || now(),
+    });
+  }
   const snap = await db.collection('users').doc(user.uid).get();
   const data = snap.exists ? snap.data() : {};
-  return clean({ id: user.uid, fullName: data.fullName || user.displayName || '', email: user.email || data.email || '', phone: data.phone || user.phoneNumber || '', photoUrl: data.photoUrl || user.photoURL || '', accountStatus: data.accountStatus || 'active', emailVerified: !!user.emailVerified, onboardingComplete: !!data.onboardingComplete, role: user.uid === OWNER_ADMIN_UID ? 'admin' : (data.role || undefined), createdAt: asDate(data.createdAt) || asDate(user.metadata?.creationTime) || now() });
+  return clean({ id: user.uid, fullName: data.fullName || user.displayName || '', email: user.email || data.email || '', phone: data.phone || user.phoneNumber || '', photoUrl: data.photoUrl || user.photoURL || '', accountStatus: data.accountStatus || 'active', emailVerified: !!user.emailVerified, onboardingComplete: !!data.onboardingComplete, role: data.role || undefined, createdAt: asDate(data.createdAt) || asDate(user.metadata?.creationTime) || now() });
 }
 function queryRows(snapshot) { return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })); }
 function relationQuery(collection, field, value) { return value ? collection.where(field, '==', value) : collection; }
