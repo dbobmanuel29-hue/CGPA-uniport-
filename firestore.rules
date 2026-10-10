@@ -252,9 +252,11 @@ service cloud.firestore {
     // =========================
 
     match /adminSettings/{id} {
-      // Settings are managed in the admin dashboard. Rules can still read them
-      // internally through get()/exists() when evaluating feature permissions.
-      allow read, write: if admin();
+      // Admins manage all settings. Signed-in users may read only the
+      // support/reports settings currently used by client-side feature gates.
+      // Keep sensitive settings in other documents restricted to admins.
+      allow read: if admin() || (signedIn() && id in ['support', 'reports']);
+      allow write: if admin();
     }
 
 
