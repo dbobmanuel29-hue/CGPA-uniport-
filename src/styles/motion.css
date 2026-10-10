@@ -133,3 +133,78 @@ button,a,.input,select,textarea{transition:color .16s ease,background-color .16s
 @media(prefers-reduced-motion:reduce){
   .stat-count-value,.chart-line-draw,.chart-draw-in .chart-grid,.chart-bar-grow,.chart-donut-segment{animation:none!important;transition:none!important;stroke-dashoffset:0!important;transform:none!important;opacity:1!important}
 }
+
+/* CGPA+ dashboard micro-interactions: restrained feedback, no new dependencies. */
+.workspace-content .stat,
+.workspace-content .panel,
+.workspace-content .quick-actions>a {
+  transition:
+    transform .24s cubic-bezier(.2,.7,.3,1),
+    box-shadow .24s ease,
+    border-color .24s ease,
+    background-color .24s ease;
+}
+.workspace-content .stat {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+.workspace-content .stat:hover,
+.workspace-content .stat:focus-within {
+  transform: translateY(-4px);
+  border-color: color-mix(in srgb, var(--green) 32%, transparent);
+  box-shadow: 0 14px 30px rgba(22, 50, 31, .09);
+}
+.workspace-content .quick-actions>a:active,
+.workspace-content .stat:active {
+  transform: translateY(-1px) scale(.995);
+}
+.button:not(:disabled):active,
+button:not(:disabled).button:active {
+  transform: translateY(0) scale(.985);
+}
+button:focus-visible,
+a:focus-visible,
+[role="switch"]:focus-visible,
+[role="tab"]:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 3px;
+}
+.chart-draw-in .chart-grid:nth-of-type(3){animation-delay:.08s}
+.chart-draw-in .chart-grid:nth-of-type(4){animation-delay:.12s}
+.chart-draw-in .chart-grid:nth-of-type(5){animation-delay:.16s}
+.chart-draw-in .chart-grid:nth-of-type(6){animation-delay:.2s}
+.chart-line-draw{animation-duration:1.05s;animation-timing-function:cubic-bezier(.2,.7,.25,1)}
+.chart-donut-segment:nth-of-type(2){animation-delay:.04s}
+.chart-donut-segment:nth-of-type(3){animation-delay:.08s}
+.chart-donut-segment:nth-of-type(4){animation-delay:.12s}
+.chart-donut-segment:nth-of-type(5){animation-delay:.16s}
+.chart-donut-segment:nth-of-type(6){animation-delay:.2s}
+.chart-donut-segment:nth-of-type(7){animation-delay:.24s}
+@media (hover:none) {
+  .workspace-content .stat:hover,
+  .workspace-content .stat:focus-within,
+  .workspace-content .quick-actions>a:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
+@media (max-width: 640px) {
+  .workspace-content .stat,
+  .workspace-content .panel,
+  .workspace-content .quick-actions>a {
+    transition-duration: .18s;
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  .workspace-content .stat,
+  .workspace-content .panel,
+  .workspace-content .quick-actions>a {
+    transition: none !important;
+  }
+  .workspace-content .stat:hover,
+  .workspace-content .stat:focus-within,
+  .workspace-content .quick-actions>a:active {
+    transform: none !important;
+  }
+}
+
