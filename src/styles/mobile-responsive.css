@@ -551,3 +551,438 @@ section.home-tools {
     transition: none;
   }
 }
+
+
+/* App-wide polish for student and admin workspaces. */
+:root {
+  --ui-space-1: 4px;
+  --ui-space-2: 8px;
+  --ui-space-3: 12px;
+  --ui-space-4: 16px;
+  --ui-space-5: 20px;
+  --ui-space-6: 24px;
+  --ui-space-8: 32px;
+  --ui-motion-fast: 160ms;
+  --ui-motion-normal: 220ms;
+  --ui-ease: cubic-bezier(.2, .7, .2, 1);
+}
+
+.workspace,
+.workspace-main,
+.workspace-content,
+.workspace-content > *,
+.panel,
+.stat,
+.workspace-card,
+.auth-card,
+.modal,
+.modal-body,
+.form-grid,
+.field,
+.table-toolbar,
+.table-filters,
+.table-pagination {
+  min-width: 0;
+}
+
+.workspace-content {
+  overflow-wrap: anywhere;
+}
+
+.workspace .page-header {
+  gap: clamp(12px, 2vw, 24px);
+  margin-bottom: clamp(22px, 3vw, 34px);
+}
+
+.workspace .page-header h1,
+.workspace-content .page-header h1 {
+  font-size: clamp(25px, 2.1vw, 34px);
+  line-height: 1.16;
+  letter-spacing: -.035em;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+
+.workspace .page-header p,
+.workspace-content .page-header p {
+  max-width: 68ch;
+  font-size: clamp(13px, .35vw + 12px, 15px);
+  line-height: 1.65;
+  text-wrap: pretty;
+}
+
+.workspace .panel,
+.workspace .stat,
+.workspace .workspace-card,
+.workspace .auth-card {
+  border-radius: clamp(13px, 1.2vw, 18px);
+}
+
+.workspace .panel-header {
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.workspace .panel-header > *,
+.workspace .panel-header > div,
+.workspace .header-actions > * {
+  min-width: 0;
+}
+
+.workspace .panel-header h2,
+.workspace .panel-header h3 {
+  line-height: 1.3;
+  text-wrap: balance;
+}
+
+.workspace .stat-value {
+  font-size: clamp(26px, 2.6vw, 38px);
+  line-height: 1.08;
+  letter-spacing: -.035em;
+  overflow-wrap: anywhere;
+}
+
+.workspace .stat-label,
+.workspace .stat p {
+  line-height: 1.55;
+}
+
+.workspace .input,
+.workspace input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+.workspace select,
+.workspace textarea,
+.auth-main .input,
+.auth-main select,
+.auth-main textarea {
+  max-width: 100%;
+  min-width: 0;
+  font: inherit;
+  line-height: 1.45;
+  transition: border-color var(--ui-motion-fast) var(--ui-ease),
+              box-shadow var(--ui-motion-fast) var(--ui-ease),
+              background-color var(--ui-motion-fast) var(--ui-ease);
+}
+
+.workspace .input,
+.workspace select,
+.auth-main .input,
+.auth-main select {
+  min-height: 44px;
+}
+
+.workspace textarea,
+.auth-main textarea {
+  min-height: 112px;
+  resize: vertical;
+}
+
+.workspace .field-label,
+.workspace .field-hint,
+.workspace .field-error {
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.workspace .button,
+.workspace button,
+.workspace a.button,
+.auth-main .button {
+  transition: transform var(--ui-motion-fast) var(--ui-ease),
+              box-shadow var(--ui-motion-fast) var(--ui-ease),
+              border-color var(--ui-motion-fast) var(--ui-ease),
+              background-color var(--ui-motion-fast) var(--ui-ease),
+              color var(--ui-motion-fast) var(--ui-ease);
+}
+
+.workspace .button:hover:not(:disabled),
+.workspace button:hover:not(:disabled),
+.auth-main .button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.workspace .button:active:not(:disabled),
+.workspace button:active:not(:disabled),
+.auth-main .button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.workspace :where(a, button, input, select, textarea, summary):focus-visible,
+.auth-main :where(a, button, input, select, textarea, summary):focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 3px;
+}
+
+.workspace .table-toolbar,
+.workspace .table-filters,
+.workspace .table-pagination {
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.workspace .table-toolbar > *,
+.workspace .table-filters > *,
+.workspace .table-pagination > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.workspace .table-scroll {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  border-radius: 12px;
+}
+
+.workspace .table-scroll table,
+.workspace .data-table {
+  max-width: 100%;
+}
+
+.workspace .data-table th,
+.workspace .data-table td {
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.workspace .table-scroll:focus-visible {
+  outline-offset: 2px;
+}
+
+.workspace .form-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(12px, 1.5vw, 20px);
+}
+
+.workspace .form-grid > *,
+.workspace .form-grid .field,
+.workspace .form-grid .full-width {
+  min-width: 0;
+}
+
+.workspace .modal {
+  width: min(100% - 28px, 680px);
+  max-width: calc(100vw - 28px);
+  max-height: min(88dvh, 900px);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.workspace .modal-header,
+.workspace .modal-actions {
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.workspace .modal-header h2 {
+  font-size: clamp(19px, 2.3vw, 25px);
+  line-height: 1.25;
+  text-wrap: balance;
+}
+
+.workspace .modal-body {
+  overflow-wrap: anywhere;
+}
+
+.workspace .chart-figure,
+.workspace .chart-wrap,
+.workspace .line-chart,
+.workspace canvas,
+.workspace svg {
+  max-width: 100%;
+}
+
+.workspace .workspace-footer {
+  padding-bottom: max(18px, env(safe-area-inset-bottom));
+}
+
+.workspace .bottom-nav {
+  padding-bottom: max(8px, env(safe-area-inset-bottom));
+}
+
+@media (min-width: 1200px) {
+  .workspace-content {
+    padding-top: clamp(28px, 3vw, 44px);
+    padding-bottom: 42px;
+  }
+
+  .workspace .panel {
+    padding: clamp(20px, 1.8vw, 28px);
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+  .workspace .stats-grid,
+  .workspace .stats-three {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .workspace .dashboard-grid,
+  .workspace .dashboard-bottom,
+  .workspace .two-panel-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .workspace .page-header {
+    align-items: flex-start;
+  }
+
+  .workspace .header-actions {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 767px) {
+  .workspace .page-header {
+    align-items: flex-start;
+  }
+
+  .workspace .page-header h1,
+  .workspace-content .page-header h1 {
+    font-size: clamp(23px, 5.8vw, 29px);
+  }
+
+  .workspace .page-header p,
+  .workspace-content .page-header p {
+    font-size: 13px;
+  }
+
+  .workspace .stats-grid,
+  .workspace .stats-three {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .workspace .dashboard-grid,
+  .workspace .dashboard-bottom,
+  .workspace .two-panel-grid,
+  .workspace .reports-layout,
+  .workspace .profile-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .workspace .panel {
+    padding: clamp(15px, 4vw, 20px);
+  }
+
+  .workspace .panel-header {
+    align-items: flex-start;
+  }
+
+  .workspace .header-actions {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .workspace .header-actions > .button,
+  .workspace .header-actions > a.button {
+    flex: 1 1 auto;
+  }
+
+  .workspace .table-toolbar > .search-box,
+  .workspace .table-toolbar > .select,
+  .workspace .table-toolbar > .button {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+
+  .workspace .table-filters > .field {
+    flex: 1 1 100%;
+    width: 100%;
+    max-width: none;
+  }
+
+  .workspace .table-pagination {
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .workspace .form-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .workspace .form-grid .full-width {
+    grid-column: auto;
+  }
+
+  .workspace .modal {
+    width: calc(100vw - 24px);
+    max-width: calc(100vw - 24px);
+    max-height: calc(100dvh - 24px - env(safe-area-inset-top));
+    border-radius: 16px;
+  }
+
+  .workspace .modal-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .workspace .modal-actions > .button {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .workspace .workspace-footer {
+    font-size: 11px;
+    line-height: 1.55;
+  }
+}
+
+@media (max-width: 420px) {
+  .workspace .stats-grid,
+  .workspace .stats-three {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .workspace .header-actions > .button,
+  .workspace .header-actions > a.button {
+    flex-basis: 100%;
+    width: 100%;
+  }
+
+  .workspace .table-pagination {
+    justify-content: center;
+  }
+
+  .workspace .modal-actions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .workspace .modal-actions > .button {
+    grid-column: 1;
+  }
+
+  .workspace .panel-header > .button,
+  .workspace .panel-header > a.button {
+    width: 100%;
+  }
+}
+
+@media (hover: none) {
+  .workspace .button:hover:not(:disabled),
+  .workspace button:hover:not(:disabled),
+  .auth-main .button:hover:not(:disabled) {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .workspace .input,
+  .workspace input,
+  .workspace select,
+  .workspace textarea,
+  .workspace .button,
+  .workspace button,
+  .auth-main .button {
+    transition: none !important;
+  }
+
+  .workspace .button:hover:not(:disabled),
+  .workspace button:hover:not(:disabled),
+  .auth-main .button:hover:not(:disabled) {
+    transform: none;
+  }
+}
