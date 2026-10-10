@@ -438,3 +438,116 @@ html {
     transform: none;
   }
 }
+
+
+/* Consistent vertical rhythm and typography across the public homepage. */
+section.metrics-band,
+section.showcase-section,
+section.compare-section,
+section.device-section,
+section.journey-section,
+section.moments-section,
+section.trust-section,
+section.why-section,
+section.how-section,
+section.faq-section,
+section.final-cta,
+section.home-tools {
+  padding-block: clamp(44px, 5.8vw, 82px);
+}
+
+.home-tools h2,
+.section-heading h2,
+.metrics-head h2,
+.story-copy h2,
+.faq-section h2,
+.final-cta h2 {
+  line-height: 1.14;
+  letter-spacing: clamp(-1.2px, -.08vw, -.35px);
+  text-wrap: balance;
+}
+
+.home-tools p,
+.section-heading p,
+.story-copy p,
+.faq-section p,
+.final-cta p {
+  line-height: 1.72;
+  text-wrap: pretty;
+}
+
+.section-heading {
+  margin-bottom: clamp(24px, 3vw, 40px);
+}
+
+.home-tools .tool-copy h3 {
+  line-height: 1.3;
+  text-wrap: balance;
+}
+
+.home-tools .tool-copy p {
+  font-size: clamp(14px, .45vw + 12px, 16px);
+}
+
+.home-tools .tool-interactive,
+.showcase,
+.trust-card,
+.journey-card,
+.benefit,
+.graduation-demo,
+.faq-list details {
+  transition: border-color .24s ease, box-shadow .24s ease, background-color .24s ease;
+}
+
+.home-tools .tool-interactive:hover,
+.trust-card:hover,
+.journey-card:hover,
+.benefit:hover {
+  border-color: color-mix(in srgb, var(--green) 38%, var(--border));
+  box-shadow: 0 12px 34px rgba(15, 48, 34, .08);
+}
+
+.home-tools .tool-interactive:focus-within,
+.trust-card:focus-within,
+.journey-card:focus-within {
+  outline: 2px solid color-mix(in srgb, var(--green) 65%, transparent);
+  outline-offset: 3px;
+}
+
+@media (max-width: 767px) {
+  section.metrics-band,
+  section.showcase-section,
+  section.compare-section,
+  section.device-section,
+  section.journey-section,
+  section.moments-section,
+  section.trust-section,
+  section.why-section,
+  section.how-section,
+  section.faq-section,
+  section.final-cta,
+  section.home-tools {
+    padding-block: 42px;
+  }
+
+  .home-tools h2,
+  .section-heading h2,
+  .metrics-head h2,
+  .story-copy h2,
+  .faq-section h2,
+  .final-cta h2 {
+    letter-spacing: -.6px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-tools .tool-interactive,
+  .showcase,
+  .trust-card,
+  .journey-card,
+  .benefit,
+  .graduation-demo,
+  .faq-list details {
+    transition: none;
+  }
+}
