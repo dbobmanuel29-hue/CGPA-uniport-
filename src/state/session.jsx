@@ -20,26 +20,43 @@ export function SessionProvider({ children }) {
   const [status, setStatus] = useState('loading');
   const epoch = useRef(0);
   useEffect(() => {
-    let active = true; let unsubscribe; const initialEpoch = epoch.current;
+    let active = true;
+    let unsubscribe;
+    let adaptersReady = false;
+
     (async () => {
       try {
-        // Firebase Auth is enough to resolve the initial signed-in UI. Start that
-        // lookup immediately while the remaining service adapters initialize in parallel.
         await registerFirebaseBackend();
-        const currentUserPromise = authService.getCurrentUser();
 
-        // Publish the already-known Firebase identity immediately so role-based
-        // navigation (including the Admin Panel button) does not wait for every
-        // unrelated backend adapter to finish initializing. Keep the route guard
-        // in "loading" until adapters are ready, so protected pages cannot race them.
-        const value = await currentUserPromise;
+        // Read any identity Firebase has already restored, but don't depend on this
+        // synchronous snapshot: Firebase may still be restoring persisted auth state.
+        const value = await authService.getCurrentUser();
         if (!active) return;
         if (value?.accountStatus === 'deleted') {
           await authService.logout().catch(() => {});
           if (active) setUser(null);
-        } else if (epoch.current === initialEpoch) {
+        } else if (value) {
           setUser(value);
         }
+
+        // Attach the auth listener BEFORE initializing unrelated adapters. Firebase's
+        // first auth-state event can now reveal the signed-in account while those
+        // services finish setting up, instead of waiting behind all of them.
+        const stop = await authService.subscribeToAuthState(next => {
+          if (!active) return;
+          if (next?.accountStatus === 'deleted') {
+            authService.logout().catch(() => {});
+            epoch.current += 1;
+            setUser(null);
+            if (adaptersReady) setStatus('connected');
+            return;
+          }
+          epoch.current += 1;
+          setUser(next);
+          if (adaptersReady) setStatus('connected');
+        });
+        if (!active && typeof stop === 'function') stop();
+        else unsubscribe = stop;
 
         await Promise.all([
           registerAuthPersistenceFix(),
@@ -55,19 +72,32 @@ export function SessionProvider({ children }) {
         ]);
         registerNotificationAdminFixes();
         if (!active) return;
-        if (value?.accountStatus === 'deleted') {
-          setStatus('connected');
-          return;
-        }
-        if (epoch.current === initialEpoch) setStatus('connected');
-        const stop = await authService.subscribeToAuthState(next => { if (!active) return; if (next?.accountStatus === 'deleted') { authService.logout().catch(() => {}); epoch.current += 1; setUser(null); setStatus('connected'); return; } epoch.current += 1; setUser(next); setStatus('connected'); });
-        if (!active && typeof stop === 'function') stop(); else unsubscribe = stop;
-      } catch { if (active && epoch.current === initialEpoch) setStatus('disconnected'); }
+
+        // The user identity can render early; protected routes still wait until all
+        // backend adapters are ready before the session is marked connected.
+        adaptersReady = true;
+        setStatus('connected');
+      } catch {
+        if (active) setStatus('disconnected');
+      }
     })();
-    return () => { active = false; if (typeof unsubscribe === 'function') unsubscribe(); };
+
+    return () => {
+      active = false;
+      if (typeof unsubscribe === 'function') unsubscribe();
+    };
   }, []);
-  function accept(value) { if (!value?.id) throw new Error('The authentication adapter must return a user with an id.'); epoch.current += 1; setUser(value); setStatus('connected'); }
-  function clear() { epoch.current += 1; setUser(null); }
+
+  function accept(value) {
+    if (!value?.id) throw new Error('The authentication adapter must return a user with an id.');
+    epoch.current += 1;
+    setUser(value);
+    setStatus('connected');
+  }
+  function clear() {
+    epoch.current += 1;
+    setUser(null);
+  }
   return <SessionContext.Provider value={{ user, status, accept, clear }}>{children}</SessionContext.Provider>;
 }
 export const useSession = () => useContext(SessionContext);
