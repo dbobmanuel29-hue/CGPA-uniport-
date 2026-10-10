@@ -250,7 +250,15 @@ service cloud.firestore {
           request.resource.data.userId == request.auth.uid
         );
 
-      allow update, delete: if signedIn() &&
+      // Students must not be able to transfer a report to another account.
+      allow update: if admin() ||
+        (
+          signedIn() &&
+          resource.data.userId == request.auth.uid &&
+          request.resource.data.userId == resource.data.userId
+        );
+
+      allow delete: if signedIn() &&
         (resource.data.userId == request.auth.uid || admin());
     }
 
@@ -264,7 +272,18 @@ service cloud.firestore {
         signedIn() &&
         request.resource.data.userId == request.auth.uid;
 
-      allow read, update, delete: if signedIn() &&
+      allow read: if signedIn() &&
+        (resource.data.userId == request.auth.uid || admin());
+
+      // Keep export-request ownership fixed while allowing admins to update status.
+      allow update: if admin() ||
+        (
+          signedIn() &&
+          resource.data.userId == request.auth.uid &&
+          request.resource.data.userId == resource.data.userId
+        );
+
+      allow delete: if signedIn() &&
         (resource.data.userId == request.auth.uid || admin());
     }
 
