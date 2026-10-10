@@ -14,6 +14,15 @@ function json(res, status, body) {
   return res.end(JSON.stringify(body));
 }
 
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 async function verify(req, ticketId) {
   const header = req.headers.authorization || '';
   if (!header.startsWith('Bearer ')) throw Object.assign(new Error('Authentication required.'), { code: 'unauthorized' });
@@ -66,10 +75,10 @@ export default async function handler(req, res) {
     const html = `
       <div style="font-family:Arial,sans-serif;line-height:1.6">
         <h2>CGPA+ ${eventLabel}</h2>
-        <p><strong>Ticket:</strong> ${ticketId || 'N/A'}</p>
-        <p><strong>From:</strong> ${sender}</p>
-        <p><strong>Subject:</strong> ${subject}</p>
-        <div style="white-space:pre-wrap;border:1px solid #ddd;padding:16px;border-radius:8px">${message.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+        <p><strong>Ticket:</strong> ${escapeHtml(ticketId || 'N/A')}</p>
+        <p><strong>From:</strong> ${escapeHtml(sender)}</p>
+        <p><strong>Subject:</strong> ${escapeHtml(subject)}</p>
+        <div style="white-space:pre-wrap;border:1px solid #ddd;padding:16px;border-radius:8px">${escapeHtml(message)}</div>
       </div>
     `;
 
@@ -93,7 +102,7 @@ export default async function handler(req, res) {
     return json(res, 200, { ok: true, emailSent: true });
   } catch (error) {
     console.error('Support email handler failed:', error);
-    const status = error?.code === 'unauthorized' ? 401 : 500;
+    const status = error?.code === 'unauthorized' ? 401 : error?.code === 'permission-denied' ? 403 : 500;
     return json(res, status, { ok: false, error: error?.message || 'Support email could not be sent.' });
   }
 }
