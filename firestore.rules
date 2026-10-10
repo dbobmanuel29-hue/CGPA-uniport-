@@ -27,10 +27,11 @@ service cloud.firestore {
     // or individual keys use the supplied default value.
     function settingBool(section, key, defaultValue) {
       let path = /databases/$(database)/documents/adminSettings/$(section);
-      return !exists(path) ||
-        !get(path).data.keys().hasAny(['settings']) ||
-        !get(path).data.settings.keys().hasAny([key]) ||
-        get(path).data.settings[key] == true;
+      return exists(path) &&
+        get(path).data.keys().hasAny(['settings']) &&
+        get(path).data.settings.keys().hasAny([key])
+        ? get(path).data.settings[key] == true
+        : defaultValue;
     }
 
     function verifiedIfRequired() {
@@ -251,8 +252,9 @@ service cloud.firestore {
     // =========================
 
     match /adminSettings/{id} {
-      allow read: if signedIn();
-      allow write: if admin();
+      // Settings are managed in the admin dashboard. Rules can still read them
+      // internally through get()/exists() when evaluating feature permissions.
+      allow read, write: if admin();
     }
 
 
