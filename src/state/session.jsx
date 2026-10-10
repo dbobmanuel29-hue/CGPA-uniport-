@@ -27,6 +27,20 @@ export function SessionProvider({ children }) {
         // lookup immediately while the remaining service adapters initialize in parallel.
         await registerFirebaseBackend();
         const currentUserPromise = authService.getCurrentUser();
+
+        // Publish the already-known Firebase identity immediately so role-based
+        // navigation (including the Admin Panel button) does not wait for every
+        // unrelated backend adapter to finish initializing. Keep the route guard
+        // in "loading" until adapters are ready, so protected pages cannot race them.
+        const value = await currentUserPromise;
+        if (!active) return;
+        if (value?.accountStatus === 'deleted') {
+          await authService.logout().catch(() => {});
+          if (active) setUser(null);
+        } else if (epoch.current === initialEpoch) {
+          setUser(value);
+        }
+
         await Promise.all([
           registerAuthPersistenceFix(),
           registerGoogleAuthFix(),
@@ -41,9 +55,11 @@ export function SessionProvider({ children }) {
         ]);
         registerNotificationAdminFixes();
         if (!active) return;
-        const value = await currentUserPromise;
-        if (value?.accountStatus === 'deleted') { await authService.logout().catch(() => {}); if (active) { setUser(null); setStatus('connected'); } return; }
-        if (active && epoch.current === initialEpoch) { setUser(value); setStatus('connected'); }
+        if (value?.accountStatus === 'deleted') {
+          setStatus('connected');
+          return;
+        }
+        if (epoch.current === initialEpoch) setStatus('connected');
         const stop = await authService.subscribeToAuthState(next => { if (!active) return; if (next?.accountStatus === 'deleted') { authService.logout().catch(() => {}); epoch.current += 1; setUser(null); setStatus('connected'); return; } epoch.current += 1; setUser(next); setStatus('connected'); });
         if (!active && typeof stop === 'function') stop(); else unsubscribe = stop;
       } catch { if (active && epoch.current === initialEpoch) setStatus('disconnected'); }
