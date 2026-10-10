@@ -1,0 +1,27 @@
+{
+  "id": "/",
+  "name": "CGPA Plus UniPort",
+  "short_name": "CGPA+",
+  "description": "GPA and CGPA calculator and academic progress tools for University of Port Harcourt students.",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#fbfbf7",
+  "theme_color": "#193a32",
+  "categories": ["education", "productivity"],
+  "icons": [
+    {
+      "src": "/pwa-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}
