@@ -1,4 +1,4 @@
-import { useId, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { Icon } from './Icon';
 import { useResource } from '../hooks/useResource';
 import { titleCase } from '../utils/formatting';
@@ -43,7 +43,42 @@ export function PageHeader({ eyebrow, title, description, actions }) {
 
 export function Panel({ title, description, action, children, className = '' }) { return <section className={`panel ${className}`}>{title && <header className="panel-header"><div><h2>{title}</h2>{description && <p>{description}</p>}</div>{action}</header>}{children}</section>; }
 
-export function Stat({ label, value = '--', suffix, icon = 'chart', hint, accent = false }) { return <div className={`stat ${accent ? 'stat-accent' : ''}`}><div className="stat-label">{label}<Icon name={icon} size={18} /></div><div className="stat-value">{value}<small>{suffix}</small></div>{hint && <p>{hint}</p>}</div>; }
+export function Stat({ label, value = '--', suffix, icon = 'chart', hint, accent = false }) {
+  const rawValue = String(value ?? '--');
+  const numericValue = Number(rawValue.replace(/,/g, ''));
+  const isNumeric = rawValue.trim() !== '' && Number.isFinite(numericValue);
+  const decimals = isNumeric && rawValue.includes('.') ? Math.min(3, rawValue.split('.')[1].length) : 0;
+  const [displayValue, setDisplayValue] = useState(isNumeric ? '0' : rawValue);
+
+  useEffect(() => {
+    if (!isNumeric) {
+      setDisplayValue(rawValue);
+      return undefined;
+    }
+    const target = numericValue;
+    const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (reducedMotion) {
+      setDisplayValue(new Intl.NumberFormat(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals }).format(target));
+      return undefined;
+    }
+    let frame = 0;
+    let startTime;
+    const duration = 720;
+    setDisplayValue(new Intl.NumberFormat(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals }).format(0));
+    const tick = (time) => {
+      if (startTime === undefined) startTime = time;
+      const progress = Math.min(1, (time - startTime) / duration);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = target * eased;
+      setDisplayValue(new Intl.NumberFormat(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals }).format(progress === 1 ? target : current));
+      if (progress < 1) frame = window.requestAnimationFrame(tick);
+    };
+    frame = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(frame);
+  }, [rawValue, isNumeric, numericValue, decimals]);
+
+  return <div className={`stat ${accent ? 'stat-accent' : ''}`}><div className="stat-label">{label}<Icon name={icon} size={18} /></div><div className="stat-value"><span className={isNumeric ? 'stat-count-value' : ''} aria-live="polite">{displayValue}</span><small>{suffix}</small></div>{hint && <p>{hint}</p>}</div>;
+}
 
 export function Tabs({ options, value, onChange, label = 'View' }) { return <div className="tabs" aria-label={label}>{options.map(option => { const o = typeof option === 'string' ? { value: option, label: titleCase(option) } : option; return <button key={o.value} type="button" aria-pressed={value === o.value} className={value === o.value ? 'active' : ''} onClick={() => onChange(o.value)}>{o.label}</button>; })}</div>; }
 

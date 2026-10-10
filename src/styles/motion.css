@@ -117,3 +117,19 @@ button,a,.input,select,textarea{transition:color .16s ease,background-color .16s
 .panel:hover,.stat:hover,.workspace-card:hover{box-shadow:0 12px 34px rgba(25,58,50,.07)}
 .route-loading{min-height:55vh;display:grid;align-content:center}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}button,a,.input,select,textarea,.button,.panel,.stat,.workspace-card,.import-choice-card,.import-manual-card,.notice,.auth-card{transition:none}.button:not(:disabled):hover,.button:not(:disabled):active{transform:none}.panel:hover,.stat:hover,.workspace-card:hover{box-shadow:none}}
+
+
+/* Dashboard data motion: count-up values and charts animate without adding dependencies. */
+.stat-count-value{display:inline-block;font-variant-numeric:tabular-nums;transition:opacity .2s}
+.chart-line-draw{stroke-dasharray:1200;stroke-dashoffset:1200;animation:chart-line-draw 1.25s cubic-bezier(.22,.68,.3,1) .12s forwards}
+.chart-draw-in .chart-grid{animation:chart-grid-in .55s ease both}
+.chart-draw-in .chart-grid:nth-of-type(2){animation-delay:.04s}
+.chart-bar-grow{transform:scaleY(0);transform-origin:bottom center;animation:chart-bar-grow .85s cubic-bezier(.22,.68,.3,1) both}
+.chart-donut-segment{animation:chart-donut-in .9s cubic-bezier(.22,.68,.3,1) both}
+@keyframes chart-line-draw{to{stroke-dashoffset:0}}
+@keyframes chart-grid-in{from{opacity:.2}to{opacity:1}}
+@keyframes chart-bar-grow{to{transform:scaleY(1)}}
+@keyframes chart-donut-in{from{opacity:.25}to{opacity:1}}
+@media(prefers-reduced-motion:reduce){
+  .stat-count-value,.chart-line-draw,.chart-draw-in .chart-grid,.chart-bar-grow,.chart-donut-segment{animation:none!important;transition:none!important;stroke-dashoffset:0!important;transform:none!important;opacity:1!important}
+}
