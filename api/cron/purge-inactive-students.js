@@ -49,7 +49,9 @@ async function deleteUserData(db, uid) {
           }
         }
       } catch (error) {
-        console.warn(`Could not query ${collection.id}.${field} for ${uid}:`, error?.message || error);
+        // Do not delete the Auth account if any required data query failed.
+        // The outer account-level handler will record the failure and retry on a later run.
+        throw new Error(`Could not query ${collection.id}.${field} for ${uid}: ${error?.message || error}`);
       }
     }
 
