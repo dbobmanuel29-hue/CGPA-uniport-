@@ -75,7 +75,7 @@ function History({ form, onBack }) {
 
       await academicService.updateProfile({
         ...form,
-        universityId: UNIVERSITY.id,
+        universityId: form.universityId || UNIVERSITY.id,
         markOnboardingComplete: true,
       });
 
