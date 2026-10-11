@@ -6,18 +6,21 @@ import { initAnalytics } from "./integration/analytics";
 import { initSiteQuality } from "./integration/site-quality";
 import { getFirebase } from "./integration/firebase-client.js";
 
-// Dismiss the initial loader as soon as React has mounted the app.
-// Avoid a fixed wait: it used to hold the screen for 900ms even when the page
-// was already ready, making the logo and workspace actions feel delayed.
+// Keep the loader visible briefly while the app renders and Firebase begins
+// resolving the signed-in state, so the page is less likely to appear half-ready.
 function DismissInitialLoader() {
   useEffect(() => {
     const initialLoader = document.getElementById("initial-loader");
     if (!initialLoader) return;
-    const frame = window.requestAnimationFrame(() => {
-      initialLoader.classList.add("is-leaving");
-      window.setTimeout(() => initialLoader.remove(), 220);
-    });
-    return () => window.cancelAnimationFrame(frame);
+    const delay = window.setTimeout(() => {
+      const frame = window.requestAnimationFrame(() => {
+        initialLoader.classList.add("is-leaving");
+        window.setTimeout(() => initialLoader.remove(), 220);
+      });
+      // The frame is cancelled automatically if the component unmounts.
+      return () => window.cancelAnimationFrame(frame);
+    }, 900);
+    return () => window.clearTimeout(delay);
   }, []);
   return null;
 }
