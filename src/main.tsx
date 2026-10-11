@@ -15,8 +15,10 @@ function DismissInitialLoader() {
     let frame = 0;
     const delay = window.setTimeout(() => {
       frame = window.requestAnimationFrame(() => {
+        // Reveal the rendered page as the branded loader fades away.
+        document.getElementById("root")?.classList.add("app-revealing");
         initialLoader.classList.add("is-leaving");
-        window.setTimeout(() => initialLoader.remove(), 220);
+        window.setTimeout(() => initialLoader.remove(), 350);
       });
     }, 900);
     return () => {
