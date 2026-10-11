@@ -9,7 +9,7 @@ import { authService } from '../services/auth-service';
 import { notificationService } from '../services/notification-service';
 import { getFirebase } from '../integration/firebase-client.js';
 
-export function Logo({ footer = false, light = false }) { return <a className={`brand ${footer ? 'brand-footer' : ''} ${light ? 'brand-light' : ''}`} href="#/" aria-label="CGPA+ home"><img className="brand-logo-image" src="/cgpa-plus-logo.svg" alt="CGPA+" /></a>; }
+export function Logo({ footer = false, light = false }) { return <a className={`brand ${footer ? 'brand-footer' : ''} ${light ? 'brand-light' : ''}`} href="#/" aria-label="CGPA+ home"><img className="brand-logo-image" src="/cgpa-plus-logo.svg" alt="CGPA+" decoding="async" fetchPriority="high" /></a>; }
 const THEME_LABELS = { light: 'Light', dark: 'Dark' }; const THEME_ICONS = { light: 'sun', dark: 'moon' };
 export function ThemeButton() { const { mode, setMode } = useAppearance(); const current = mode === 'dark' ? 'dark' : 'light'; const next = current === 'light' ? 'dark' : 'light'; return <button className="icon-button theme-button" aria-label={`Switch appearance to ${THEME_LABELS[next]} mode`} title={`Appearance: ${THEME_LABELS[current]} · click for ${THEME_LABELS[next]} mode`} onClick={() => setMode(next)}><Icon name={THEME_ICONS[current]} size={18} /></button>; }
 function SkipLink({ target, children }) { return <a className="skip-link" href={`#${target}`} onClick={event => { event.preventDefault(); const main=document.getElementById(target); main?.focus({preventScroll:true}); main?.scrollIntoView({behavior:'instant'}); }}>{children}</a>; }
