@@ -301,7 +301,7 @@ const PREP = [
 ];
 
 const PHASES = [
-  ['Set up', 'Steps 1 to 2', 'Create your account and select your university when institution selection is available for your profile.'],
+  ['Set up', 'Steps 1 to 2', 'Create your account and set up your academic profile using the institution-specific catalogue available in CGPA+.'],
   ['Personalize', 'Steps 3 to 6', 'Choose your faculty, department and programme, then add your academic session and level.'],
   ['Use it', 'Steps 7 to 8', 'Enter results, calculate your figures and start planning the semesters ahead.'],
 ];
@@ -316,7 +316,7 @@ const TIPS = [
 export function HowItWorks() {
   const steps = [
     ['Create your CGPA+ account.', 'Start with your name and email, or use the Google sign-in integration when the authentication backend is connected.'],
-    ['Your university is already selected.', 'University-specific setup depends on a verified catalogue and grading policy for your institution.'],
+    ['Set up your academic profile.', 'University-specific features depend on a verified academic catalogue and grading policy for your institution.'],
     ['Select your faculty.', 'Choose from the faculty catalogue supplied for your selected institution.'],
     ['Find your department.', 'The department selector follows your faculty, so the academic context stays connected.'],
     ['Choose your programme.', 'Select the programme and academic version that match your university record.'],
@@ -331,7 +331,7 @@ export function HowItWorks() {
         eyebrow="ONE STEP AT A TIME"
         title="A clearer journey starts here."
         description="From your first sign-in to your next academic milestone. Here is how CGPA+ fits into student life."
-        meta={[['check', '8 simple steps'], ['clock', 'About 5 minutes'], ['lock', 'University pre-selected']]}
+        meta={[['check', '8 simple steps'], ['clock', 'About 5 minutes'], ['graduation', 'Academic profile setup']]}
       />
 
       <section className="prep-section container">
