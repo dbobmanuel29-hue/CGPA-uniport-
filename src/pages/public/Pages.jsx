@@ -37,7 +37,7 @@ export function PublicCta({ eyebrow = 'YOUR NEXT CHAPTER', title, copy, primary 
 
 const PRINCIPLES = [
   ['shield', 'Honesty over polish', 'We would rather show an empty state than fill your dashboard with numbers that were never yours.'],
-  ['graduation', 'One university, done properly', 'Each institution needs its own verified academic structure and grading rules before its connected features can be enabled.'],
+  ['graduation', 'One university, done properly', 'CGPA+ is focused on UniPort, using University of Port Harcourt academic information for its student workspace.'],
   ['lock', 'Your data is not the product', 'No trackers, no advertising, no quiet data collection. Calculations run in your browser.'],
   ['users', 'Students first, always', 'Built around the realities of student life: limited data, shared devices and busy weeks.'],
   ['target', 'Clarity beats complexity', 'Every screen should answer a question you actually have, in language you already use.'],
@@ -54,7 +54,7 @@ const IS_ISNT = [
 
 const STORY = [
   ['The problem', 'Students were tracking results across notebooks, group chats and half-finished spreadsheets, recalculating the same figures every semester.'],
-  ['The focus', 'CGPA+ is expanding to support more universities, with each institution’s academic structure verified before its connected features are enabled.'],
+  ['The focus', 'CGPA+ is currently built for University of Port Harcourt students. Other universities are not supported in this release.'],
   ['The build', 'The interface was designed mobile-first, with a shared calculation engine, reusable components and clear loading, empty and error states.'],
   ['Where we are', 'The frontend is complete and navigable. Authentication, records and reporting are prepared for a verified backend rather than simulated.'],
 ];
@@ -65,8 +65,8 @@ export function About() {
       <PublicHeading
         eyebrow="A STUDENT-FIRST PERSPECTIVE"
         title="Your ambition deserves a little clarity."
-        description="CGPA+ is an independent academic companion for Nigerian university students, bringing calculation, tracking and planning tools into one place."
-        meta={[['location', 'Nigeria'], ['graduation', 'University-focused tools'],  ['shield', 'Independent platform']]}
+        description="CGPA+ is an independent academic companion for University of Port Harcourt students, bringing GPA and CGPA calculation, result tracking and academic planning into one place."
+        meta={[['location', 'Nigeria'], ['graduation', 'UniPort student tools'],  ['shield', 'Independent platform']]}
       />
 
       <div className="public-content container">
@@ -81,7 +81,7 @@ export function About() {
           </div>
           <div data-reveal="right" data-reveal-delay="2">
             <img className="about-photo" src="https://images.pexels.com/photos/6334575/pexels-photo-6334575.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200" loading="lazy" alt="Students discussing their studies in a library" />
-            <Notice><strong>Independent by design.</strong> CGPA+ is not an official university website. Your university remains the authority on results, transcripts, grading and graduation eligibility.</Notice>
+            <Notice><strong>Independent by design.</strong> CGPA+ is not an official university website. The University of Port Harcourt remains the authority on official results, transcripts, grading and graduation eligibility.</Notice>
           </div>
         </div>
       </div>
@@ -144,7 +144,7 @@ export function About() {
           <div>
             <span className="eyebrow">OUR MISSION</span>
             <h3>Make academic progress easier to understand.</h3>
-            <p>Give university students clear, accessible tools to track results, plan responsibly and feel more in control of their academic journey.</p>
+            <p>Give UniPort students clear, accessible tools to track results, plan responsibly and feel more in control of their academic journey.</p>
           </div>
           <div>
             <span className="eyebrow">OUR VISION</span>
@@ -169,7 +169,7 @@ const DEEP_DIVES = [
   },
   {
     eyebrow: '02 / ORGANIZATION',
-    title: 'Your record, structured the way your university is.',
+    title: 'Your record, organized for your UniPort academic journey.',
     copy: 'Results are grouped by academic session, semester and level so each grade carries its context. Search, filter and sort your way to the courses you need.',
     points: ['Session, semester and level filters', 'Searchable and sortable tables', 'Add, edit and delete individual results', 'A full academic timeline view'],
     link: ['See the academic record', '/app/academic'],
@@ -301,7 +301,7 @@ const PREP = [
 ];
 
 const PHASES = [
-  ['Set up', 'Steps 1 to 2', 'Create your account and set up your academic profile using the institution-specific catalogue available in CGPA+.'],
+  ['Set up', 'Steps 1 to 2', 'Create your account and set up your academic profile using the UniPort academic catalogue available in CGPA+.'],
   ['Personalize', 'Steps 3 to 6', 'Choose your faculty, department and programme, then add your academic session and level.'],
   ['Use it', 'Steps 7 to 8', 'Enter results, calculate your figures and start planning the semesters ahead.'],
 ];
@@ -316,10 +316,10 @@ const TIPS = [
 export function HowItWorks() {
   const steps = [
     ['Create your CGPA+ account.', 'Start with your name and email, or use the Google sign-in integration when the authentication backend is connected.'],
-    ['Set up your academic profile.', 'University-specific features depend on a verified academic catalogue and grading policy for your institution.'],
-    ['Select your faculty.', 'Choose from the faculty catalogue supplied for your selected institution.'],
+    ['Set up your academic profile.', 'Your academic profile uses the UniPort catalogue. Confirm official grading and classification with the University of Port Harcourt.'],
+    ['Select your UniPort faculty.', 'Choose from the University of Port Harcourt faculty catalogue.'],
     ['Find your department.', 'The department selector follows your faculty, so the academic context stays connected.'],
-    ['Choose your programme.', 'Select the programme and academic version that match your university record.'],
+    ['Choose your programme.', 'Select the programme and academic version that match your UniPort record.'],
     ['Set your academic context.', 'Add your admission session, current level, academic session and semester. Matriculation and phone numbers are optional.'],
     ['Bring your results together.', 'Enter your courses, credit units and grades. Local calculators work now; cloud records require the connected backend.'],
     ['Track. Calculate. Improve.', 'Review trends, explore target CGPAs and build a considered plan for the semesters ahead.'],
