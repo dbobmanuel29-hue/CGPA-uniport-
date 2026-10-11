@@ -12,15 +12,17 @@ function DismissInitialLoader() {
   useEffect(() => {
     const initialLoader = document.getElementById("initial-loader");
     if (!initialLoader) return;
+    let frame = 0;
     const delay = window.setTimeout(() => {
-      const frame = window.requestAnimationFrame(() => {
+      frame = window.requestAnimationFrame(() => {
         initialLoader.classList.add("is-leaving");
         window.setTimeout(() => initialLoader.remove(), 220);
       });
-      // The frame is cancelled automatically if the component unmounts.
-      return () => window.cancelAnimationFrame(frame);
     }, 900);
-    return () => window.clearTimeout(delay);
+    return () => {
+      window.clearTimeout(delay);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
   }, []);
   return null;
 }
