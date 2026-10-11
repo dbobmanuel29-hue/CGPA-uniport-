@@ -54,7 +54,7 @@ const IS_ISNT = [
 
 const STORY = [
   ['The problem', 'Students were tracking results across notebooks, group chats and half-finished spreadsheets, recalculating the same figures every semester.'],
-  ['The focus', 'CGPA+ is expanding to support more universities, with each institution's academic structure verified before its connected features are enabled.'],
+  ['The focus', 'CGPA+ is expanding to support more universities, with each institution’s academic structure verified before its connected features are enabled.'],
   ['The build', 'The interface was designed mobile-first, with a shared calculation engine, reusable components and clear loading, empty and error states.'],
   ['Where we are', 'The frontend is complete and navigable. Authentication, records and reporting are prepared for a verified backend rather than simulated.'],
 ];
