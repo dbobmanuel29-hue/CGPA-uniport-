@@ -77,7 +77,7 @@ const COMPARISON = [
 const TRUST = [
   ['shield', 'No invented academic data', 'We never fill your dashboard with made-up results. Empty means empty, until your real records arrive.'],
   ['lock', 'Calculations stay on your device', 'The public calculators run locally in your browser. Nothing is uploaded while you experiment.'],
-  ['graduation', 'Your university stays the authority', 'Grading policy, classification and graduation eligibility must follow your institution's verified rules, never assumptions.'],
+  ['graduation', 'Your university stays the authority', 'Grading policy, classification and graduation eligibility must follow your institution’s verified rules, never assumptions.'],
   ['cloud', 'Honest about what is connected', 'If a feature needs a backend that is not live yet, we say so plainly instead of faking success.'],
 ];
 
