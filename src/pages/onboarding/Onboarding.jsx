@@ -181,7 +181,7 @@ export default function Onboarding() {
     try {
       return await academicService.updateProfile({
         ...form,
-        universityId: UNIVERSITY.id,
+        universityId: form.universityId || UNIVERSITY.id,
         markOnboardingComplete: false,
       });
     } catch (error) {
@@ -219,7 +219,7 @@ export default function Onboarding() {
         <Button
           onClick={() => academicService.updateProfile({
             ...form,
-            universityId: UNIVERSITY.id,
+            universityId: form.universityId || UNIVERSITY.id,
             markOnboardingComplete: true,
           }).then(() => navigate('/app'))}
         >
@@ -234,12 +234,12 @@ export default function Onboarding() {
       <span className="eyebrow">{step === 'profile' ? "LET'S MAKE THIS YOURS" : 'BUILD YOUR CGPA HISTORY'}</span>
       <h1>
         {step === 'profile'
-          ? <>Your UniPort journey.<br />Your academic profile.</>
+          ? <>Your academic journey.<br />Your academic profile.</>
           : <>Bring your previous results<br />with you.</>}
       </h1>
       <p className="onboarding-description">
         {step === 'profile'
-          ? 'Tell us your Faculty, Department, Programme and current level. Your university is already fixed to the University of Port Harcourt.'
+          ? 'Choose your university, then tell us your Faculty, Department, Programme and current level.'
           : `You selected ${current} Level. Add the results you already have from every level up to ${current} Level so CGPA+ can calculate your GPA and CGPA.`}
       </p>
       <div className="onboarding-steps">
