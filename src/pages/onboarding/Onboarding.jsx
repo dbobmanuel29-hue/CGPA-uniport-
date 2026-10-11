@@ -196,7 +196,7 @@ export default function Onboarding() {
   function submit(e) {
     e.preventDefault();
     setValidation('');
-    if (!String(form.matriculationNumber || '').trim()) return setValidation('Please enter your UniPort matriculation number to complete your academic profile.');
+    if (!String(form.matriculationNumber || '').trim()) return setValidation('Please enter your matriculation number to complete your academic profile.');
     if (PROFILE_FIELDS.some(k => !form[k])) {
       return setValidation('Please complete Faculty, Department, Programme, Admission Session, Current Level, Current Session and Current Semester.');
     }
