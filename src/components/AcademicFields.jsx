@@ -1,9 +1,8 @@
-import { AsyncSelect, Field, Input, Select } from './ui';
-import { UNIVERSITIES, UNIVERSITY, getMatriculationConfig, isUniversitySupported } from '../data/universities';
+import { AsyncSelect, Field, Input, UniversityLock } from './ui';
 import { academicService } from '../services/academic-service';
 import { FALLBACK_FACULTIES, FALLBACK_DEPARTMENTS, FALLBACK_PROGRAMMES, FALLBACK_LEVELS, FALLBACK_SEMESTERS, FALLBACK_SESSIONS } from '../data/uniport-catalogue';
 
-export const emptyAcademic = { universityId: UNIVERSITY.id, facultyId: '', departmentId: '', programmeId: '', academicVersionId: '', admissionSessionId: '', currentLevelId: '', currentSessionId: '', currentSemesterId: '', matriculationNumber: '', phone: '' };
+export const emptyAcademic = { facultyId: '', departmentId: '', programmeId: '', academicVersionId: '', admissionSessionId: '', currentLevelId: '', currentSessionId: '', currentSemesterId: '', matriculationNumber: '', phone: '' };
 
 async function loadOrFallback(loader, fallback) {
   try {
@@ -15,24 +14,14 @@ async function loadOrFallback(loader, fallback) {
 }
 
 export function AcademicFields({ form, setForm, withUniversity = true, optional = true, requireMatriculation = false }) {
-  const change = key => e => setForm(prev => ({ ...prev, [key]: e.target.value, ...(key === 'universityId' ? { facultyId: '', departmentId: '', programmeId: '', academicVersionId: '', admissionSessionId: '', currentLevelId: '', currentSessionId: '', currentSemesterId: '' } : key === 'facultyId' ? { departmentId: '', programmeId: '', academicVersionId: '', currentLevelId: '', currentSemesterId: '' } : key === 'departmentId' ? { programmeId: '', academicVersionId: '', currentLevelId: '', currentSemesterId: '' } : key === 'programmeId' ? { academicVersionId: '', currentLevelId: '', currentSemesterId: '' } : {}) }));
-  const facultyLoader = () => {
-    const universityId = form.universityId || UNIVERSITY.id;
-    if (!isUniversitySupported(universityId)) return Promise.resolve([]);
-    return loadOrFallback(() => academicService.getFaculties({ universityId }), universityId === UNIVERSITY.id ? FALLBACK_FACULTIES : []);
-  };
-  const departmentLoader = () => {
-    const universityId = form.universityId || UNIVERSITY.id;
-    if (!isUniversitySupported(universityId)) return Promise.resolve([]);
-    return loadOrFallback(() => academicService.getDepartments({ facultyId: form.facultyId, universityId }), universityId === UNIVERSITY.id ? FALLBACK_DEPARTMENTS.filter(row => row.facultyId === form.facultyId) : []);
-  };
+  const change = key => e => setForm(prev => ({ ...prev, [key]: e.target.value, ...(key === 'facultyId' ? { departmentId: '', programmeId: '', academicVersionId: '', currentLevelId: '', currentSemesterId: '' } : key === 'departmentId' ? { programmeId: '', academicVersionId: '', currentLevelId: '', currentSemesterId: '' } : key === 'programmeId' ? { academicVersionId: '', currentLevelId: '', currentSemesterId: '' } : {}) }));
+  const facultyLoader = () => loadOrFallback(() => academicService.getFaculties(), FALLBACK_FACULTIES);
+  const departmentLoader = () => loadOrFallback(() => academicService.getDepartments({ facultyId: form.facultyId }), FALLBACK_DEPARTMENTS.filter(row => row.facultyId === form.facultyId));
   const programmeLoader = async () => {
-    const universityId = form.universityId || UNIVERSITY.id;
-    if (!isUniversitySupported(universityId)) return [];
     const departments = await departmentLoader();
     const selectedDepartment = departments.find(row => row.id === form.departmentId);
     try {
-      const rows = await academicService.getProgrammes({ departmentId: form.departmentId, universityId });
+      const rows = await academicService.getProgrammes({ departmentId: form.departmentId });
       if (Array.isArray(rows) && rows.length) {
         // Keep the catalogue IDs for compatibility, but present every course of study
         // consistently as a B.Sc. programme in the student profile form.
@@ -44,27 +33,12 @@ export function AcademicFields({ form, setForm, withUniversity = true, optional 
     if (selectedDepartment) return [{ id: `fallback-bsc-${selectedDepartment.id}`, name: `B.Sc. ${selectedDepartment.name}`, departmentId: selectedDepartment.id, status: 'active' }];
     return [];
   };
-  const levelLoader = () => {
-    const universityId = form.universityId || UNIVERSITY.id;
-    if (!isUniversitySupported(universityId)) return Promise.resolve([]);
-    return loadOrFallback(() => academicService.getLevels({ programmeId: form.programmeId, universityId }), universityId === UNIVERSITY.id ? FALLBACK_LEVELS : []);
-  };
-  const semesterLoader = () => {
-    const universityId = form.universityId || UNIVERSITY.id;
-    if (!isUniversitySupported(universityId)) return Promise.resolve([]);
-    return loadOrFallback(() => academicService.getSemesters({ programmeId: form.programmeId, universityId }), universityId === UNIVERSITY.id ? FALLBACK_SEMESTERS : []);
-  };
-  const sessionLoader = () => {
-    const universityId = form.universityId || UNIVERSITY.id;
-    if (!isUniversitySupported(universityId)) return Promise.resolve([]);
-    return loadOrFallback(() => academicService.getAcademicSessions({ universityId }), universityId === UNIVERSITY.id ? FALLBACK_SESSIONS : []);
-  };
-
-  const selectedUniversity = UNIVERSITIES.find(item => item.id === (form.universityId || UNIVERSITY.id)) || UNIVERSITY;
-  const matriculation = getMatriculationConfig(form.universityId || UNIVERSITY.id);
+  const levelLoader = () => loadOrFallback(() => academicService.getLevels({ programmeId: form.programmeId }), FALLBACK_LEVELS);
+  const semesterLoader = () => loadOrFallback(() => academicService.getSemesters({ programmeId: form.programmeId }), FALLBACK_SEMESTERS);
+  const sessionLoader = () => loadOrFallback(() => academicService.getAcademicSessions(), FALLBACK_SESSIONS);
 
   return <>
-    {withUniversity && <div className="form-grid"><Field label="University" hint={selectedUniversity.status !== 'supported' ? 'This university is not available for academic calculations yet.' : 'More Nigerian universities will be added after their grading rules are verified.'}><Select value={form.universityId || UNIVERSITY.id} onChange={change('universityId')} required><option value="">Choose your university</option>{UNIVERSITIES.map(item => <option key={item.id} value={item.id} disabled={item.status !== 'supported'}>{item.name}{item.status !== 'supported' ? ' — coming soon' : ''}</option>)}</Select></Field></div>}
+    {withUniversity && <UniversityLock />}
     <div className="form-grid">
       <AsyncSelect label="Faculty" loader={facultyLoader} value={form.facultyId} onChange={change('facultyId')} />
       <AsyncSelect label="Department" loader={departmentLoader} dependencies={[form.facultyId]} enabled={!!form.facultyId} value={form.departmentId} onChange={change('departmentId')} />
@@ -74,7 +48,7 @@ export function AcademicFields({ form, setForm, withUniversity = true, optional 
       <AsyncSelect label="Current academic session" loader={sessionLoader} value={form.currentSessionId} onChange={change('currentSessionId')} />
       <AsyncSelect label="Current semester" loader={semesterLoader} dependencies={[form.programmeId]} enabled={!!form.programmeId} value={form.currentSemesterId} onChange={change('currentSemesterId')} />
       {(optional || requireMatriculation) && <>
-        <Field label={matriculation?.label || 'Matriculation / registration number'} optional={!requireMatriculation} hint={matriculation?.hint || (requireMatriculation ? 'Required to complete your academic profile.' : undefined)}><Input required={requireMatriculation} autoComplete="off" value={form.matriculationNumber || ''} onChange={change('matriculationNumber')} placeholder={matriculation?.placeholder || 'As shown on your student record'} /></Field>
+        <Field label="Matriculation number" optional={!requireMatriculation} hint={requireMatriculation ? 'Required to complete your UniPort academic profile.' : undefined}><Input required={requireMatriculation} autoComplete="off" value={form.matriculationNumber || ''} onChange={change('matriculationNumber')} placeholder="As shown on your student record" /></Field>
         <Field label="Phone number" optional><Input type="tel" autoComplete="tel" value={form.phone || ''} onChange={change('phone')} placeholder="Your contact number" /></Field>
       </>}
     </div>
