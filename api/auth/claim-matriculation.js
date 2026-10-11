@@ -38,6 +38,40 @@ export default async function handler(req, res) {
     const matriculationNumber = normalizeMatriculationNumber(req.body?.matriculationNumber);
     const matriculationNumberKey = matriculationNumber.replace(/\//g, '__');
     const db = admin.firestore(app);
+
+    // Older CGPA+ accounts may already have a matriculation number saved
+    // without a matching matriculationClaims document. Check those legacy
+    // records before creating a claim, so the claim collection is not the
+    // only source of truth for uniqueness.
+    const rawMatriculationNumber = String(req.body?.matriculationNumber || '').trim();
+    const legacyCandidates = [...new Set([
+      matriculationNumber,
+      rawMatriculationNumber,
+      rawMatriculationNumber.replace(/\\s+/g, ''),
+      rawMatriculationNumber.toUpperCase(),
+      rawMatriculationNumber.toLowerCase(),
+    ].filter(Boolean))];
+
+    const legacyChecks = legacyCandidates.flatMap(candidate => [
+      db.collection('users').where('matriculationNumber', '==', candidate).limit(10).get(),
+      db.collection('academicProfiles').where('matriculationNumber', '==', candidate).limit(10).get(),
+    ]);
+    const legacySnapshots = await Promise.all(legacyChecks);
+    const legacyOwnerUids = new Set();
+    for (const snapshot of legacySnapshots) {
+      for (const doc of snapshot.docs) {
+        const ownerUid = doc.id;
+        if (ownerUid && ownerUid !== decoded.uid) legacyOwnerUids.add(ownerUid);
+      }
+    }
+    if (legacyOwnerUids.size) {
+      return json(res, 409, {
+        ok: false,
+        code: 'auth/matriculation-already-used',
+        error: 'That matriculation number is already linked to an existing CGPA+ account. Use the account that already has this number, or contact support if you believe this is a mistake.',
+      });
+    }
+
     const userRef = db.collection('users').doc(decoded.uid);
     const profileRef = db.collection('academicProfiles').doc(decoded.uid);
     const claimRef = db.collection('matriculationClaims').doc(matriculationNumberKey);
