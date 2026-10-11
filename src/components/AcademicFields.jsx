@@ -1,8 +1,9 @@
-import { AsyncSelect, Field, Input, UniversityLock } from './ui';
+import { AsyncSelect, Field, Input, Select } from './ui';
+import { UNIVERSITIES, UNIVERSITY } from '../data/universities';
 import { academicService } from '../services/academic-service';
 import { FALLBACK_FACULTIES, FALLBACK_DEPARTMENTS, FALLBACK_PROGRAMMES, FALLBACK_LEVELS, FALLBACK_SEMESTERS, FALLBACK_SESSIONS } from '../data/uniport-catalogue';
 
-export const emptyAcademic = { facultyId: '', departmentId: '', programmeId: '', academicVersionId: '', admissionSessionId: '', currentLevelId: '', currentSessionId: '', currentSemesterId: '', matriculationNumber: '', phone: '' };
+export const emptyAcademic = { universityId: UNIVERSITY.id, facultyId: '', departmentId: '', programmeId: '', academicVersionId: '', admissionSessionId: '', currentLevelId: '', currentSessionId: '', currentSemesterId: '', matriculationNumber: '', phone: '' };
 
 async function loadOrFallback(loader, fallback) {
   try {
@@ -14,8 +15,8 @@ async function loadOrFallback(loader, fallback) {
 }
 
 export function AcademicFields({ form, setForm, withUniversity = true, optional = true, requireMatriculation = false }) {
-  const change = key => e => setForm(prev => ({ ...prev, [key]: e.target.value, ...(key === 'facultyId' ? { departmentId: '', programmeId: '', academicVersionId: '', currentLevelId: '', currentSemesterId: '' } : key === 'departmentId' ? { programmeId: '', academicVersionId: '', currentLevelId: '', currentSemesterId: '' } : key === 'programmeId' ? { academicVersionId: '', currentLevelId: '', currentSemesterId: '' } : {}) }));
-  const facultyLoader = () => loadOrFallback(() => academicService.getFaculties(), FALLBACK_FACULTIES);
+  const change = key => e => setForm(prev => ({ ...prev, [key]: e.target.value, ...(key === 'universityId' ? { facultyId: '', departmentId: '', programmeId: '', academicVersionId: '', admissionSessionId: '', currentLevelId: '', currentSessionId: '', currentSemesterId: '' } : key === 'facultyId' ? { departmentId: '', programmeId: '', academicVersionId: '', currentLevelId: '', currentSemesterId: '' } : key === 'departmentId' ? { programmeId: '', academicVersionId: '', currentLevelId: '', currentSemesterId: '' } : key === 'programmeId' ? { academicVersionId: '', currentLevelId: '', currentSemesterId: '' } : {}) }));
+  const facultyLoader = () => loadOrFallback(() => academicService.getFaculties({ universityId: form.universityId || UNIVERSITY.id }), FALLBACK_FACULTIES);
   const departmentLoader = () => loadOrFallback(() => academicService.getDepartments({ facultyId: form.facultyId }), FALLBACK_DEPARTMENTS.filter(row => row.facultyId === form.facultyId));
   const programmeLoader = async () => {
     const departments = await departmentLoader();
@@ -37,8 +38,10 @@ export function AcademicFields({ form, setForm, withUniversity = true, optional 
   const semesterLoader = () => loadOrFallback(() => academicService.getSemesters({ programmeId: form.programmeId }), FALLBACK_SEMESTERS);
   const sessionLoader = () => loadOrFallback(() => academicService.getAcademicSessions(), FALLBACK_SESSIONS);
 
+  const selectedUniversity = UNIVERSITIES.find(item => item.id === (form.universityId || UNIVERSITY.id)) || UNIVERSITY;
+
   return <>
-    {withUniversity && <UniversityLock />}
+    {withUniversity && <div className="form-grid"><Field label="University" hint={selectedUniversity.status !== 'supported' ? 'This university is not available for academic calculations yet.' : 'More Nigerian universities will be added after their grading rules are verified.'}><Select value={form.universityId || UNIVERSITY.id} onChange={change('universityId')} required><option value="">Choose your university</option>{UNIVERSITIES.map(item => <option key={item.id} value={item.id} disabled={item.status !== 'supported'}>{item.name}{item.status !== 'supported' ? ' — coming soon' : ''}</option>)}</Select></Field></div>}
     <div className="form-grid">
       <AsyncSelect label="Faculty" loader={facultyLoader} value={form.facultyId} onChange={change('facultyId')} />
       <AsyncSelect label="Department" loader={departmentLoader} dependencies={[form.facultyId]} enabled={!!form.facultyId} value={form.departmentId} onChange={change('departmentId')} />
@@ -48,7 +51,7 @@ export function AcademicFields({ form, setForm, withUniversity = true, optional 
       <AsyncSelect label="Current academic session" loader={sessionLoader} value={form.currentSessionId} onChange={change('currentSessionId')} />
       <AsyncSelect label="Current semester" loader={semesterLoader} dependencies={[form.programmeId]} enabled={!!form.programmeId} value={form.currentSemesterId} onChange={change('currentSemesterId')} />
       {(optional || requireMatriculation) && <>
-        <Field label="Matriculation number" optional={!requireMatriculation} hint={requireMatriculation ? 'Required to complete your UniPort academic profile.' : undefined}><Input required={requireMatriculation} autoComplete="off" value={form.matriculationNumber || ''} onChange={change('matriculationNumber')} placeholder="As shown on your student record" /></Field>
+        <Field label="Matriculation number" optional={!requireMatriculation} hint={requireMatriculation ? 'Required to complete your academic profile.' : undefined}><Input required={requireMatriculation} autoComplete="off" value={form.matriculationNumber || ''} onChange={change('matriculationNumber')} placeholder="As shown on your student record" /></Field>
         <Field label="Phone number" optional><Input type="tel" autoComplete="tel" value={form.phone || ''} onChange={change('phone')} placeholder="Your contact number" /></Field>
       </>}
     </div>
