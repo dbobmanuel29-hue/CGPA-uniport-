@@ -5,6 +5,14 @@ export function configureServices(configuration) { configured = true; for (const
 export function getServiceAdapter(namespace, name) { return adapters.get(`${namespace}.${name}`); }
 export function createService(namespace, methods) { return Object.freeze(Object.fromEntries(methods.map(method => [method, async (...args) => { const key = `${namespace}.${method}`; const fn = adapters.get(key); if (!fn) throw new BackendNotConnectedError(key); return await fn(...args); }]))); }
 export function friendlyError(error) {
+  // Keep onboarding and academic-profile errors specific so students know
+  // exactly what needs fixing instead of seeing a generic failure message.
+  if (error?.code === 'auth/matriculation-already-used') return error.message || 'This matriculation number is already linked to another CGPA+ account. Sign in to the original account or contact support if you believe this is a mistake.';
+  if (error?.code === 'auth/matriculation-required') return error.message || 'Enter your UniPort matriculation number to continue.';
+  if (error?.code === 'auth/matriculation-invalid') return error.message || 'The matriculation number format is invalid. Check the letters, numbers, and separators, then try again.';
+  if (error?.code === 'auth/matriculation-claim-failed') return error.message || 'We could not verify that this matriculation number is available. Check your connection and try again.';
+  if (error?.code === 'validation/invalid-university') return error.message || 'This profile must use the University of Port Harcourt.';
+  if (error?.code === 'validation/missing-history') return error.message || 'Add the required previous academic results before finishing setup.';
   if (error?.code === 'BACKEND_NOT_CONNECTED') return 'The backend is not connected yet. Nothing has been saved or sent.';
   if (error?.code === 'auth/invalid-credential') return 'Your email or password was not recognised. Please try again.';
   if (error?.code === 'auth/wrong-password') return 'Your email or password was not recognised. Please try again.';
