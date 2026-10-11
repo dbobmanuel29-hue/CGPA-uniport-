@@ -95,7 +95,7 @@ function Metric({ value, decimals = 0, suffix = '', label, detail }) {
 export function CalculatorPreview() {
   const [rows, setRows] = useState([{ code: 'Course 01', credits: 3, points: 5 }, { code: 'Course 02', credits: 2, points: 4 }, { code: 'Course 03', credits: 3, points: 5 }]);
   const totals = calculateGPA(rows);
-  return <div className="calculator-preview"><div className="preview-topline"><span><Icon name="calculator" size={17} />Your semester, in focus.</span><Badge>Demo preview</Badge></div><div className="preview-course-table"><div className="preview-course-head"><span>COURSE</span><span>CREDIT UNITS</span><span>GRADE POINTS</span></div>{rows.map((row, i) => <div className="preview-course-row" key={row.code}><span><i>{String(i + 1).padStart(2, '0')}</i>{row.code}</span><select aria-label={`Credit units for ${row.code}`} value={row.credits} onChange={e => setRows(rows.map((r, j) => j === i ? { ...r, credits: Number(e.target.value) } : r))}>{[1, 2, 3, 4, 5, 6].map(v => <option key={v}>{v}</option>)}</select><select aria-label={`Grade points for ${row.code}`} value={row.points} onChange={e => setRows(rows.map((r, j) => j === i ? { ...r, points: Number(e.target.value) } : r))}>{[5, 4, 3, 2, 1, 0].map(v => <option key={v} value={v}>{v.toFixed(1)} points</option>)}</select></div>)}</div><div className="preview-result"><div><span>Your semester GPA</span><strong aria-live="polite" key={totals.gpa} className="value-animate">{number(totals.gpa)}<small>/ 5.00</small></strong></div><div className="preview-result-right"><span>{totals.totalCreditUnits} credit units</span><span>{totals.totalQualityPoints} quality points</span><Icon name="chart" size={27} /></div></div><p className="demo-footnote">Sample courses. Illustrative 5-point scale, not a verified UniPort policy.</p></div>;
+  return <div className="calculator-preview"><div className="preview-topline"><span><Icon name="calculator" size={17} />Your semester, in focus.</span><Badge>Demo preview</Badge></div><div className="preview-course-table"><div className="preview-course-head"><span>COURSE</span><span>CREDIT UNITS</span><span>GRADE POINTS</span></div>{rows.map((row, i) => <div className="preview-course-row" key={row.code}><span><i>{String(i + 1).padStart(2, '0')}</i>{row.code}</span><select aria-label={`Credit units for ${row.code}`} value={row.credits} onChange={e => setRows(rows.map((r, j) => j === i ? { ...r, credits: Number(e.target.value) } : r))}>{[1, 2, 3, 4, 5, 6].map(v => <option key={v}>{v}</option>)}</select><select aria-label={`Grade points for ${row.code}`} value={row.points} onChange={e => setRows(rows.map((r, j) => j === i ? { ...r, points: Number(e.target.value) } : r))}>{[5, 4, 3, 2, 1, 0].map(v => <option key={v} value={v}>{v.toFixed(1)} points</option>)}</select></div>)}</div><div className="preview-result"><div><span>Your semester GPA</span><strong aria-live="polite" key={totals.gpa} className="value-animate">{number(totals.gpa)}<small>/ 5.00</small></strong></div><div className="preview-result-right"><span>{totals.totalCreditUnits} credit units</span><span>{totals.totalQualityPoints} quality points</span><Icon name="chart" size={27} /></div></div><p className="demo-footnote">Sample courses. Illustrative 5-point scale, not a verified university grading policy.</p></div>;
 }
 
 export function DashboardPreview() {
@@ -156,7 +156,7 @@ export default function Home() {
     <section className="metrics-band" id="home-metrics">
       <div className="container">
         <div className="metrics-head" data-reveal>
-          <span className="eyebrow">ONE UNIVERSITY. EVERY POSSIBILITY.</span>
+          <span className="eyebrow">ONE PLATFORM. EVERY POSSIBILITY.</span>
           <h2>A focused companion,<br />not another portal.</h2>
         </div>
         <div className="metrics-grid" data-reveal-group>
@@ -323,7 +323,7 @@ export default function Home() {
       <div className="container">
         <div className="section-heading" data-reveal>
           <div><span className="eyebrow">DESIGNED WITH YOU IN MIND</span><h2>Student life is a lot.<br />Your academic tools shouldn't be.</h2></div>
-          <p>A focused companion for one university, built to make your next step feel simpler.</p>
+          <p>A focused companion for your academic journey, built to make your next step feel simpler.</p>
         </div>
         <div className="benefit-grid" data-reveal-group>
           {[['Know your numbers', 'Less spreadsheet stress. More academic clarity.'], ['Track every semester', 'Keep all your results in their proper context.'], ['Understand performance', 'See progress, not just a list of grades.'], ['Plan ahead', 'Make informed goals for what comes next.'], ['Stay organized', 'A single home for your academic journey.']].map(([t, d], i) => <div className="benefit" key={t}><span>0{i + 1}</span><h3>{t}</h3><p>{d}</p></div>)}
