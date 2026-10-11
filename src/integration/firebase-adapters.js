@@ -38,6 +38,28 @@ async function userAccount(user, db) {
 }
 
 
+async function createStudentAccount({ user, fullName, acceptedTerms }) {
+  const token = await user.getIdToken();
+  const response = await fetch('/api/auth/register-student', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      fullName: fullName || user.displayName || '',
+      acceptedTerms: !!acceptedTerms,
+    }),
+  });
+  let result = {};
+  try { result = await response.json(); } catch {}
+  if (!response.ok) {
+    throw Object.assign(new Error(result.error || 'Your student account could not be created. Please try again.'), {
+      code: result.code || 'auth/registration-failed',
+    });
+  }
+}
+
 function queryRows(snapshot) { return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })); }
 function relationQuery(collection, field, value) { return value ? collection.where(field, '==', value) : collection; }
 async function getCollection(db, name, filters = {}) { let query = db.collection(name); for (const [field, value] of Object.entries(filters)) if (value) query = query.where(field, '==', value); const snap = await query.get(); return queryRows(snap); }
