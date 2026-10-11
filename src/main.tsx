@@ -4,6 +4,7 @@ import "./index.css";
 import App from "./App";
 import { initAnalytics } from "./integration/analytics";
 import { initSiteQuality } from "./integration/site-quality";
+import { getFirebase } from "./integration/firebase-client.js";
 
 // Dismiss the initial loader as soon as React has mounted the app.
 // Avoid a fixed wait: it used to hold the screen for 900ms even when the page
@@ -23,6 +24,10 @@ function DismissInitialLoader() {
 
 initAnalytics();
 initSiteQuality();
+
+// Start Firebase SDK loading while React is mounting so the signed-in state and
+// role-specific workspace actions can resolve sooner after the loader fades.
+void getFirebase().catch(() => {});
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
