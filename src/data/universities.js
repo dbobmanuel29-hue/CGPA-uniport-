@@ -76,6 +76,39 @@ export const UNIVERSITIES = Object.freeze([
   comingSoon('NOUN', 'National Open University of Nigeria', 'NOUN', 'FCT, Nigeria'),
 ]);
 
+// First rollout candidates are ordered for practical launch value, not as a claim
+// that every student at these institutions lacks a calculator. Selection balances
+// likely student reach, regional rollout, public-university coverage and the need
+// to verify institution-specific grading rules before enabling calculations.
+export const UNIVERSITY_ROLLOUT_PRIORITY = Object.freeze([
+  Object.freeze({ universityId: 'RSU', rank: 1, reason: 'Nearby to the UniPort launch base; efficient first partner/outreach test in Rivers State.' }),
+  Object.freeze({ universityId: 'UNN', rank: 2, reason: 'Large established public university; helps extend coverage into the South-East.' }),
+  Object.freeze({ universityId: 'UNILAG', rank: 3, reason: 'Major public university and an important South-West adoption test.' }),
+  Object.freeze({ universityId: 'UI', rank: 4, reason: 'Major established university; official material shows a 4-point policy, so it is a valuable grading-engine test.' }),
+  Object.freeze({ universityId: 'UNIBEN', rank: 5, reason: 'Established public university that expands coverage into the South-South.' }),
+  Object.freeze({ universityId: 'UNICAL', rank: 6, reason: 'Regional South-South coverage and practical student outreach.' }),
+  Object.freeze({ universityId: 'UNIUYO', rank: 7, reason: 'Regional coverage in Akwa Ibom and a natural next public-university cohort.' }),
+  Object.freeze({ universityId: 'OAU', rank: 8, reason: 'Major public university and a useful South-West validation cohort.' }),
+  Object.freeze({ universityId: 'UNILORIN', rank: 9, reason: 'Broad public-university reach; verify the applicable grading policy by admission cohort.' }),
+  Object.freeze({ universityId: 'ABU', rank: 10, reason: 'Important northern public-university coverage.' }),
+  Object.freeze({ universityId: 'BUK', rank: 11, reason: 'Important north-western public-university coverage.' }),
+  Object.freeze({ universityId: 'UNIZIK', rank: 12, reason: 'Adds another major South-East student cohort.' }),
+  Object.freeze({ universityId: 'FUTO', rank: 13, reason: 'Technology-focused public-university cohort and South-East coverage.' }),
+  Object.freeze({ universityId: 'FUTA', rank: 14, reason: 'Technology-focused public-university cohort and South-West coverage.' }),
+  Object.freeze({ universityId: 'LASU', rank: 15, reason: 'Adds another large Lagos-area public-university cohort.' }),
+  Object.freeze({ universityId: 'IAUE', rank: 16, reason: 'Nearby Rivers State institution; potential efficient partner outreach.' }),
+  Object.freeze({ universityId: 'NDU', rank: 17, reason: 'Adds Bayelsa and wider Niger Delta coverage.' }),
+  Object.freeze({ universityId: 'DELSU', rank: 18, reason: 'Adds Delta State public-university coverage.' }),
+  Object.freeze({ universityId: 'UNIABUJA', rank: 19, reason: 'Adds Federal Capital Territory coverage.' }),
+  Object.freeze({ universityId: 'UNIMAID', rank: 20, reason: 'Adds North-East regional coverage.' }),
+]);
+
+const rolloutPriorityById = new Map(UNIVERSITY_ROLLOUT_PRIORITY.map(item => [item.universityId, item]));
+
+export function getUniversityRolloutPriority(universityId) {
+  return rolloutPriorityById.get(String(universityId || '').trim().toUpperCase()) || null;
+}
+
 export const UNIVERSITY = UNIVERSITIES.find(university => university.id === 'UNIPORT');
 
 export function getUniversityById(universityId) {
