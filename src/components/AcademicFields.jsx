@@ -13,7 +13,7 @@ async function loadOrFallback(loader, fallback) {
   }
 }
 
-export function AcademicFields({ form, setForm, withUniversity = true, optional = true }) {
+export function AcademicFields({ form, setForm, withUniversity = true, optional = true, requireMatriculation = false }) {
   const change = key => e => setForm(prev => ({ ...prev, [key]: e.target.value, ...(key === 'facultyId' ? { departmentId: '', programmeId: '', academicVersionId: '', currentLevelId: '', currentSemesterId: '' } : key === 'departmentId' ? { programmeId: '', academicVersionId: '', currentLevelId: '', currentSemesterId: '' } : key === 'programmeId' ? { academicVersionId: '', currentLevelId: '', currentSemesterId: '' } : {}) }));
   const facultyLoader = () => loadOrFallback(() => academicService.getFaculties(), FALLBACK_FACULTIES);
   const departmentLoader = () => loadOrFallback(() => academicService.getDepartments({ facultyId: form.facultyId }), FALLBACK_DEPARTMENTS.filter(row => row.facultyId === form.facultyId));
@@ -47,8 +47,8 @@ export function AcademicFields({ form, setForm, withUniversity = true, optional 
       <AsyncSelect label="Current level" loader={levelLoader} dependencies={[form.programmeId]} enabled={!!form.programmeId} value={form.currentLevelId} onChange={change('currentLevelId')} />
       <AsyncSelect label="Current academic session" loader={sessionLoader} value={form.currentSessionId} onChange={change('currentSessionId')} />
       <AsyncSelect label="Current semester" loader={semesterLoader} dependencies={[form.programmeId]} enabled={!!form.programmeId} value={form.currentSemesterId} onChange={change('currentSemesterId')} />
-      {optional && <>
-        <Field label="Matriculation number" optional><Input value={form.matriculationNumber || ''} onChange={change('matriculationNumber')} placeholder="As shown on your student record" /></Field>
+      {(optional || requireMatriculation) && <>
+        <Field label="Matriculation number" optional={!requireMatriculation} hint={requireMatriculation ? 'Required to complete your UniPort academic profile.' : undefined}><Input required={requireMatriculation} autoComplete="off" value={form.matriculationNumber || ''} onChange={change('matriculationNumber')} placeholder="As shown on your student record" /></Field>
         <Field label="Phone number" optional><Input type="tel" autoComplete="tel" value={form.phone || ''} onChange={change('phone')} placeholder="Your contact number" /></Field>
       </>}
     </div>

@@ -62,15 +62,7 @@ service cloud.firestore {
     match /users/{uid} {
       allow read: if self(uid) || admin();
 
-      allow create: if self(uid) &&
-        request.resource.data.role == 'student' &&
-        request.resource.data.matriculationNumber is string &&
-        request.resource.data.matriculationNumber.size() >= 5 &&
-        request.resource.data.matriculationNumber.size() <= 32 &&
-        request.resource.data.matriculationNumberKey is string &&
-        request.resource.data.matriculationNumberKey.size() >= 5 &&
-        request.resource.data.matriculationNumberKey.size() <= 64 &&
-        getAfter(/databases/$(database)/documents/matriculationClaims/$(request.resource.data.matriculationNumberKey)).data.uid == uid;
+      allow create: if self(uid) && request.resource.data.role == 'student';
 
       allow update: if admin() ||
         (

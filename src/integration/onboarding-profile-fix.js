@@ -17,6 +17,18 @@ export async function registerOnboardingProfileFix() {
         }
 
         const uid = sdk.auth.currentUser.uid;
+        const matriculationNumber = String(payload.matriculationNumber || '').trim();
+        if (matriculationNumber) {
+          const token = await sdk.auth.currentUser.getIdToken();
+          const response = await fetch('/api/auth/claim-matriculation', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ matriculationNumber }),
+          });
+          let result = {};
+          try { result = await response.json(); } catch {}
+          if (!response.ok) throw Object.assign(new Error(result.error || 'Could not save this matriculation number.'), { code: result.code || 'auth/matriculation-claim-failed' });
+        }
         const markComplete = payload.markOnboardingComplete === true;
         const profile = Object.fromEntries(
           Object.entries({ ...payload, userId: uid, universityId: UNIVERSITY.id }).filter(([, value]) => value !== undefined)

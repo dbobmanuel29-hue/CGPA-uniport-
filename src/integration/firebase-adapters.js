@@ -37,39 +37,6 @@ async function userAccount(user, db) {
   return clean({ id: user.uid, fullName: data.fullName || user.displayName || '', email: user.email || data.email || '', phone: data.phone || user.phoneNumber || '', photoUrl: data.photoUrl || user.photoURL || '', matriculationNumber: data.matriculationNumber || '', accountStatus: data.accountStatus || 'active', emailVerified: !!user.emailVerified, onboardingComplete: !!data.onboardingComplete, role: data.role || undefined, createdAt: asDate(data.createdAt) || asDate(user.metadata?.creationTime) || now() });
 }
 
-function normalizeMatriculationNumber(value) {
-  const normalized = String(value || '').toUpperCase().replace(/\s+/g, '');
-  if (!normalized) throw Object.assign(new Error('A UniPort matriculation number is required.'), { code: 'auth/matriculation-required' });
-  if (normalized.length < 5 || normalized.length > 32 || !/[0-9]/.test(normalized) || !/^[A-Z0-9/.-]+$/.test(normalized)) {
-    throw Object.assign(new Error('Enter a valid UniPort matriculation number.'), { code: 'auth/matriculation-invalid' });
-  }
-  return normalized;
-}
-
-async function createStudentAccount({ user, fullName, matriculationNumber, acceptedTerms }) {
-  const normalized = normalizeMatriculationNumber(matriculationNumber);
-  const token = await user.getIdToken();
-  const response = await fetch('/api/auth/register-student', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({
-      fullName: fullName || user.displayName || '',
-      matriculationNumber: normalized,
-      acceptedTerms: !!acceptedTerms,
-    }),
-  });
-  let result = {};
-  try { result = await response.json(); } catch {}
-  if (!response.ok) {
-    throw Object.assign(new Error(result.error || 'Your student account could not be created. Please try again.'), {
-      code: result.code || 'auth/matriculation-registration-failed',
-    });
-  }
-  return normalized;
-}
 
 function queryRows(snapshot) { return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })); }
 function relationQuery(collection, field, value) { return value ? collection.where(field, '==', value) : collection; }
@@ -86,8 +53,8 @@ async function registerAuth() {
   const { auth, db, storage } = await ctx(); const persistence = window.firebase.auth.Auth.Persistence;
   const authMethods = {
     async login({email,password,remember=true}) { await auth.setPersistence(remember?persistence.LOCAL:persistence.SESSION); const result=await auth.signInWithEmailAndPassword(email,password); return userAccount(result.user,db); },
-    async loginWithGoogle({intent,matriculationNumber,acceptedTerms}) { googleAuthValidationInProgress=true; try { const provider=new window.firebase.auth.GoogleAuthProvider(); provider.setCustomParameters({prompt:'select_account'}); const result=await auth.signInWithPopup(provider); const ref=db.collection('users').doc(result.user.uid); const existing=await ref.get(); if(!existing.exists && intent==='login') { await auth.signOut(); throw Object.assign(new Error('No CGPA+ account was found for this Google account. Create an account first.'),{code:'auth/cgpa-account-not-found'}); } if(!existing.exists) { try { await createStudentAccount({user:result.user,fullName:result.user.displayName||'',matriculationNumber,acceptedTerms}); } catch(error) { try { await result.user.delete(); } catch { await auth.signOut(); } throw error; } } return userAccount(result.user,db); } finally { googleAuthValidationInProgress=false; } },
-    async register({fullName,email,password,acceptedTerms,matriculationNumber}) { if(!acceptedTerms) throw Object.assign(new Error('Terms acceptance is required.'),{code:'auth/terms-required'}); const normalizedMatriculationNumber=normalizeMatriculationNumber(matriculationNumber); const result=await auth.createUserWithEmailAndPassword(email,password); await result.user.updateProfile({displayName:fullName}); try { await createStudentAccount({user:result.user,fullName,matriculationNumber:normalizedMatriculationNumber,acceptedTerms}); } catch(error) { try { await result.user.delete(); } catch { await auth.signOut(); } throw error; } return userAccount(result.user,db); },
+    async loginWithGoogle({intent,acceptedTerms}) { googleAuthValidationInProgress=true; try { const provider=new window.firebase.auth.GoogleAuthProvider(); provider.setCustomParameters({prompt:'select_account'}); const result=await auth.signInWithPopup(provider); const ref=db.collection('users').doc(result.user.uid); const existing=await ref.get(); if(!existing.exists && intent==='login') { await auth.signOut(); throw Object.assign(new Error('No CGPA+ account was found for this Google account. Create an account first.'),{code:'auth/cgpa-account-not-found'}); } if(!existing.exists) { try { await createStudentAccount({user:result.user,fullName:result.user.displayName||'',acceptedTerms}); } catch(error) { try { await result.user.delete(); } catch { await auth.signOut(); } throw error; } } return userAccount(result.user,db); } finally { googleAuthValidationInProgress=false; } },
+    async register({fullName,email,password,acceptedTerms}) { if(!acceptedTerms) throw Object.assign(new Error('Terms acceptance is required.'),{code:'auth/terms-required'}); const result=await auth.createUserWithEmailAndPassword(email,password); await result.user.updateProfile({displayName:fullName}); try { await createStudentAccount({user:result.user,fullName,acceptedTerms}); } catch(error) { try { await result.user.delete(); } catch { await auth.signOut(); } throw error; } return userAccount(result.user,db); },
     async sendPasswordReset({email}) { await auth.sendPasswordResetEmail(email); return {accepted:true}; },
     async logout(){await auth.signOut();return{ok:true};}, async getCurrentUser(){
       const user = auth.currentUser;

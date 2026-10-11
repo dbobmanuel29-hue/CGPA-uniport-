@@ -196,6 +196,7 @@ export default function Onboarding() {
   function submit(e) {
     e.preventDefault();
     setValidation('');
+    if (!String(form.matriculationNumber || '').trim()) return setValidation('Please enter your UniPort matriculation number to complete your academic profile.');
     if (PROFILE_FIELDS.some(k => !form[k])) {
       return setValidation('Please complete Faculty, Department, Programme, Admission Session, Current Level, Current Session and Current Semester.');
     }
@@ -250,7 +251,7 @@ export default function Onboarding() {
 
       {step === 'profile' ? (
         <form className="onboarding-panel form-stack" onSubmit={submit}>
-          <AcademicFields form={form} setForm={setForm} />
+          <AcademicFields form={form} setForm={setForm} requireMatriculation />
           <Notice>
             Your current level controls the history required: 100 → none, 200 → 100 + 200,
             300 → 100 + 200 + 300, and so on.
