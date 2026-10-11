@@ -12,7 +12,7 @@ const HERO = '/images/uniport-campus-hero.jpg';
 const STUDY = 'https://images.pexels.com/photos/8199762/pexels-photo-8199762.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200';
 const CAMPUS = 'https://images.pexels.com/photos/6334877/pexels-photo-6334877.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200';
 
-const RIBBON = ['For Nigerian university students', 'GPA calculator', 'CGPA tracking', 'Target planning', 'Academic timeline', 'Graduation progress', 'Performance analytics', 'Semester records', 'Course attention', 'Academic reports'];
+const RIBBON = ['For UniPort students', 'GPA calculator', 'CGPA tracking', 'Target planning', 'Academic timeline', 'Graduation progress', 'Performance analytics', 'Semester records', 'Course attention', 'Academic reports'];
 
 const SHOWCASE = {
   calculate: {
@@ -77,7 +77,7 @@ const COMPARISON = [
 const TRUST = [
   ['shield', 'No invented academic data', 'We never fill your dashboard with made-up results. Empty means empty, until your real records arrive.'],
   ['lock', 'Calculations stay on your device', 'The public calculators run locally in your browser. Nothing is uploaded while you experiment.'],
-  ['graduation', 'Your university stays the authority', 'Grading policy, classification and graduation eligibility must follow your institution’s verified rules, never assumptions.'],
+  ['graduation', 'UniPort remains the academic authority', 'Official grading policy, classification and graduation eligibility remain subject to verified University of Port Harcourt rules.'],
   ['cloud', 'Honest about what is connected', 'If a feature needs a backend that is not live yet, we say so plainly instead of faking success.'],
 ];
 
@@ -119,7 +119,7 @@ export default function Home() {
         <p className="hero-eyebrow animate-in">YOUR AMBITION. YOUR NEXT CHAPTER.</p>
         <h1 className="hero-wordmark animate-in stagger-1" data-page-heading tabIndex={-1}>CGPA<span>+</span></h1>
         <h2 className="hero-title animate-in stagger-2">Your Academic<br />Journey, Simplified.</h2>
-        <p className="hero-description animate-in stagger-2">CGPA+ is an academic companion for Nigerian university students to calculate, track, organize and plan their academic progress.</p>
+        <p className="hero-description animate-in stagger-2">CGPA+ is an academic companion built for University of Port Harcourt students to calculate GPA and CGPA, organize results and plan academic progress.</p>
         <div className="hero-actions animate-in stagger-3">
           {loggedIn
             ? <Button href="#/app" variant="lime" endIcon="diagonal">Open dashboard</Button>
@@ -130,7 +130,7 @@ export default function Home() {
         <div className="hero-chips animate-in stagger-4">
           <span><Icon name="check" size={13} />No account needed to calculate</span>
           <span><Icon name="lock" size={13} />Your inputs stay on your device</span>
-          <span><Icon name="graduation" size={13} />For university students</span>
+          <span><Icon name="graduation" size={13} />For UniPort students</span>
         </div>
       </div>
       <button
@@ -161,7 +161,7 @@ export default function Home() {
         </div>
         <div className="metrics-grid" data-reveal-group>
           <Metric value={16} label="Academic tools" detail="Calculators, records, analytics and planning" />
-          <Metric value={1} label="Shared calculation engine" detail="Built to support institution-specific academic rules" />
+          <Metric value={1} label="Shared calculation engine" detail="Designed around the University of Port Harcourt student journey" />
           <Metric value={4} label="Grading scales" detail="Choose 4.0, 5.0, 7.0 or 10.0 for planning" />
           <Metric value={0} label="Naira to calculate" detail="Public calculators are free and account-free" />
         </div>
@@ -353,7 +353,7 @@ export default function Home() {
         <a className="section-link" href="#/how-it-works">See how it works<Icon name="diagonal" size={16} /></a>
       </div>
       <div className="steps-row" data-reveal-group>
-        {[['Create your account', 'Your own space for a clearer academic journey.'], ['Make it yours', 'Add your university, faculty, programme and level.'], ['Bring your results', 'Enter your courses, credits and grade points.'], ['Own your progress', 'Calculate, understand and plan your next move.']].map(([t, d], i) => <div className="step" key={t}><span className="step-number">0{i + 1}</span><h3>{t}</h3><p>{d}</p></div>)}
+        {[['Create your account', 'Your own space for a clearer academic journey.'], ['Make it yours', 'Add your faculty, department, programme and level.'], ['Bring your results', 'Enter your courses, credits and grade points.'], ['Own your progress', 'Calculate, understand and plan your next move.']].map(([t, d], i) => <div className="step" key={t}><span className="step-number">0{i + 1}</span><h3>{t}</h3><p>{d}</p></div>)}
       </div>
     </section>
 
@@ -405,7 +405,7 @@ export default function Home() {
           <img src={CAMPUS} alt="Students working together at a study table" loading="lazy" />
           <div>
             <h3>Independent, and clear about it.</h3>
-            <p>CGPA+ is an independent student platform, not an official university website. Your institution remains the authority on official results, transcripts, grading and graduation eligibility.</p>
+            <p>CGPA+ is an independent student platform, not an official university website. The University of Port Harcourt remains the authority on official results, transcripts, grading and graduation eligibility.</p>
             <a className="section-link" href="#/about">Read more about us<Icon name="arrow" size={15} /></a>
           </div>
         </div>
