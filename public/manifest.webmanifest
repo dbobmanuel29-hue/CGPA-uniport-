@@ -2,7 +2,7 @@
   "id": "/",
   "name": "CGPA Plus",
   "short_name": "CGPA+",
-  "description": "GPA and CGPA tools, academic records, and progress planning for Nigerian university students.",
+  "description": "GPA and CGPA tools, academic records, and progress planning for University of Port Harcourt students.",
   "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",
