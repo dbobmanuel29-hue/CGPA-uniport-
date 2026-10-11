@@ -123,7 +123,7 @@ export default function Home() {
         <div className="hero-actions animate-in stagger-3">
           {loggedIn
             ? <Button href="#/app" variant="lime" endIcon="diagonal">Open dashboard</Button>
-            : <Button href="#/register" variant="lime" endIcon="diagonal">Get started</Button>}
+            : <Button href={loggedIn ? '#/app' : '#/register'} variant="lime" endIcon="diagonal">{loggedIn ? 'Open dashboard' : 'Get started'}</Button>}
           <Button href="#/app/calculator" variant="transparent" icon="calculator">Calculate GPA</Button>
           {!loggedIn && <a href="#/login" className="hero-sign-in">Sign in<Icon name="arrow" size={15} /></a>}
         </div>
@@ -313,7 +313,7 @@ export default function Home() {
           <div className="compare-column compare-after" data-reveal="right" data-reveal-delay="2">
             <header><span className="compare-tag">With CGPA+</span><h3>Organized and clear</h3></header>
             <ul>{COMPARISON.map(([, after]) => <li key={after}><Icon name="check" size={14} />{after}</li>)}</ul>
-            <Button href="#/register" variant="lime" endIcon="arrow">Start with CGPA+</Button>
+            <Button href={loggedIn ? '#/app' : '#/register'} variant="lime" endIcon="arrow">{loggedIn ? 'Open dashboard' : 'Start with CGPA+'}</Button>
           </div>
         </div>
       </div>
@@ -432,7 +432,7 @@ export default function Home() {
           <p>Start with a little clarity. See how far it takes you.</p>
         </div>
         <div className="final-cta-actions" data-reveal="right" data-reveal-delay="2">
-          <Button href="#/register" variant="lime" endIcon="diagonal">Get started with CGPA+</Button>
+          <Button href={loggedIn ? '#/app' : '#/register'} variant="lime" endIcon="diagonal">{loggedIn ? 'Open dashboard' : 'Get started with CGPA+'}</Button>
           <Button href="#/app/calculator" variant="transparent" icon="calculator">Calculate your GPA</Button>
           <span className="final-cta-note">Free calculators. No account required.</span>
         </div>
