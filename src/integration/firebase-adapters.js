@@ -38,7 +38,7 @@ async function userAccount(user, db) {
 }
 
 function normalizeMatriculationNumber(value) {
-  const normalized = String(value || '').toUpperCase().replace(/\\s+/g, '');
+  const normalized = String(value || '').toUpperCase().replace(/\s+/g, '');
   if (!normalized) throw Object.assign(new Error('A UniPort matriculation number is required.'), { code: 'auth/matriculation-required' });
   if (normalized.length < 5 || normalized.length > 32 || !/[0-9]/.test(normalized) || !/^[A-Z0-9/.-]+$/.test(normalized)) {
     throw Object.assign(new Error('Enter a valid UniPort matriculation number.'), { code: 'auth/matriculation-invalid' });
@@ -50,7 +50,7 @@ async function createStudentAccount({ db, user, fullName, email, matriculationNu
   const normalized = normalizeMatriculationNumber(matriculationNumber);
   // Firestore document IDs cannot contain '/', so encode it into a reserved
   // sequence that cannot appear in accepted matriculation-number characters.
-  const matriculationNumberKey = normalized.replace(/\\//g, '__');
+  const matriculationNumberKey = normalized.replace(/\//g, '__');
   const claimRef = db.collection('matriculationClaims').doc(matriculationNumberKey);
   const userRef = db.collection('users').doc(user.uid);
   const profileRef = db.collection('academicProfiles').doc(user.uid);
