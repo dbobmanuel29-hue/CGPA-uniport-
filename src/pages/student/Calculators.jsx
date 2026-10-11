@@ -12,7 +12,7 @@ import { planningClassification } from '../../data/grading';
 import { useResource } from '../../hooks/useResource';
 
 function CalculatorNav({ active }) { return <nav className="calculator-nav" aria-label="Calculation tools">{[['gpa', 'GPA calculator', '/app/calculator'], ['cgpa', 'CGPA calculator', '/app/cgpa'], ['target', 'Target CGPA', '/app/target'], ['projection', 'Projection', '/app/projection']].map(([key, label, path]) => <a href={`#${path}`} key={key} className={active === key ? 'active' : ''}>{label}</a>)}</nav>; }
-function PlanningNote() { return <Notice icon="shield"><strong>Your inputs. A planning estimate.</strong> These tools do not assume UniPort grading rules. Enter points from your result sheet and select the appropriate maximum scale. Classification requires the backend grading policy.</Notice>; }
+function PlanningNote() { return <Notice icon="shield"><strong>Your inputs. A planning estimate.</strong> Enter the grade points and maximum scale shown on your result sheet. These calculators provide planning estimates; do not treat the selected scale or any example as confirmation of official UniPort grading policy. Confirm classification with the University of Port Harcourt.</Notice>; }
 function SaveSemester({ open, onClose, rows, maxPoint }) {
   const [metadata, setMetadata] = useState({ sessionId: '', semesterId: '', levelId: '' });
   const action = useAction();
