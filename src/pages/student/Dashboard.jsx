@@ -63,10 +63,10 @@ export default function Dashboard() {
     return { ...fallback, courseCount: currentRows.length, gpa: credits ? qualityPoints / credits : 0 };
   }, [profile, results]);
 
-  const actions = [['plus', 'Add result', '/app/academic?add=1'], ['upload', 'Import UniPort result', '/app/import'], ['upload', 'Import from Excel', '/app/import'], ['book', 'My courses', '/app/academic'], ['calculator', 'Calculate GPA', '/app/calculator'], ['bars', 'Analytics', '/app/analytics'], ['target', 'Target CGPA', '/app/target'], ['file', 'Generate report', '/app/reports'], ['help', 'Contact support', '/app/support']];
   const hasAcademicProfile = Boolean(profile?.programmeId || profile?.facultyId);
   const universityName = profile?.universityName || profile?.universityShortName || (profile?.universityId && profile.universityId !== 'UNIPORT' ? profile.universityId : 'UniPort');
   const isUniPort = !profile?.universityId || profile.universityId === 'UNIPORT';
+  const actions = [['plus', 'Add result', '/app/academic?add=1'], ...(isUniPort ? [['upload', 'Import UniPort result', '/app/import']] : []), ['upload', 'Import from Excel', '/app/import'], ['book', 'My courses', '/app/academic'], ['calculator', 'Calculate GPA', '/app/calculator'], ['bars', 'Analytics', '/app/analytics'], ['target', 'Target CGPA', '/app/target'], ['file', 'Generate report', '/app/reports'], ['help', 'Contact support', '/app/support']];
   const hasResults = results.length > 0 || Boolean(summary.totalCredits);
   const dashboardLoading = resource.status === 'loading' || profileResource.status === 'loading' || resultsResource.status === 'loading';
   const progressPercent = graduation.percent ?? data.academicProgress?.percent ?? null;
