@@ -32,7 +32,7 @@ export function AcademicFields({ form, setForm, withUniversity = true, optional 
     const departments = await departmentLoader();
     const selectedDepartment = departments.find(row => row.id === form.departmentId);
     try {
-      const rows = await academicService.getProgrammes({ departmentId: form.departmentId });
+      const rows = await academicService.getProgrammes({ departmentId: form.departmentId, universityId });
       if (Array.isArray(rows) && rows.length) {
         // Keep the catalogue IDs for compatibility, but present every course of study
         // consistently as a B.Sc. programme in the student profile form.
