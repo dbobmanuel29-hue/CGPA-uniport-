@@ -261,7 +261,7 @@ export const UNIVERSITIES = Object.freeze([
   comingSoon('MARANATHA', 'Maranatha University', 'Maranatha', 'Lagos State, Nigeria'),
   comingSoon('AVEMARIA', 'Ave Maria University', 'Ave Maria', 'Nasarawa State, Nigeria'),
   comingSoon('ALISTIQAMA', 'Al-Istiqama University', 'Al-Istiqama', 'Kano State, Nigeria'),
-  comingSoon('MUD IAME', 'Mudiame University', 'Mudiame', 'Edo State, Nigeria'),
+  comingSoon('MUDIAME', 'Mudiame University', 'Mudiame', 'Edo State, Nigeria'),
   comingSoon('HAVILLA', 'Havilla University', 'Havilla', 'Cross River State, Nigeria'),
   comingSoon('CLARETIAN', 'Claretian University of Nigeria', 'Claretian', 'Imo State, Nigeria'),
   comingSoon('KARLKUMM', 'Karl-Kumm University', 'Karl-Kumm', 'Plateau State, Nigeria'),
