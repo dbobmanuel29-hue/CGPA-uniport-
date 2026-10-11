@@ -48,6 +48,34 @@ export function friendlyError(error) {
   if (error?.code === 'reports/disabled') return 'Student report requests are currently disabled by the administrator.';
   if (error?.code === 'not-found/support') return 'That support request could not be found.';
   if (error?.code === 'validation/support-request' || error?.code === 'validation/support-reply') return error.message || 'Please check your support message and try again.';
-  return 'We could not complete this request. Please try again.';
+  // Common browser, Firebase, upload, validation and network failures.
+  const code = String(error?.code || '').toLowerCase();
+  if (['auth/invalid-email'].includes(code)) return 'Enter a valid email address, for example name@example.com.';
+  if (['auth/weak-password'].includes(code)) return 'Your password is too weak. Use at least 8 characters and choose a stronger password.';
+  if (['auth/missing-password'].includes(code)) return 'Enter your password to continue.';
+  if (['auth/missing-email'].includes(code)) return 'Enter the email address for this account.';
+  if (['auth/email-already-in-use'].includes(code)) return 'This email already has an account. Sign in instead, or reset your password if needed.';
+  if (['auth/user-token-expired', 'auth/id-token-expired', 'auth/invalid-user-token'].includes(code)) return 'Your session has expired. Sign in again and repeat your action.';
+  if (['auth/network-request-failed', 'unavailable', 'network-error', 'failed-precondition/network'].includes(code)) return 'The connection was interrupted. Check your internet connection and try again.';
+  if (['storage/unauthorized', 'storage/unauthenticated'].includes(code)) return 'You are not allowed to upload this file. Sign in again or contact support if the problem continues.';
+  if (['storage/canceled'].includes(code)) return 'The upload was cancelled before it finished. Choose the file again to retry.';
+  if (['storage/retry-limit-exceeded'].includes(code)) return 'The upload could not finish because the connection kept failing. Check your network and try again.';
+  if (['storage/invalid-format', 'file/invalid-type'].includes(code)) return 'This file type is not supported. Choose a supported file format and try again.';
+  if (['storage/invalid-checksum', 'storage/server-file-wrong-size'].includes(code)) return 'The uploaded file did not pass its integrity check. Choose the file again and retry.';
+  if (['storage/quota-exceeded'].includes(code)) return 'File storage is currently full. Please contact support.';
+  if (['deadline-exceeded', 'timeout', 'request-timeout'].includes(code)) return 'The request took too long to finish. Check your connection and try again.';
+  if (['already-exists', 'conflict'].includes(code)) return 'This record already exists. Check for a duplicate before trying again.';
+  if (['not-found', 'resource-not-found'].includes(code)) return 'The item you requested could not be found. It may have been removed or moved.';
+  if (['failed-precondition'].includes(code)) return 'This action cannot be completed yet. Check that the required setup or previous step is complete.';
+  if (['invalid-argument', 'validation/invalid-input'].includes(code)) return 'Some information is missing or invalid. Review the highlighted fields and correct them.';
+  if (['resource-exhausted', 'quota-exceeded'].includes(code)) return 'This feature has reached a temporary usage limit. Wait a little and try again.';
+  if (['internal', 'unknown', 'server-error'].includes(code)) return 'The service encountered an unexpected problem. Try again shortly; if it continues, contact support.';
+  if (error?.name === 'TypeError' && /fetch|network|load failed/i.test(String(error?.message || ''))) return 'CGPA+ could not reach the service. Check your internet connection and try again.';
+  // Preserve clear, user-facing messages authored by the app, but do not expose
+  // raw SDK/HTTP internals, stack traces, URLs or server implementation details.
+  const message = String(error?.message || '').trim();
+  const looksTechnical = /^(Firebase:|FirebaseError:|TypeError:|NetworkError|Request failed with status|HTTP \d{3}|\w+Error:)|stack trace| at \w+ \(/i.test(message);
+  if (message && !looksTechnical && message.length <= 240 && !/https?:\/\/|Bearer\s|token=|api[_-]?key/i.test(message)) return message;
+  return 'CGPA+ could not complete this action because the cause could not be identified. Check your connection, review the information you entered, and try again. If it continues, contact support.';
 }
 export function backendConfigured() { return configured; }
