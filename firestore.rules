@@ -63,7 +63,14 @@ service cloud.firestore {
       allow read: if self(uid) || admin();
 
       allow create: if self(uid) &&
-        request.resource.data.role == 'student';
+        request.resource.data.role == 'student' &&
+        request.resource.data.matriculationNumber is string &&
+        request.resource.data.matriculationNumber.size() >= 5 &&
+        request.resource.data.matriculationNumber.size() <= 32 &&
+        request.resource.data.matriculationNumberKey is string &&
+        request.resource.data.matriculationNumberKey.size() >= 5 &&
+        request.resource.data.matriculationNumberKey.size() <= 64 &&
+        getAfter(/databases/$(database)/documents/matriculationClaims/$(request.resource.data.matriculationNumberKey)).data.uid == uid;
 
       allow update: if admin() ||
         (
@@ -75,6 +82,24 @@ service cloud.firestore {
       allow delete: if self(uid) || admin();
     }
 
+
+
+    // =========================
+    // MATRICULATION NUMBER CLAIMS
+    // =========================
+    // Only a signed-in user can check a single claim during signup. Listing
+    // the collection is admin-only; claim records contain no student number.
+    match /matriculationClaims/{claimId} {
+      allow get: if signedIn();
+      allow list: if admin();
+
+      allow create: if self(request.resource.data.uid) &&
+        request.resource.data.keys().hasOnly(['uid', 'createdAt']) &&
+        request.resource.data.createdAt is timestamp &&
+        getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data.matriculationNumberKey == claimId;
+
+      allow update, delete: if admin();
+    }
 
     // =========================
     // STUDENT PROFILE

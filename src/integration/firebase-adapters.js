@@ -34,8 +34,56 @@ async function userAccount(user, db) {
   }
   const snap = await db.collection('users').doc(user.uid).get();
   const data = snap.exists ? snap.data() : {};
-  return clean({ id: user.uid, fullName: data.fullName || user.displayName || '', email: user.email || data.email || '', phone: data.phone || user.phoneNumber || '', photoUrl: data.photoUrl || user.photoURL || '', accountStatus: data.accountStatus || 'active', emailVerified: !!user.emailVerified, onboardingComplete: !!data.onboardingComplete, role: data.role || undefined, createdAt: asDate(data.createdAt) || asDate(user.metadata?.creationTime) || now() });
+  return clean({ id: user.uid, fullName: data.fullName || user.displayName || '', email: user.email || data.email || '', phone: data.phone || user.phoneNumber || '', photoUrl: data.photoUrl || user.photoURL || '', matriculationNumber: data.matriculationNumber || '', accountStatus: data.accountStatus || 'active', emailVerified: !!user.emailVerified, onboardingComplete: !!data.onboardingComplete, role: data.role || undefined, createdAt: asDate(data.createdAt) || asDate(user.metadata?.creationTime) || now() });
 }
+
+function normalizeMatriculationNumber(value) {
+  const normalized = String(value || '').toUpperCase().replace(/\\s+/g, '');
+  if (!normalized) throw Object.assign(new Error('A UniPort matriculation number is required.'), { code: 'auth/matriculation-required' });
+  if (normalized.length < 5 || normalized.length > 32 || !/[0-9]/.test(normalized) || !/^[A-Z0-9/.-]+$/.test(normalized)) {
+    throw Object.assign(new Error('Enter a valid UniPort matriculation number.'), { code: 'auth/matriculation-invalid' });
+  }
+  return normalized;
+}
+
+async function createStudentAccount({ db, user, fullName, email, matriculationNumber, acceptedTerms, provider }) {
+  const normalized = normalizeMatriculationNumber(matriculationNumber);
+  // Firestore document IDs cannot contain '/', so encode it into a reserved
+  // sequence that cannot appear in accepted matriculation-number characters.
+  const matriculationNumberKey = normalized.replace(/\\//g, '__');
+  const claimRef = db.collection('matriculationClaims').doc(matriculationNumberKey);
+  const userRef = db.collection('users').doc(user.uid);
+  const profileRef = db.collection('academicProfiles').doc(user.uid);
+  const stamp = window.firebase.firestore.FieldValue.serverTimestamp();
+
+  await db.runTransaction(async transaction => {
+    const claim = await transaction.get(claimRef);
+    if (claim.exists && claim.data().uid !== user.uid) {
+      throw Object.assign(new Error('That matriculation number is already linked to a CGPA+ account.'), { code: 'auth/matriculation-already-used' });
+    }
+    if (!claim.exists) transaction.set(claimRef, { uid: user.uid, createdAt: stamp });
+    transaction.set(userRef, clean({
+      fullName: fullName || user.displayName || '',
+      email: email || user.email || '',
+      matriculationNumber: normalized,
+      matriculationNumberKey,
+      accountStatus: 'active',
+      onboardingComplete: false,
+      role: user.uid === OWNER_ADMIN_UID ? 'admin' : 'student',
+      acceptedTermsAt: acceptedTerms ? stamp : undefined,
+      createdAt: stamp,
+      provider: provider || 'password',
+    }), { merge: true });
+    transaction.set(profileRef, {
+      universityId: UNIVERSITY.id,
+      userId: user.uid,
+      createdAt: stamp,
+    }, { merge: true });
+  });
+
+  return normalized;
+}
+
 function queryRows(snapshot) { return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })); }
 function relationQuery(collection, field, value) { return value ? collection.where(field, '==', value) : collection; }
 async function getCollection(db, name, filters = {}) { let query = db.collection(name); for (const [field, value] of Object.entries(filters)) if (value) query = query.where(field, '==', value); const snap = await query.get(); return queryRows(snap); }
@@ -51,8 +99,8 @@ async function registerAuth() {
   const { auth, db, storage } = await ctx(); const persistence = window.firebase.auth.Auth.Persistence;
   const authMethods = {
     async login({email,password,remember=true}) { await auth.setPersistence(remember?persistence.LOCAL:persistence.SESSION); const result=await auth.signInWithEmailAndPassword(email,password); return userAccount(result.user,db); },
-    async loginWithGoogle({intent}) { googleAuthValidationInProgress=true; try { const provider=new window.firebase.auth.GoogleAuthProvider(); provider.setCustomParameters({prompt:'select_account'}); const result=await auth.signInWithPopup(provider); const ref=db.collection('users').doc(result.user.uid); const existing=await ref.get(); if(!existing.exists && intent==='login') { await auth.signOut(); throw Object.assign(new Error('No CGPA+ account was found for this Google account. Create an account first.'),{code:'auth/cgpa-account-not-found'}); } if(!existing.exists) await ref.set({fullName:result.user.displayName||'',email:result.user.email||'',accountStatus:'active',onboardingComplete:false,role:result.user.uid===OWNER_ADMIN_UID?'admin':'student',createdAt:window.firebase.firestore.FieldValue.serverTimestamp(),provider:'google'}); return userAccount(result.user,db); } finally { googleAuthValidationInProgress=false; } },
-    async register({fullName,email,password,acceptedTerms}) { if(!acceptedTerms) throw Object.assign(new Error('Terms acceptance is required.'),{code:'auth/terms-required'}); const result=await auth.createUserWithEmailAndPassword(email,password); await result.user.updateProfile({displayName:fullName}); await db.collection('users').doc(result.user.uid).set({fullName,email,accountStatus:'active',onboardingComplete:false,role:result.user.uid===OWNER_ADMIN_UID?'admin':'student',acceptedTermsAt:window.firebase.firestore.FieldValue.serverTimestamp(),createdAt:window.firebase.firestore.FieldValue.serverTimestamp()}); await db.collection('academicProfiles').doc(result.user.uid).set({universityId:UNIVERSITY.id,userId:result.user.uid,createdAt:window.firebase.firestore.FieldValue.serverTimestamp()}); return userAccount(result.user,db); },
+    async loginWithGoogle({intent,matriculationNumber,acceptedTerms}) { googleAuthValidationInProgress=true; try { const provider=new window.firebase.auth.GoogleAuthProvider(); provider.setCustomParameters({prompt:'select_account'}); const result=await auth.signInWithPopup(provider); const ref=db.collection('users').doc(result.user.uid); const existing=await ref.get(); if(!existing.exists && intent==='login') { await auth.signOut(); throw Object.assign(new Error('No CGPA+ account was found for this Google account. Create an account first.'),{code:'auth/cgpa-account-not-found'}); } if(!existing.exists) { try { await createStudentAccount({db,user:result.user,fullName:result.user.displayName||'',email:result.user.email||'',matriculationNumber,acceptedTerms,provider:'google'}); } catch(error) { try { await result.user.delete(); } catch { await auth.signOut(); } throw error; } } return userAccount(result.user,db); } finally { googleAuthValidationInProgress=false; } },
+    async register({fullName,email,password,acceptedTerms,matriculationNumber}) { if(!acceptedTerms) throw Object.assign(new Error('Terms acceptance is required.'),{code:'auth/terms-required'}); const normalizedMatriculationNumber=normalizeMatriculationNumber(matriculationNumber); const result=await auth.createUserWithEmailAndPassword(email,password); await result.user.updateProfile({displayName:fullName}); try { await createStudentAccount({db,user:result.user,fullName,email,matriculationNumber:normalizedMatriculationNumber,acceptedTerms,provider:'password'}); } catch(error) { try { await result.user.delete(); } catch { await auth.signOut(); } throw error; } return userAccount(result.user,db); },
     async sendPasswordReset({email}) { await auth.sendPasswordResetEmail(email); return {accepted:true}; },
     async logout(){await auth.signOut();return{ok:true};}, async getCurrentUser(){
       const user = auth.currentUser;
