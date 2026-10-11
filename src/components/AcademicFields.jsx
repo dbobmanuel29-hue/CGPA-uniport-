@@ -21,8 +21,14 @@ export function AcademicFields({ form, setForm, withUniversity = true, optional 
     if (!isUniversitySupported(universityId)) return Promise.resolve([]);
     return loadOrFallback(() => academicService.getFaculties({ universityId }), universityId === UNIVERSITY.id ? FALLBACK_FACULTIES : []);
   };
-  const departmentLoader = () => loadOrFallback(() => academicService.getDepartments({ facultyId: form.facultyId }), FALLBACK_DEPARTMENTS.filter(row => row.facultyId === form.facultyId));
+  const departmentLoader = () => {
+    const universityId = form.universityId || UNIVERSITY.id;
+    if (!isUniversitySupported(universityId)) return Promise.resolve([]);
+    return loadOrFallback(() => academicService.getDepartments({ facultyId: form.facultyId, universityId }), universityId === UNIVERSITY.id ? FALLBACK_DEPARTMENTS.filter(row => row.facultyId === form.facultyId) : []);
+  };
   const programmeLoader = async () => {
+    const universityId = form.universityId || UNIVERSITY.id;
+    if (!isUniversitySupported(universityId)) return [];
     const departments = await departmentLoader();
     const selectedDepartment = departments.find(row => row.id === form.departmentId);
     try {
@@ -38,9 +44,21 @@ export function AcademicFields({ form, setForm, withUniversity = true, optional 
     if (selectedDepartment) return [{ id: `fallback-bsc-${selectedDepartment.id}`, name: `B.Sc. ${selectedDepartment.name}`, departmentId: selectedDepartment.id, status: 'active' }];
     return [];
   };
-  const levelLoader = () => loadOrFallback(() => academicService.getLevels({ programmeId: form.programmeId }), FALLBACK_LEVELS);
-  const semesterLoader = () => loadOrFallback(() => academicService.getSemesters({ programmeId: form.programmeId }), FALLBACK_SEMESTERS);
-  const sessionLoader = () => loadOrFallback(() => academicService.getAcademicSessions(), FALLBACK_SESSIONS);
+  const levelLoader = () => {
+    const universityId = form.universityId || UNIVERSITY.id;
+    if (!isUniversitySupported(universityId)) return Promise.resolve([]);
+    return loadOrFallback(() => academicService.getLevels({ programmeId: form.programmeId, universityId }), universityId === UNIVERSITY.id ? FALLBACK_LEVELS : []);
+  };
+  const semesterLoader = () => {
+    const universityId = form.universityId || UNIVERSITY.id;
+    if (!isUniversitySupported(universityId)) return Promise.resolve([]);
+    return loadOrFallback(() => academicService.getSemesters({ programmeId: form.programmeId, universityId }), universityId === UNIVERSITY.id ? FALLBACK_SEMESTERS : []);
+  };
+  const sessionLoader = () => {
+    const universityId = form.universityId || UNIVERSITY.id;
+    if (!isUniversitySupported(universityId)) return Promise.resolve([]);
+    return loadOrFallback(() => academicService.getAcademicSessions({ universityId }), universityId === UNIVERSITY.id ? FALLBACK_SESSIONS : []);
+  };
 
   const selectedUniversity = UNIVERSITIES.find(item => item.id === (form.universityId || UNIVERSITY.id)) || UNIVERSITY;
   const matriculation = getMatriculationConfig(form.universityId || UNIVERSITY.id);
