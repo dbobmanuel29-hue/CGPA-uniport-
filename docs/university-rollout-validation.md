@@ -1,49 +1,60 @@
-# CGPA+ Public-University Rollout Validation
+# CGPA+ Rivers State Rollout Research
 
 **Research date:** 11 October 2026  
-**Product rule:** A university must not become calculation-enabled just because it is public or uses a familiar grading scale. Enable it only after (1) genuine student need is evidenced, (2) official grading rules are verified for the relevant programme/cohort/session, and (3) its course catalogue has been reviewed. Private universities are intentionally outside CGPA+'s target directory.
+**Scope decision:** Focus CGPA+ on public universities located in Rivers State instead of researching public universities across Nigeria. Private universities remain outside the product directory. Being public does not automatically qualify a university: CGPA+ should target institutions where students have a genuine unmet need for GPA/CGPA calculation or academic planning.
 
-## Candidate review
+## Rivers State public-university landscape
 
-| Candidate | Evidence about existing calculator/tools | Current decision |
+The NUC's Nigerian University System directory lists these public universities in Rivers State: University of Port Harcourt (federal), Rivers State University (state), Ignatius Ajuru University of Education (state), and Federal University of Environment and Technology (federal). The NUC directory also lists private institutions in Rivers State, but they are out of scope under the product decision.
+
+Official source: https://enuc.nuc.edu.ng/nus
+
+## Candidate decisions
+
+| University | What was verified | Current decision |
 |---|---|---|
-| Rivers State University (RSU) | The user confirms RSU can calculate its own GPA/CGPA. A September 2025 report also describes RSU's eCAMPUS Aspire app as including CGPA prediction. | **Skip for now.** Do not prioritize unless students identify a meaningful gap the official tool does not address. |
-| University of Nigeria, Nsukka (UNN) | The official Google Play listing for the UNN PRIDE app says students can view published results together with GPA and CGPA. The official QA unit links to undergraduate academic regulations, but the accessible PDF is labelled 2013/2014. | **Skip as a primary target for now.** Its official app already exposes GPA/CGPA. Revisit only if students report missing features such as what-if forecasting or course planning. |
-| University of Lagos (UNILAG) | UNILAG has an official student portal and 2025 Student Life Cycle Guidelines covering grading, GPA and academic standing. Public sources reviewed do not conclusively establish whether students can calculate/forecast GPA/CGPA inside the authenticated portal. | **Unresolved.** Ask current UNILAG students about the portal before deciding whether there is a gap. Do not enable calculations yet. |
-| Obafemi Awolowo University (OAU) | OAU has an official student information portal and published examination regulations explaining GPA calculation. The public pages reviewed do not prove whether students have an independent calculator or useful forecasting tools inside the authenticated portal. | **Next candidate to investigate.** Verify actual student-facing functionality and student need before spending time on catalogue/rules implementation. Do not enable calculations yet. |
-| University of Ibadan (UI) | UI has an official student portal and an official Result Management System page that explicitly lists CGPA computation. The result system appears staff-facing behind sign-in, so that does not prove students have a calculator themselves. | **Do not prioritize without further evidence.** Ask students whether their student portal displays calculated GPA/CGPA and whether they need a separate planning tool. |
+| University of Port Harcourt (UniPort) | This is CGPA+'s existing launch institution. | **Supported.** Keep existing features working and treat UniPort as the reference implementation. |
+| Rivers State University (RSU) | The user confirms RSU can calculate its own GPA/CGPA. A September 2025 report also describes the RSU eCAMPUS Aspire app as including CGPA prediction. | **Skip for now.** Do not spend rollout effort here unless RSU students later identify a specific unmet need beyond the existing tool. |
+| Ignatius Ajuru University of Education (IAUE) | IAUE has an official university website and a student/enterprise portal that accepts email, matriculation/registration number, phone number or UIN for login. Publicly accessible pages reviewed do not establish whether students can calculate GPA/CGPA themselves inside the authenticated portal. | **First candidate to investigate.** Ask current IAUE students whether the portal calculates semester GPA and cumulative CGPA, whether it supports what-if/future-grade planning, and what is missing. Do not enable calculations until need, rules and course data are verified. |
+| Federal University of Environment and Technology (FUET), Koroma/Saakpenwa | FUET is a federal public university in Rivers State. Its official website lists undergraduate programmes and academic sessions; its ARIS portal supports student login, clearance, fees and course registration. Public pages reviewed do not confirm whether it provides a student-facing GPA/CGPA calculator. The institution is new, so cohort and catalogue coverage require special care. | **Second candidate to investigate.** First confirm current enrolled cohorts, available programmes, grading policy, results availability and whether its student portal already computes GPA/CGPA. Do not enable calculations until all evidence is complete. |
 
-## Sources
+## Official sources
+
+### National university list
+- National Universities Commission (NUC), Nigerian University System directory, including university ownership and state: https://enuc.nuc.edu.ng/nus
+
+### UniPort
+- Official University of Port Harcourt website: https://www.uniport.edu.ng/
+- CGPA+ remains the active implementation for UniPort: https://www.cgpaplus.name.ng/
 
 ### RSU
-- Official RSU website: https://www.rsu.edu.ng/
-- Report on RSU's eCAMPUS Aspire app, published 1 September 2025: https://myschoolnews.ng/rivers-state-university-launches-ecampus-aspire-mobile-app
+- Official Rivers State University website: https://www.rsu.edu.ng/
+- Report on RSU's eCAMPUS Aspire app, published 1 September 2025 (secondary reporting): https://myschoolnews.ng/rivers-state-university-launches-ecampus-aspire-mobile-app
 
-### UNN
-- Official UNN PRIDE app listing (says students can see results with GPA and CGPA): https://play.google.com/store/apps/details?id=ng.edu.unn.pride
-- Official Quality Assurance Unit undergraduate regulations page: https://qau.unn.edu.ng/undergraduate-academic-regulations/
-- Regulation PDF linked by the official QA unit (labelled 2013/2014): https://qau.unn.edu.ng/wp-content/uploads/sites/92/2023/12/010-Undergraduate-Academic-Regulation-1.pdf
+### IAUE
+- Official IAUE website and undergraduate programmes: https://iaue.edu.ng/admissions/undergraduate-studies/
+- Official IAUE student/enterprise portal: https://www.enterpriseschoolsportal.iaue.edu.ng/Account/Login
+- Official IAUE contact details for academic/ICT enquiries: https://iaue.edu.ng/contact-us/
 
-### UNILAG
-- Official 2025 Student Life Cycle Guidelines: https://unilag.edu.ng/wp-content/uploads/2025/04/Student-Life-Cycle-GUIDELINES-Hyperlinked.pdf
-- Official student portal: https://studentportal.unilag.edu.ng/index.html
+### FUET
+- Official FUET website and undergraduate programmes: https://fuet.edu.ng/
+- Official FUET student ARIS portal: https://aris.fuet.edu.ng/index
+- Official FUET about page describing its campuses and public-university status: https://fuet.edu.ng/about/
 
-### OAU
-- Official OAU student information portal: https://eportal.oauife.edu.ng/home.php
-- Official OAU Examination Regulations PDF (published GPA calculation rules; older document, so confirm current policy): https://eportal.oauife.edu.ng/downloads/ExaminationREgulations.pdf
+## Research plan for IAUE and FUET
 
-### UI
-- Official UI student portal: https://student-portal.ui.edu.ng/login
-- Official UI Result Management System (lists CGPA Computation; appears to be an authenticated results-management system): https://uirms.ui.edu.ng/
+1. **Ask students directly:** Does your official portal calculate semester GPA and cumulative CGPA automatically? Can you calculate a projected CGPA before taking exams? What do you still calculate manually? Which features would make CGPA+ useful?
+2. **Check official portal access:** Review public help pages and ask the university ICT/student support desk when authenticated features cannot be verified from public pages. Do not infer that a feature is absent simply because it is not visible without login.
+3. **Verify academic rules:** Obtain current, authoritative undergraduate regulations for each university and confirm grading scale, grade boundaries, credit weighting, repeat/carry-over rules, rounding, degree classification and programme/cohort exceptions.
+4. **Build the course catalogue:** Use official handbooks and programme documents to verify faculties, departments, programmes, course codes, course titles, credit units, semester/level and academic-session validity. Do not invent missing courses.
+5. **Validate calculations:** Compare sample GPA/CGPA calculations and edge cases with official examples or independently verified results.
+6. **Release gate:** Keep IAUE and FUET marked coming-soon until student need, grading rules, catalogue coverage and calculation tests are all approved. Do not let either institution fall back to UniPort data.
 
-## Required release gate
+## Current rollout decision
 
-1. **Need validation:** Ask students whether their own university portal calculates semester GPA and cumulative CGPA, whether it supports future-grade/what-if forecasting, and what is missing. Do not infer absence from a web search alone.
-2. **Official rules:** Obtain current authoritative regulations for the relevant programme/cohort/session. Record grade boundaries, grade points, credit weighting, repeats/carry-overs, rounding and classification thresholds.
-3. **Catalogue:** Verify faculties, departments, programmes, levels, semesters, course codes, titles, credit units and session validity from official sources. Never invent course rows.
-4. **Testing:** Compare GPA/CGPA, failed/repeated courses, rounding and classification boundaries with independently verified examples.
-5. **Release gate:** Keep a university marked coming-soon until need, rules, catalogue and tests are all approved. UniPort remains the only calculation-enabled university.
+- **Enabled:** UniPort only.
+- **Skip:** RSU, because the user confirms its own GPA/CGPA calculation is available.
+- **Investigate next:** IAUE, then FUET.
+- **Excluded:** Private universities in Rivers State, in line with the product scope.
 
-## Evidence limitations
-
-This is desk research, not a guarantee that every student-facing portal feature has been identified. A university's staff result-management system or published grading rules do not prove that students have a useful self-service calculator. Third-party calculators do not prove the official portal is inadequate. No new university has been enabled by this research.
+This is initial desk research, not proof that IAUE or FUET lack official calculators. The student-facing features behind their portals must be confirmed before making a final decision or enabling calculations.
