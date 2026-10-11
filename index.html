@@ -33,6 +33,8 @@
     <style>
       #initial-loader{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fbfbf7;color:#24332d;opacity:1;visibility:visible;transition:opacity .35s ease,visibility .35s ease}
       #initial-loader.is-leaving{opacity:0;visibility:hidden;pointer-events:none}
+      #root.app-revealing{animation:app-reveal .35s ease both}
+      @keyframes app-reveal{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
       #initial-loader .wordmark{font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:clamp(42px,8vw,64px);font-weight:750;letter-spacing:-.075em;line-height:1}
       #initial-loader .word{color:#214c3e}
       #initial-loader .plus{color:#a5c950;margin-left:1px}
@@ -41,7 +43,7 @@
       #initial-loader .status{margin:13px 0 0;color:#7a817a;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:11px;font-weight:600;letter-spacing:.13em;text-transform:uppercase}
       @keyframes initial-loader-line{0%{transform:translateX(-120%)}100%{transform:translateX(340%)}}
       @media(prefers-color-scheme:dark){#initial-loader{background:#101b16;color:#edf1e7}#initial-loader .word{color:#edf1e7}#initial-loader .rule{background:#304039}#initial-loader .rule span{background:#a3cdab}#initial-loader .status{color:#8f9a92}}
-      @media(prefers-reduced-motion:reduce){#initial-loader .rule span{animation:none;width:100%}}
+      @media(prefers-reduced-motion:reduce){#initial-loader .rule span{animation:none;width:100%}#root.app-revealing{animation:none}}
     </style>
     <script type="application/ld+json">
       {
