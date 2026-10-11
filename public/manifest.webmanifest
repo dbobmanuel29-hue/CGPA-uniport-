@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "CGPA Plus UniPort",
+  "name": "CGPA Plus",
   "short_name": "CGPA+",
-  "description": "GPA and CGPA calculator and academic progress tools for University of Port Harcourt students.",
+  "description": "GPA and CGPA tools, academic records, and progress planning for Nigerian university students.",
   "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",
