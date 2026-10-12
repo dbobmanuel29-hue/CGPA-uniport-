@@ -7,14 +7,14 @@
 }
 
 html {
-  min-width: 320px;
+  min-width: 280px;
   text-size-adjust: 100%;
   -webkit-text-size-adjust: 100%;
   scroll-padding-top: clamp(72px, 9vh, 108px);
 }
 
 body, #root {
-  min-width: 320px;
+  min-width: 280px;
   max-width: 100%;
 }
 
