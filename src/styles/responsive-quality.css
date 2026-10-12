@@ -109,9 +109,15 @@ button:not(:disabled):active,
 }
 
 .cookie-consent {
-  left: max(16px, env(safe-area-inset-left, 0px)) !important;
-  right: max(16px, env(safe-area-inset-right, 0px)) !important;
+  /* Keep the banner centered and constrain it symmetrically on every viewport. */
+  left: max(16px, calc((100vw - 760px) / 2)) !important;
+  right: max(16px, calc((100vw - 760px) / 2)) !important;
   bottom: max(92px, calc(var(--cgpa-safe-bottom) + 76px)) !important;
+  width: auto !important;
+  max-width: 760px;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  box-sizing: border-box !important;
   max-height: min(48svh, 360px);
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -176,6 +182,20 @@ button:not(:disabled):active,
   overscroll-behavior: contain;
 }
 
+/* Tablet hero: show the complete photo instead of cropping its edges. */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .home-hero {
+    height: clamp(560px, 68vw, 680px);
+    min-height: 560px;
+  }
+
+  .home-hero .hero-photo {
+    object-fit: contain;
+    object-position: center center;
+    background-color: #193b2d;
+  }
+}
+
 /* Small laptops, tablets and landscape phones. */
 @media (max-width: 1024px) {
   .container {
@@ -208,7 +228,7 @@ button:not(:disabled):active,
     /* Explicit mobile width/insets prevent fixed banners touching the right screen edge. */
     left: 12px !important;
     right: 12px !important;
-    width: calc(100% - 24px) !important;
+    width: calc(100vw - 24px) !important;
     max-width: none !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
@@ -301,7 +321,7 @@ button:not(:disabled):active,
   .cookie-consent {
     left: 8px !important;
     right: 8px !important;
-    width: calc(100% - 16px) !important;
+    width: calc(100vw - 16px) !important;
     max-width: none !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
