@@ -12,13 +12,13 @@
   "categories": ["education", "productivity"],
   "icons": [
     {
-      "src": "/pwa-icon.svg",
+      "src": "/pwa-icon.svg?v=6",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
     },
     {
-      "src": "/pwa-icon-maskable.svg",
+      "src": "/pwa-icon-maskable.svg?v=6",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "maskable"
