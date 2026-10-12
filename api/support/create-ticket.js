@@ -107,16 +107,20 @@ export default async function handler(req, res) {
       return json(res, 429, { ok: false, code: 'support/rate-limited', error: 'You have sent several support requests recently. Please wait a few minutes and try again.', retryAfterSeconds: result.retryAfterSeconds });
     }
 
-    await db.collection('notifications').add({
-      userId: 'lmUB6IdhuaOlHjzkqBE7PH2',
-      type: 'support',
-      title: 'New support request',
-      message: `${fullName} submitted a support request: ${subject}`,
-      relatedId: result.ticketId,
-      route: '/admin/support',
-      read: false,
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
-    });
+    try {
+      await db.collection('notifications').add({
+        userId: 'lmUB6IdhuaOlHjzkqBE7PH2',
+        type: 'support',
+        title: 'New support request',
+        message: `${fullName} submitted a support request: ${subject}`,
+        relatedId: result.ticketId,
+        route: '/admin/support',
+        read: false,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+    } catch (notificationError) {
+      console.error('Support ticket was created but admin alert could not be saved:', notificationError);
+    }
 
     return json(res, 201, { ok: true, ticketId: result.ticketId });
   } catch (error) {
