@@ -557,3 +557,238 @@ button:not(:disabled):active,
     max-width: min(52%, 560px);
   }
 }
+
+
+/* Final cross-device layout pass: narrow phones, foldables, tablets and desktops.
+   These rules adapt existing components without replacing the site's design. */
+:root { --cgpa-page-gutter: clamp(14px, 3.2vw, 44px); }
+
+html, body, #root {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+#root, .app, main, section, article, aside, header, footer,
+.public-layout, .public-main, .workspace, .workspace-main,
+.workspace-content, .container, .section-inner {
+  min-width: 0;
+}
+
+img, video, canvas, iframe {
+  max-width: 100%;
+}
+
+.container, .section-inner {
+  box-sizing: border-box;
+}
+
+@media (min-width: 1200px) {
+  .container {
+    width: min(100% - 64px, 1240px);
+    margin-inline: auto;
+  }
+  .home-hero {
+    height: 582px;
+    min-height: 560px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+  .container {
+    width: 100%;
+    padding-inline: clamp(22px, 4vw, 44px);
+  }
+
+  /* A dedicated photo column prevents the students being cropped behind text. */
+  .home-hero {
+    height: clamp(540px, 70vw, 650px) !important;
+    min-height: 540px !important;
+    max-height: 650px;
+  }
+  .home-hero > .hero-photo {
+    width: 68% !important;
+    object-position: center 38% !important;
+  }
+  .home-hero .hero-content.container {
+    padding-top: clamp(44px, 6vw, 68px) !important;
+    padding-bottom: 36px !important;
+    padding-inline: clamp(24px, 4vw, 48px) !important;
+  }
+  .home-hero .hero-content > * {
+    max-width: min(50%, 500px);
+  }
+
+  .tools-grid,
+  .analytics-story-grid,
+  .graduation-story {
+    gap: clamp(20px, 3vw, 44px);
+  }
+
+  .analytics-story-grid { grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); }
+  .graduation-story { grid-template-columns: minmax(0, 1fr) minmax(0, .9fr); }
+  .workspace-content { padding-inline: clamp(18px, 2.5vw, 30px); }
+}
+
+@media (max-width: 767px) {
+  :root { --cgpa-page-gutter: clamp(12px, 4vw, 22px); }
+
+  .container, .section-inner {
+    width: 100%;
+    max-width: 100%;
+    padding-inline: var(--cgpa-page-gutter) !important;
+  }
+
+  .home-hero {
+    height: auto !important;
+    min-height: max(620px, 88svh) !important;
+    max-height: none !important;
+  }
+  .home-hero > .hero-photo {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 100% !important;
+    object-position: 62% center !important;
+  }
+  .home-hero .hero-content.container {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 48px var(--cgpa-page-gutter) 88px !important;
+  }
+  .home-hero .hero-content > * { max-width: 100%; }
+  .home-hero .hero-title { max-width: 18ch; }
+  .home-hero .hero-description { max-width: 44ch; }
+  .home-hero .hero-actions { flex-wrap: wrap; }
+  .home-hero .hero-actions .button { max-width: 100%; }
+
+  .tools-grid,
+  .analytics-story-grid,
+  .graduation-story,
+  .projection-demo,
+  .dashboard-grid,
+  .dashboard-bottom,
+  .two-panel-grid,
+  .reports-layout,
+  .profile-layout {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .analytics-story-grid,
+  .graduation-story { gap: 24px; }
+
+  .projection-answer { min-height: 280px; }
+  .scenario-options { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 5px; }
+  .scenario-options button { min-width: 0; }
+
+  .public-header { max-width: 100%; }
+  .public-header .nav-inner { min-width: 0; gap: 10px; }
+  .public-header .brand { min-width: 0; max-width: calc(100% - 58px); }
+  .public-header .brand-logo-image { max-width: 100%; }
+  .public-header .brand-name { font-size: clamp(21px, 6vw, 28px); }
+
+  .auth-page {
+    min-height: 100dvh;
+    height: auto !important;
+    overflow: visible !important;
+  }
+  .auth-aside, .auth-main { min-width: 0; max-width: 100%; }
+  .auth-main { overflow: visible; }
+  .auth-box { width: 100%; max-width: 440px; margin-inline: auto; }
+
+  .workspace-content {
+    width: 100%;
+    max-width: 100%;
+    padding-inline: var(--cgpa-page-gutter);
+  }
+  .workspace .panel,
+  .workspace .workspace-card,
+  .workspace .stat,
+  .workspace .report-paper {
+    max-width: 100%;
+    min-width: 0;
+  }
+  .workspace .table-scroll,
+  .workspace .table-wrap,
+  .table-scroll,
+  .table-wrap {
+    max-width: 100%;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  .workspace table, .data-table { min-width: 560px; }
+  .workspace .page-header,
+  .workspace .panel-header,
+  .workspace .table-toolbar,
+  .workspace .table-filters,
+  .workspace .table-pagination {
+    flex-wrap: wrap;
+    min-width: 0;
+  }
+  .workspace .page-header > *,
+  .workspace .panel-header > *,
+  .workspace .table-toolbar > *,
+  .workspace .table-filters > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .workspace .form-grid,
+  .workspace .calculator-layout,
+  .workspace .projection-inputs,
+  .workspace .course-entry-row {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .workspace input,
+  .workspace select,
+  .workspace textarea,
+  .workspace button,
+  .workspace .button {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 420px) {
+  :root { --cgpa-page-gutter: 12px; }
+
+  .home-hero .hero-content.container { padding-top: 42px !important; }
+  .home-hero .hero-wordmark { font-size: clamp(52px, 15vw, 66px); }
+  .home-hero .hero-wordmark > small { font-size: 12px; margin-left: 8px; padding: 5px 7px; }
+  .home-hero .hero-title { font-size: clamp(28px, 8vw, 36px); letter-spacing: -1px; }
+  .home-hero .hero-actions { align-items: stretch; }
+  .home-hero .hero-actions .button { flex: 1 1 100%; justify-content: center; }
+
+  .tools-grid, .scenario-options { gap: 6px; }
+  .tool-copy, .calculator-preview { padding-inline: 14px; }
+  .projection-demo > div:first-child { padding: 20px 14px; }
+  .projection-answer { padding-inline: 16px; }
+  .projection-answer > strong { font-size: clamp(48px, 16vw, 68px); }
+
+  .workspace-content { padding-inline: 10px; }
+  .workspace .panel, .workspace .stat, .workspace .workspace-card { padding: 13px; }
+  .workspace .stats-grid, .workspace .stats-three { grid-template-columns: minmax(0, 1fr) !important; }
+  .workspace .modal { width: calc(100vw - 20px); max-width: calc(100vw - 20px); }
+  .workspace .modal-actions { grid-template-columns: minmax(0, 1fr) !important; }
+  .workspace .modal-actions > * { width: 100%; }
+}
+
+@media (max-width: 340px) {
+  .home-hero .hero-wordmark { font-size: 48px; }
+  .home-hero .hero-wordmark > small { display: none; }
+  .home-hero .hero-actions .button,
+  .home-hero .hero-sign-in { width: 100%; margin-left: 0; }
+  .scenario-options { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .workspace-header-actions { flex-wrap: wrap; }
+}
+
+/* Landscape phones and foldables: use available height without clipping content. */
+@media (max-height: 520px) and (max-width: 950px) {
+  .home-hero {
+    min-height: 540px !important;
+    height: auto !important;
+  }
+  .auth-page { height: auto !important; min-height: 100dvh !important; }
+  .auth-main { max-height: 100dvh; overflow-y: auto !important; }
+}
+
+@supports not (overflow: clip) {
+  html, body, #root { overflow-x: hidden; }
+}
