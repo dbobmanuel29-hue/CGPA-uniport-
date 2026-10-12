@@ -10,8 +10,8 @@ import { useSession } from '../../state/session';
 import { getFirebase } from '../../integration/firebase-client.js';
 
 const HERO = '/images/uniport-campus-hero.jpg';
-const STUDY = 'https://images.pexels.com/photos/8199762/pexels-photo-8199762.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200';
-const CAMPUS = 'https://images.pexels.com/photos/6334877/pexels-photo-6334877.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200';
+const STUDY = 'https://campex.ng/assets/img/hero_placeholder.jpg';
+const CAMPUS = 'https://claretianuniversity.edu.ng/img/ijmb-aspect-img.jpg';
 
 const RIBBON = ['For UniPort students', 'GPA calculator', 'CGPA tracking', 'Target planning', 'Academic timeline', 'Graduation progress', 'Performance analytics', 'Semester records', 'Course attention', 'Academic reports'];
 
@@ -169,7 +169,7 @@ function Testimonials() {
         <div className="testimonial-card-top"><span className="testimonial-avatar">{item.photoUrl ? <img src={item.photoUrl} alt={`Profile of ${item.name}`} loading="lazy" /> : (item.name || 'S').trim().slice(0,1).toUpperCase()}</span><div className="testimonial-person"><strong>{item.name || 'CGPA+ student'}</strong><span>CGPA+ community</span></div><span className="testimonial-quote-mark" aria-hidden="true">“</span></div>
         <div className="testimonial-rating" aria-label={`${item.rating} out of 5 stars`}>{'★'.repeat(Number(item.rating) || 0)}<span>{'★'.repeat(5 - (Number(item.rating) || 0))}</span></div>
         <p className="testimonial-text">{item.text}</p>
-      </article>)}</div> : <div className="testimonial-empty"><img className="testimonial-empty-photo" src="https://images.pexels.com/photos/31437215/pexels-photo-31437215.jpeg?auto=compress&cs=tinysrgb&w=480&h=480&fit=crop" alt="Nigerian university graduate in academic attire" loading="lazy" /><div><strong>Your experience can help another student.</strong><p>There are no published reviews yet. If CGPA+ has helped you, share your honest feedback.</p><button type="button" className="testimonial-write-button" onClick={() => { setShowForm(true); setError(""); }}>Be the first to review <Icon name="arrow" size={15} /></button></div></div>}
+      </article>)}</div> : <div className="testimonial-empty"><img className="testimonial-empty-photo" src="https://campex.ng/assets/img/hero_placeholder.jpg" alt="Nigerian university graduate in academic attire" loading="lazy" /><div><strong>Your experience can help another student.</strong><p>There are no published reviews yet. If CGPA+ has helped you, share your honest feedback.</p><button type="button" className="testimonial-write-button" onClick={() => { setShowForm(true); setError(""); }}>Be the first to review <Icon name="arrow" size={15} /></button></div></div>}
     </div>
   </section>;
 }

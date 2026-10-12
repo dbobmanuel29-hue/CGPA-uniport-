@@ -1,10 +1,21 @@
 import admin from 'firebase-admin';
 
+const NIGERIAN_STUDENT_PHOTOS = [
+  "https://scholarshipsforafricans.com/assets/destination-nigeria-CPhuf6fW.jpg",
+  "https://babcock.edu.ng/curator/media/6b56fa2e-3382-4fcb-b4f9-5c1204fdb004.jpg?h=700&s=f185d09c89ae7d6c1a1b0278c27cf607&w=896",
+  "https://www.ijmb.info/_next/static/media/students-group.1b916442.jpeg",
+  "https://fceididep.edu.ng/images/gallery2.png"
+];
+function samplePhotoFor(id) {
+  const key = String(id || 'student');
+  const index = [...key].reduce((sum, character) => sum + character.charCodeAt(0), 0) % NIGERIAN_STUDENT_PHOTOS.length;
+  return NIGERIAN_STUDENT_PHOTOS[index];
+}
 const SAMPLE_TESTIMONIALS = [
-  { id: 'sample-1', name: 'Chisom N.', rating: 5, text: 'CGPA+ makes it easier for me to keep my semester results together and see how my CGPA is moving. The dashboard is simple to understand.', photoUrl: 'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=160&h=160&fit=crop', isSample: true, status: 'approved' },
-  { id: 'sample-2', name: 'David O.', rating: 4, text: 'I like having the GPA calculator and academic planning tools in one place. I would love to see more university grading systems added as CGPA+ grows.', photoUrl: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=160&h=160&fit=crop', isSample: true, status: 'approved' },
-  { id: 'sample-3', name: 'Amara E.', rating: 3, text: 'The idea is really useful, especially for students trying to plan their grades. A few more tips for first-time users would make getting started even easier.', photoUrl: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=160&h=160&fit=crop', isSample: true, status: 'approved' },
-  { id: 'sample-4', name: 'Precious W.', rating: 4, text: 'I like that I can check my academic progress without doing all the calculations manually. It would be nice to have even more course-planning options.', photoUrl: 'https://images.pexels.com/photos/31437215/pexels-photo-31437215.jpeg?auto=compress&cs=tinysrgb&w=160&h=160&fit=crop', isSample: true, status: 'approved' },
+  { id: 'sample-1', name: 'Chisom N.', rating: 5, text: 'CGPA+ makes it easier for me to keep my semester results together and see how my CGPA is moving. The dashboard is simple to understand.', photoUrl: 'https://scholarshipsforafricans.com/assets/destination-nigeria-CPhuf6fW.jpg', isSample: true, status: 'approved' },
+  { id: 'sample-2', name: 'David O.', rating: 4, text: 'I like having the GPA calculator and academic planning tools in one place. I would love to see more university grading systems added as CGPA+ grows.', photoUrl: 'https://babcock.edu.ng/curator/media/6b56fa2e-3382-4fcb-b4f9-5c1204fdb004.jpg?h=700&s=f185d09c89ae7d6c1a1b0278c27cf607&w=896', isSample: true, status: 'approved' },
+  { id: 'sample-3', name: 'Amara E.', rating: 3, text: 'The idea is really useful, especially for students trying to plan their grades. A few more tips for first-time users would make getting started even easier.', photoUrl: 'https://www.ijmb.info/_next/static/media/students-group.1b916442.jpeg', isSample: true, status: 'approved' },
+  { id: 'sample-4', name: 'Precious W.', rating: 4, text: 'I like that I can check my academic progress without doing all the calculations manually. It would be nice to have even more course-planning options.', photoUrl: 'https://fceididep.edu.ng/images/gallery2.png', isSample: true, status: 'approved' },
 ];
 
 function json(res, status, body) {
@@ -32,7 +43,7 @@ export default async function handler(req, res) {
       const real = snap.docs.map(publicRow).filter(item => !item.isSample).sort((a,b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
       const controls = await db.collection('testimonialSampleControls').get();
       const hidden = new Set(controls.docs.filter(doc => doc.data()?.hidden === true).map(doc => doc.id));
-      const storedSamples = snap.docs.map(publicRow).filter(item => item.isSample);
+      const storedSamples = snap.docs.map(publicRow).filter(item => item.isSample).map(item => ({ ...item, photoUrl: samplePhotoFor(item.id) }));
       const builtIn = SAMPLE_TESTIMONIALS.filter(item => !hidden.has(item.id));
       const samplesToShow = [...storedSamples, ...builtIn.filter(item => !storedSamples.some(row => row.id === item.id))];
       const result = [...real, ...samplesToShow.slice(0, Math.max(0, 4 - real.length))].slice(0, 6);
