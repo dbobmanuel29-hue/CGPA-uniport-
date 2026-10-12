@@ -17,10 +17,10 @@ button,input,select,textarea{font-size:clamp(15px,.25vw + 14px,17px)}
 @media(max-width:640px){body{font-size:16px;line-height:1.62}.container{padding-left:18px;padding-right:18px}}
 
 /* Academic onboarding guide */
-.academic-guide-trigger{position:fixed;right:24px;bottom:24px;z-index:70;display:inline-flex;align-items:center;gap:9px;padding:10px 15px;border:1px solid var(--border);border-radius:999px;background:var(--surface);color:var(--text);font:650 13px/1 system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;box-shadow:0 12px 34px rgba(22,44,35,.12);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+.academic-guide-trigger{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:max(16px,env(safe-area-inset-bottom,0px));z-index:10005;display:inline-flex;align-items:center;gap:9px;min-height:48px;padding:10px 15px;border:1px solid var(--border);border-radius:999px;background:var(--surface);color:var(--text);font:650 13px/1 system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;box-shadow:0 12px 34px rgba(22,44,35,.18);cursor:pointer;pointer-events:auto;touch-action:manipulation;-webkit-tap-highlight-color:transparent;transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
 .academic-guide-trigger:hover{transform:translateY(-2px);box-shadow:0 16px 40px rgba(22,44,35,.16);border-color:color-mix(in srgb,var(--green) 30%,var(--border))}
 .academic-guide-trigger__icon{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--green);color:var(--surface);font-size:13px;font-weight:800}
-.academic-guide-backdrop{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:24px;background:rgba(13,22,18,.48);backdrop-filter:blur(8px);animation:academic-fade .2s ease both}
+.academic-guide-backdrop{position:fixed;inset:0;z-index:10030;display:grid;place-items:center;padding:24px;background:rgba(13,22,18,.48);backdrop-filter:blur(8px);animation:academic-fade .2s ease both}
 .academic-guide{width:min(920px,100%);max-height:min(760px,calc(100vh - 48px));overflow:auto;background:var(--surface);border:1px solid var(--border);border-radius:24px;box-shadow:0 30px 90px rgba(0,0,0,.24);animation:academic-up .28s cubic-bezier(.2,.8,.2,1) both}
 .academic-guide__header{display:flex;justify-content:space-between;gap:24px;padding:30px 32px 24px;border-bottom:1px solid var(--border)}
 .academic-guide__header .eyebrow{margin-bottom:8px;font-size:10px}
@@ -186,3 +186,8 @@ button,input,select,textarea{font-size:clamp(15px,.25vw + 14px,17px)}
   .cookie-consent-decline,.cookie-consent-accept{transition:none}
   .cookie-consent-accept:hover{transform:none}
 }
+
+/* Keep the help control reachable on every route and above floating UI layers. */
+.academic-guide-trigger:focus-visible{outline:3px solid var(--green,#10b981);outline-offset:4px}
+.academic-guide-backdrop{overscroll-behavior:contain;touch-action:pan-y}
+@media(max-width:480px){.academic-guide-trigger{right:max(12px,env(safe-area-inset-right,0px));bottom:max(12px,env(safe-area-inset-bottom,0px));min-height:48px;padding:10px 13px}.academic-guide{max-height:calc(100dvh - 24px);border-radius:18px}.academic-guide__header{padding:22px 18px 18px;gap:12px}.academic-guide__body{padding:18px}.academic-guide__tabs{padding:10px 14px}.academic-guide__steps{grid-template-columns:minmax(0,1fr)}.academic-guide__excel-intro{align-items:flex-start;flex-direction:column}}
