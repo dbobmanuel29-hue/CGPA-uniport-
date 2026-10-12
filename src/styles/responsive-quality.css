@@ -400,3 +400,38 @@ button:not(:disabled):active,
     transform: none !important;
   }
 }
+
+
+/* Auth screens on tablets: keep the complete campus photo visible in the left panel. */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .auth-page {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    min-height: 100dvh;
+  }
+
+  .auth-aside {
+    min-width: 0;
+    min-height: 100dvh;
+    padding: clamp(24px, 3.2vw, 40px);
+    background-color: #16372c;
+  }
+
+  .auth-aside > img {
+    object-fit: contain;
+    object-position: center center;
+    background-color: #16372c;
+  }
+
+  .auth-aside h2 {
+    font-size: clamp(30px, 3.6vw, 38px);
+  }
+
+  .auth-main {
+    min-width: 0;
+    padding: 64px clamp(24px, 3.5vw, 42px) 36px;
+  }
+
+  .auth-box {
+    max-width: 400px;
+  }
+}
