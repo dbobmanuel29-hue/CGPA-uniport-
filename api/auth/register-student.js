@@ -42,6 +42,7 @@ export default async function handler(req, res) {
 
     const userRef = db.collection('users').doc(decoded.uid);
     const profileRef = db.collection('academicProfiles').doc(decoded.uid);
+    const adminNotificationRef = db.collection('notifications').doc();
     const stamp = admin.firestore.FieldValue.serverTimestamp();
 
     const result = await db.runTransaction(async transaction => {
@@ -65,6 +66,18 @@ export default async function handler(req, res) {
         userId: decoded.uid,
         createdAt: stamp,
       }, { merge: true });
+      if (decoded.uid !== OWNER_ADMIN_UID) {
+        transaction.create(adminNotificationRef, {
+          userId: OWNER_ADMIN_UID,
+          type: 'registration',
+          title: 'New student registered',
+          message: `${fullName} has created a CGPA+ account.`,
+          relatedId: decoded.uid,
+          route: '/admin/students',
+          read: false,
+          createdAt: stamp,
+        });
+      }
       return { created: true };
     });
 
