@@ -32,7 +32,7 @@ export default function CookieConsent() {
   if (!visible) return null;
 
   return createPortal(
-    <aside className="cookie-consent" role="dialog" aria-labelledby="cookie-consent-title" style={{ position: "fixed", left: "max(16px, env(safe-area-inset-left))", right: "max(16px, env(safe-area-inset-right))", bottom: "max(16px, env(safe-area-inset-bottom))", zIndex: 10000, width: "auto", maxWidth: "760px", marginInline: "auto", boxSizing: "border-box" }}>
+    <aside className="cookie-consent" role="dialog" aria-labelledby="cookie-consent-title" style={{ position: "fixed", left: "max(16px, env(safe-area-inset-left))", right: "max(16px, env(safe-area-inset-right))", bottom: "max(92px, calc(env(safe-area-inset-bottom) + 76px))", zIndex: 10000, width: "auto", maxWidth: "760px", marginInline: "auto", boxSizing: "border-box" }}>
       <div>
         <strong id="cookie-consent-title">Cookies & optional analytics</strong>
         <p>
