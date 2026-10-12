@@ -205,8 +205,14 @@ button:not(:disabled):active,
   }
 
   .cookie-consent {
-    left: max(10px, env(safe-area-inset-left, 0px)) !important;
-    right: max(10px, env(safe-area-inset-right, 0px)) !important;
+    /* Explicit mobile width/insets prevent fixed banners touching the right screen edge. */
+    left: 12px !important;
+    right: 12px !important;
+    width: calc(100% - 24px) !important;
+    max-width: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    box-sizing: border-box !important;
     bottom: max(82px, calc(var(--cgpa-safe-bottom) + 70px)) !important;
     max-height: min(46svh, 310px);
     gap: 10px !important;
