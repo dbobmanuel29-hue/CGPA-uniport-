@@ -103,6 +103,10 @@ export function TestimonialsAdmin() {
   </section>;
 }
 
+export function AdminReviewsPage() {
+  return <><PageHeader eyebrow="CGPA+ UNIPORT ADMINISTRATION" title="Student reviews." description="Review student feedback, approve genuine testimonials and remove submissions that should not be published." /><TestimonialsAdmin /></>;
+}
+
 export default function AdminDashboard() {
   const resource = useResource(() => adminService.getDashboard());
   const stats = resource.data?.stats || {};
