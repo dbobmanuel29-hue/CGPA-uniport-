@@ -76,7 +76,38 @@ export default async function handler(req, res) {
       const ref = db.collection('testimonials').doc(id);
       const snap = await ref.get();
       if (!snap.exists || snap.data()?.isSample === true) return json(res, 404, { ok: false, error: 'Student review not found.' });
-      await ref.update({ status: action === 'approve' ? 'approved' : 'rejected', moderatedBy: token.uid, moderatedAt: admin.firestore.FieldValue.serverTimestamp() });
+      const nextStatus = action === 'approve' ? 'approved' : 'rejected';
+      const review = snap.data() || {};
+      await ref.update({ status: nextStatus, moderatedBy: token.uid, moderatedAt: admin.firestore.FieldValue.serverTimestamp() });
+
+      // Clear the admin's pending-review alert once this review is actioned.
+      const relatedNotifications = await db.collection('notifications').where('relatedId', '==', id).get();
+      const batch = db.batch();
+      let changedNotifications = 0;
+      relatedNotifications.docs.forEach(notification => {
+        const data = notification.data() || {};
+        if (data.type === 'review' && data.userId === OWNER_ADMIN_UID && data.read !== true) {
+          batch.update(notification.ref, { read: true, readAt: admin.firestore.FieldValue.serverTimestamp() });
+          changedNotifications += 1;
+        }
+      });
+      if (changedNotifications) await batch.commit();
+
+      // Let the student know whether their review was approved or rejected.
+      if (review.userId && review.status !== nextStatus) {
+        await db.collection('notifications').add({
+          userId: review.userId,
+          type: 'review',
+          title: nextStatus === 'approved' ? 'Your review was approved' : 'Your review was not approved',
+          message: nextStatus === 'approved'
+            ? 'Your review is now approved and may appear on CGPA+.'
+            : 'Your review was not approved for publication. You can contact support if you need clarification.',
+          relatedId: id,
+          route: '/app/notifications',
+          read: false,
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+      }
       return json(res, 200, { ok: true });
     }
     return json(res, 400, { ok: false, error: 'Unsupported testimonial action.' });
