@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSession } from '../state/session';
 
 const STEPS = [
@@ -31,6 +31,8 @@ export default function AcademicGuide() {
   const { user } = useSession();
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState('manual');
+  const triggerRef = useRef(null);
+  const closeRef = useRef(null);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -46,20 +48,26 @@ export default function AcademicGuide() {
 
   useEffect(() => {
     if (!open) return;
+    const previousFocus = document.activeElement;
+    const oldOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const focusTimer = window.requestAnimationFrame(() => closeRef.current?.focus());
     const onKey = event => { if (event.key === 'Escape') setOpen(false); };
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    return () => {
+      window.cancelAnimationFrame(focusTimer);
+      document.body.style.overflow = oldOverflow;
+      if (previousFocus && typeof previousFocus.focus === 'function') previousFocus.focus();
+    };
   }, [open]);
 
-  if (!user?.id) return null;
-
   return <>
-    <button className="academic-guide-trigger" onClick={() => setOpen(true)} aria-label="Open CGPA+ academic guide">
+    <button ref={triggerRef} type="button" className="academic-guide-trigger" onClick={() => setOpen(true)} aria-haspopup="dialog" aria-expanded={open} aria-label="Open CGPA+ help and academic guide">
       <span className="academic-guide-trigger__icon">?</span>
       <span className="academic-guide-trigger__text">How it works</span>
     </button>
 
-    {open && <div className="academic-guide-backdrop" onMouseDown={event => { if (event.target === event.currentTarget) setOpen(false); }}>
+    {open && <div className="academic-guide-backdrop" onClick={event => { if (event.target === event.currentTarget) setOpen(false); }}>
       <section className="academic-guide" role="dialog" aria-modal="true" aria-labelledby="academic-guide-title">
         <header className="academic-guide__header">
           <div>
@@ -67,7 +75,7 @@ export default function AcademicGuide() {
             <h2 id="academic-guide-title">Your first results? Start here.</h2>
             <p>New to CGPA+ or adding another semester? Follow these simple steps. You can enter results one by one, import an Excel spreadsheet, or upload your UniPort result.</p>
           </div>
-          <button className="academic-guide__close" onClick={() => setOpen(false)} aria-label="Close guide">×</button>
+          <button ref={closeRef} type="button" className="academic-guide__close" onClick={() => setOpen(false)} aria-label="Close guide">×</button>
         </header>
 
         <div className="academic-guide__tabs" role="tablist" aria-label="Academic guide sections">
@@ -102,7 +110,7 @@ export default function AcademicGuide() {
         {tab === 'excel' && <div className="academic-guide__body">
           <div className="academic-guide__excel-intro">
             <div><strong>Put one course on each row.</strong><p>Your first row must contain the headings below. Do not merge cells, leave blank rows in the middle, or put a title above the headings.</p></div>
-            <button onClick={downloadTemplate}>Download template</button>
+            <button type="button" onClick={downloadTemplate}>Download template</button>
           </div>
           <div className="academic-guide__table-wrap">
             <table><thead><tr>{EXCEL_ROWS[0].map(cell => <th key={cell}>{cell}</th>)}</tr></thead><tbody>{EXCEL_ROWS.slice(1).map((row, index) => <tr key={index}>{row.map((cell, cellIndex) => <td key={cellIndex}>{cell}</td>)}</tr>)}</tbody></table>
