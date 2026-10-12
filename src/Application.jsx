@@ -51,7 +51,7 @@ const AdminSupport = loadNamed(adminSupportAndAudit, 'AdminSupport');
 const AdminReports = lazy(() => import('./pages/admin/Reports'));
 const AuditLogs = loadNamed(adminSupportAndAudit, 'AuditLogs');
 const AdminSettings = lazy(() => import('./pages/admin/Settings'));
-const AdminReviews = loadNamed(() => import('./pages/admin/Dashboard'), 'TestimonialsAdmin');
+const AdminReviews = loadNamed(() => import('./pages/admin/Dashboard'), 'AdminReviewsPage');
 
 const PUBLIC_CALCULATORS = new Set(['/app/calculator', '/app/cgpa', '/app/target', '/app/projection']);
 const ROUTES = {
