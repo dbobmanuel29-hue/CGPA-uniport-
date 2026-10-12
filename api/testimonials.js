@@ -1,5 +1,6 @@
 import admin from 'firebase-admin';
 
+const OWNER_ADMIN_UID = 'lmUB6IdhuaOlHjzkqBE7PH2';
 const NIGERIAN_STUDENT_PHOTOS = [
   "https://scholarshipsforafricans.com/assets/destination-nigeria-CPhuf6fW.jpg",
   "https://babcock.edu.ng/curator/media/6b56fa2e-3382-4fcb-b4f9-5c1204fdb004.jpg?h=700&s=f185d09c89ae7d6c1a1b0278c27cf607&w=896",
@@ -69,6 +70,9 @@ export default async function handler(req, res) {
       return json(res, 400, { ok: false, error: 'Choose 1–5 stars and write at least 10 characters (up to 1,000).'});
     }
     const rateRef = db.collection('testimonialRateLimits').doc(decoded.uid);
+    const reviewRef = db.collection('testimonials').doc();
+    const adminNotificationRef = db.collection('notifications').doc();
+    const studentName = cleanText(decoded.name || decoded.email?.split('@')[0] || 'CGPA+ student', 80);
     const now = Date.now();
     const result = await db.runTransaction(async transaction => {
       const rateSnap = await transaction.get(rateRef);
@@ -76,17 +80,27 @@ export default async function handler(req, res) {
       const inWindow = Number.isFinite(rate.windowStartMs) && now >= rate.windowStartMs && now - rate.windowStartMs < 10 * 60 * 1000;
       const count = inWindow ? Number(rate.count || 0) : 0;
       if (count >= 3) return { limited: true };
-      const ref = db.collection('testimonials').doc();
-      transaction.create(ref, {
+      const createdAt = admin.firestore.FieldValue.serverTimestamp();
+      transaction.create(reviewRef, {
         userId: decoded.uid,
-        name: cleanText(decoded.name || decoded.email?.split('@')[0] || 'CGPA+ student', 80),
+        name: studentName,
         email: cleanText(decoded.email || '', 254),
         photoUrl: typeof decoded.picture === 'string' && decoded.picture.startsWith('https://') ? decoded.picture.slice(0, 1000) : '',
         rating, text, isSample: false, status: 'pending',
-        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        createdAt,
+      });
+      transaction.create(adminNotificationRef, {
+        userId: OWNER_ADMIN_UID,
+        type: 'review',
+        title: 'New review pending approval',
+        message: `${studentName} submitted a ${rating}-star review that needs your attention.`,
+        relatedId: reviewRef.id,
+        route: '/admin/reviews',
+        read: false,
+        createdAt,
       });
       transaction.set(rateRef, { windowStartMs: inWindow ? rate.windowStartMs : now, count: count + 1, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
-      return { submitted: true };
+      return { submitted: true, reviewId: reviewRef.id };
     });
     if (result.limited) return json(res, 429, { ok: false, error: 'You have submitted several reviews recently. Please wait a few minutes before trying again.' });
     return json(res, 201, { ok: true, message: 'Your review is pending admin approval.' });
