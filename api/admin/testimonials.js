@@ -1,11 +1,6 @@
 import admin from 'firebase-admin';
 
 const OWNER_ADMIN_UID = 'lmUB6IdhuaOlHjzkqBEyoNkE7PH2';
-const SAMPLE_TESTIMONIALS = [
-  { id: 'sample-1', name: 'Sample UniPort Student', rating: 5, text: 'The calculator preview shows how GPA and CGPA calculations can be organized in one place. This is an illustrative example, not a real student review.', photoUrl: 'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=160&h=160&fit=crop', isSample: true, status: 'approved' },
-  { id: 'sample-2', name: 'Sample CGPA+ User', rating: 5, text: 'A clear dashboard can make it easier to follow semester records and plan academic targets. This is sample content until real student feedback is approved.', photoUrl: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=160&h=160&fit=crop', isSample: true, status: 'approved' },
-  { id: 'sample-3', name: 'Sample Student', rating: 4, text: 'Having GPA tools, academic records and planning features together is the kind of experience CGPA+ aims to provide. Illustrative sample only.', photoUrl: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=160&h=160&fit=crop', isSample: true, status: 'approved' },
-];
 function json(res, status, body) { res.status(status).setHeader('Content-Type', 'application/json'); res.setHeader('Cache-Control', 'no-store'); return res.end(JSON.stringify(body)); }
 function getApp() {
   if (admin.apps.length) return admin.app();
@@ -36,12 +31,9 @@ export default async function handler(req, res) {
   try {
     const { db, token } = await requireAdmin(req);
     if (req.method === 'GET') {
-      const [reviews, controls] = await Promise.all([db.collection('testimonials').get(), db.collection('testimonialSampleControls').get()]);
-      const hidden = new Set(controls.docs.filter(doc => doc.data()?.hidden === true).map(doc => doc.id));
-      const stored = reviews.docs.map(row);
-      const defaults = SAMPLE_TESTIMONIALS.filter(item => !hidden.has(item.id)).map(item => ({ ...item, isHidden: false }));
-      const all = [...stored, ...defaults].sort((a,b) => {
-        const rank = item => item.isSample ? 0 : item.status === 'pending' ? 1 : item.status === 'approved' ? 2 : 3;
+      const reviews = await db.collection('testimonials').get();
+      const all = reviews.docs.map(row).sort((a,b) => {
+        const rank = item => item.status === 'pending' ? 0 : item.status === 'approved' ? 1 : 2;
         return rank(a) - rank(b) || String(b.createdAt || '').localeCompare(String(a.createdAt || ''));
       });
       return json(res, 200, { ok: true, testimonials: all });
@@ -54,25 +46,20 @@ export default async function handler(req, res) {
       const text = cleanText(req.body?.text, 1000);
       const rating = Number(req.body?.rating);
       const photoUrl = cleanText(req.body?.photoUrl, 1000);
-      if (name.length < 2 || text.length < 10 || !Number.isInteger(rating) || rating < 1 || rating > 5) return json(res, 400, { ok: false, error: 'Enter a name, review of at least 10 characters and rating from 1–5.' });
+      if (name.length < 2 || text.length < 10 || !Number.isInteger(rating) || rating < 1 || rating > 5 || req.body?.genuineConsent !== true) return json(res, 400, { ok: false, error: 'Enter the student details, a review of at least 10 characters, a 1–5 rating, and confirm that the feedback is genuine and you have permission to publish it.' });
       if (photoUrl && !/^https:\/\//i.test(photoUrl)) return json(res, 400, { ok: false, error: 'Photo URL must start with https://.' });
-      const ref = await db.collection('testimonials').add({ name, text, rating, photoUrl, isSample: true, status: 'approved', createdBy: token.uid, createdAt: admin.firestore.FieldValue.serverTimestamp() });
+      const ref = await db.collection('testimonials').add({ name, text, rating, photoUrl, isSample: false, status: 'approved', createdBy: token.uid, createdAt: admin.firestore.FieldValue.serverTimestamp() });
       return json(res, 201, { ok: true, id: ref.id });
     }
     if (!id) return json(res, 400, { ok: false, error: 'A testimonial ID is required.' });
     if (action === 'delete') {
-      if (SAMPLE_TESTIMONIALS.some(item => item.id === id)) {
-        await db.collection('testimonialSampleControls').doc(id).set({ hidden: true, updatedBy: token.uid, updatedAt: admin.firestore.FieldValue.serverTimestamp() }, { merge: true });
-      } else {
-        const ref = db.collection('testimonials').doc(id);
-        const snap = await ref.get();
-        if (!snap.exists) return json(res, 404, { ok: false, error: 'That testimonial no longer exists.' });
-        await ref.delete();
-      }
+      const ref = db.collection('testimonials').doc(id);
+      const snap = await ref.get();
+      if (!snap.exists) return json(res, 404, { ok: false, error: 'That testimonial no longer exists.' });
+      await ref.delete();
       return json(res, 200, { ok: true });
     }
     if (action === 'approve' || action === 'reject') {
-      if (id.startsWith('sample-')) return json(res, 400, { ok: false, error: 'Sample testimonials do not need moderation.' });
       const ref = db.collection('testimonials').doc(id);
       const snap = await ref.get();
       if (!snap.exists || snap.data()?.isSample === true) return json(res, 404, { ok: false, error: 'Student review not found.' });

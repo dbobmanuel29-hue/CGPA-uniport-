@@ -36,6 +36,7 @@ function TestimonialsAdmin() {
   const [rating, setRating] = useState(5);
   const [photoUrl, setPhotoUrl] = useState('');
   const [showForm, setShowForm] = useState(false);
+  const [genuineConsent, setGenuineConsent] = useState(false);
 
   async function request(path, method = 'GET', body) {
     const sdk = await getFirebase();
@@ -71,32 +72,32 @@ function TestimonialsAdmin() {
     finally { setBusyId(''); }
   }
 
-  async function addSample(event) {
+  async function addTestimonial(event) {
     event.preventDefault(); setError(''); setNotice(''); setBusyId('new');
     try {
-      await request('/api/admin/testimonials', 'POST', { action: 'create', name, text: textValue, rating, photoUrl });
-      setName(''); setTextValue(''); setRating(5); setPhotoUrl(''); setShowForm(false);
-      setNotice('Sample testimonial added. It will be clearly labelled as sample content on the homepage.');
+      await request('/api/admin/testimonials', 'POST', { action: 'create', name, text: textValue, rating, photoUrl, genuineConsent });
+      setName(''); setTextValue(''); setRating(5); setPhotoUrl(''); setGenuineConsent(false); setShowForm(false);
+      setNotice('Testimonial published.');
       await refresh();
     } catch (e) { setError(e.message || 'The sample testimonial could not be added.'); }
     finally { setBusyId(''); }
   }
 
   return <section className="admin-testimonials-section">
-    <div className="admin-testimonials-heading"><div><span className="eyebrow">HOMEPAGE CONTENT</span><h2>Testimonials & student reviews</h2><p>Add or remove sample cards, and approve real student feedback before it appears publicly.</p></div><div className="admin-testimonials-actions"><Button variant="outline" icon="refresh" onClick={refresh} busy={loading}>Refresh</Button><Button variant="lime" icon="plus" onClick={() => setShowForm(value => !value)}>{showForm ? 'Close form' : 'Add testimonial'}</Button></div></div>
+    <div className="admin-testimonials-heading"><div><span className="eyebrow">HOMEPAGE CONTENT</span><h2>Testimonials & student reviews</h2><p>Add genuine student feedback with permission, or approve and remove submitted reviews.</p></div><div className="admin-testimonials-actions"><Button variant="outline" icon="refresh" onClick={refresh} busy={loading}>Refresh</Button><Button variant="lime" icon="plus" onClick={() => setShowForm(value => !value)}>{showForm ? 'Close form' : 'Add testimonial'}</Button></div></div>
     {error && <Notice tone="error" icon="alert">{error}</Notice>}
     {notice && <Notice tone="success" icon="check">{notice}</Notice>}
-    {showForm && <form className="admin-testimonial-form" onSubmit={addSample}>
-      <div className="admin-testimonial-form-title"><strong>Add a sample testimonial</strong><span>It will be marked as sample content, not a real student quote.</span></div>
+    {showForm && <form className="admin-testimonial-form" onSubmit={addTestimonial}>
+      <div className="admin-testimonial-form-title"><strong>Add a student testimonial</strong><span>Only publish feedback genuinely shared by a student, with permission to display their name and photo.</span></div>
       <label>Name shown<input value={name} onChange={e => setName(e.target.value)} minLength={2} maxLength={80} required placeholder="e.g. UniPort student" /></label>
-      <label>Review text<textarea value={textValue} onChange={e => setTextValue(e.target.value)} minLength={10} maxLength={1000} rows={3} required placeholder="Write illustrative feedback..." /></label>
+      <label>Review text<textarea value={textValue} onChange={e => setTextValue(e.target.value)} minLength={10} maxLength={1000} rows={3} required placeholder="Enter the student’s actual feedback..." /></label>
       <div className="admin-testimonial-form-row"><label>Star rating<select value={rating} onChange={e => setRating(Number(e.target.value))}>{[5,4,3,2,1].map(value => <option key={value} value={value}>{value} star{value === 1 ? '' : 's'}</option>)}</select></label><label>Photo URL (optional)<input type="url" value={photoUrl} onChange={e => setPhotoUrl(e.target.value)} placeholder="https://..." /></label></div>
-      <button type="submit" disabled={busyId === 'new'}>{busyId === 'new' ? 'Adding…' : 'Save sample testimonial'}</button>
+      <label className="admin-testimonial-consent"><input type="checkbox" checked={genuineConsent} onChange={e => setGenuineConsent(e.target.checked)} required /> I confirm this is genuine student feedback and I have permission to publish the name and photo provided.</label><button type="submit" disabled={busyId === 'new' || !genuineConsent}>{busyId === 'new' ? 'Adding…' : 'Publish testimonial'}</button>
     </form>}
     {loading ? <p className="admin-testimonial-loading">Loading testimonials…</p> : !items.length ? <p className="admin-testimonial-loading">No testimonials to manage yet.</p> : <div className="admin-testimonial-list">{items.map(item => <article className="admin-testimonial-row" key={item.id}>
       <span className="admin-testimonial-avatar">{item.photoUrl ? <img src={item.photoUrl} alt="" loading="lazy" /> : (item.name || 'S').slice(0,1).toUpperCase()}</span>
-      <div className="admin-testimonial-main"><div className="admin-testimonial-person"><strong>{item.name}</strong><span className={item.isSample ? 'is-sample' : item.status === 'approved' ? 'is-approved' : item.status === 'rejected' ? 'is-rejected' : 'is-pending'}>{item.isSample ? 'Sample' : (item.status || 'pending')}</span><span className="admin-testimonial-stars">{'★'.repeat(Number(item.rating) || 0)}</span></div><p>{item.text}</p><small>{item.isSample ? 'Clearly labelled on the homepage' : item.email || 'Student review'}</small></div>
-      <div className="admin-testimonial-row-actions">{!item.isSample && item.status !== 'approved' && <button type="button" disabled={!!busyId} onClick={() => act(item,'approve')}>Approve</button>}{!item.isSample && item.status !== 'rejected' && <button type="button" disabled={!!busyId} onClick={() => act(item,'reject')}>Reject</button>}<button type="button" className="delete" disabled={!!busyId} onClick={() => { if (window.confirm(`Delete this ${item.isSample ? 'sample testimonial' : 'student review'}?`)) act(item,'delete'); }}>{busyId === item.id ? 'Working…' : 'Delete'}</button></div>
+      <div className="admin-testimonial-main"><div className="admin-testimonial-person"><strong>{item.name}</strong><span className={item.isSample ? 'is-sample' : item.status === 'approved' ? 'is-approved' : item.status === 'rejected' ? 'is-rejected' : 'is-pending'}>{item.isSample ? 'Legacy sample — hidden publicly' : (item.status || 'pending')}</span><span className="admin-testimonial-stars">{'★'.repeat(Number(item.rating) || 0)}</span></div><p>{item.text}</p><small>{item.isSample ? 'Delete this old placeholder; it is hidden from the homepage' : item.email || 'Student review'}</small></div>
+      <div className="admin-testimonial-row-actions">{!item.isSample && item.status !== 'approved' && <button type="button" disabled={!!busyId} onClick={() => act(item,'approve')}>Approve</button>}{!item.isSample && item.status !== 'rejected' && <button type="button" disabled={!!busyId} onClick={() => act(item,'reject')}>Reject</button>}<button type="button" className="delete" disabled={!!busyId} onClick={() => { if (window.confirm(`Delete this ${item.isSample ? 'old placeholder' : 'student testimonial'}?`)) act(item,'delete'); }}>{busyId === item.id ? 'Working…' : 'Delete'}</button></div>
     </article>)}</div>}
   </section>;
 }

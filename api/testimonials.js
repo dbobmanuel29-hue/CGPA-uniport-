@@ -1,11 +1,5 @@
 import admin from 'firebase-admin';
 
-const SAMPLE_TESTIMONIALS = [
-  { id: 'sample-1', name: 'Sample UniPort Student', rating: 5, text: 'The calculator preview shows how GPA and CGPA calculations can be organized in one place. This is an illustrative example, not a real student review.', photoUrl: 'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=160&h=160&fit=crop', isSample: true, status: 'approved' },
-  { id: 'sample-2', name: 'Sample CGPA+ User', rating: 5, text: 'A clear dashboard can make it easier to follow semester records and plan academic targets. This is sample content until real student feedback is approved.', photoUrl: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=160&h=160&fit=crop', isSample: true, status: 'approved' },
-  { id: 'sample-3', name: 'Sample Student', rating: 4, text: 'Having GPA tools, academic records and planning features together is the kind of experience CGPA+ aims to provide. Illustrative sample only.', photoUrl: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=160&h=160&fit=crop', isSample: true, status: 'approved' },
-];
-
 function json(res, status, body) {
   res.status(status).setHeader('Content-Type', 'application/json');
   res.setHeader('Cache-Control', 'no-store');
@@ -19,7 +13,7 @@ function getApp() {
 }
 function publicRow(doc) {
   const data = doc.data();
-  return { id: doc.id, name: data.name || 'CGPA+ student', text: data.text || '', rating: Number(data.rating) || 5, photoUrl: data.photoUrl || '', isSample: data.isSample === true, status: data.status || 'pending', createdAt: data.createdAt?.toDate?.()?.toISOString?.() || null };
+  return { id: doc.id, name: data.name || 'CGPA+ student', text: data.text || '', rating: Number(data.rating) || 5, photoUrl: data.photoUrl || '', createdAt: data.createdAt?.toDate?.()?.toISOString?.() || null };
 }
 function cleanText(value, max = 1000) { return typeof value === 'string' ? value.trim().slice(0, max) : ''; }
 
@@ -28,14 +22,8 @@ export default async function handler(req, res) {
     try {
       const db = admin.firestore(getApp());
       const snap = await db.collection('testimonials').where('status', '==', 'approved').get();
-      const real = snap.docs.map(publicRow).filter(item => !item.isSample).sort((a,b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
-      const sampleControls = await db.collection('testimonialSampleControls').get();
-      const hidden = new Set(sampleControls.docs.filter(doc => doc.data()?.hidden === true).map(doc => doc.id));
-      const storedSamples = snap.docs.map(publicRow).filter(item => item.isSample);
-      const builtIn = SAMPLE_TESTIMONIALS.filter(item => !hidden.has(item.id));
-      const samples = [...storedSamples, ...builtIn.filter(item => !storedSamples.some(row => row.id === item.id))];
-      const result = [...real, ...samples.slice(0, Math.max(0, 3 - real.length))].slice(0, 6);
-      return json(res, 200, { ok: true, testimonials: result });
+      const testimonials = snap.docs.map(publicRow).filter(item => !snap.docs.find(doc => doc.id === item.id)?.data()?.isSample).sort((a,b) => String(b.createdAt || '').localeCompare(String(a.createdAt || ''))).slice(0, 6);
+      return json(res, 200, { ok: true, testimonials });
     } catch (error) {
       console.error('Public testimonials load failed:', error);
       return json(res, 500, { ok: false, error: 'Testimonials could not be loaded right now.' });
