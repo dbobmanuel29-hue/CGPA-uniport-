@@ -867,3 +867,119 @@ img, video, canvas, iframe {
 @media (prefers-reduced-motion: reduce) {
   .auth-main .input { transition: none; }
 }
+
+
+/* Consistent compact controls and responsive record tables across authenticated pages. */
+.mobile-record-list { display: none; }
+
+@media (max-width: 767px) {
+  .data-table { width: 100%; min-width: 0; }
+  .data-table > .desktop-table { display: none !important; }
+  .data-table > .mobile-record-list {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    width: 100%;
+    min-width: 0;
+  }
+  .mobile-record-card {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+  }
+  .mobile-record-field {
+    display: grid;
+    grid-template-columns: minmax(80px, 38%) minmax(0, 1fr);
+    gap: 8px;
+    align-items: start;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .mobile-record-field.mobile-record-primary { display: block; padding-top: 0; }
+  .mobile-record-label { font-size: 11px; line-height: 1.4; color: var(--muted); }
+  .mobile-record-value { min-width: 0; font-size: 12px; line-height: 1.45; text-align: right; overflow-wrap: anywhere; }
+  .mobile-record-primary .mobile-record-label { display: block; margin-bottom: 4px; }
+  .mobile-record-primary .mobile-record-value { text-align: left; font-size: 14px; font-weight: 700; }
+  .mobile-record-value .button, .mobile-record-value button {
+    width: auto;
+    min-width: 0;
+    min-height: 30px !important;
+    padding: 5px 8px !important;
+    font-size: 11px !important;
+    line-height: 1.25;
+  }
+  .mobile-record-actions { display: flex; flex-wrap: wrap; gap: 6px; padding-top: 10px; margin-top: 3px; }
+  .mobile-record-actions .icon-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    min-width: 0;
+    min-height: 32px;
+    padding: 6px 9px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 11px;
+    line-height: 1.2;
+  }
+  .workspace button:not(.icon-button):not(.nav-icon),
+  .workspace .button,
+  .workspace-content button:not(.icon-button):not(.nav-icon),
+  .workspace-content .button {
+    min-height: 34px;
+    padding: 7px 10px;
+    font-size: 12px;
+    line-height: 1.3;
+  }
+  .workspace .icon-button, .workspace-content .icon-button {
+    min-width: 32px;
+    min-height: 32px;
+    padding: 6px;
+  }
+  .workspace .table-pagination, .workspace-content .table-pagination {
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .workspace .table-pagination > div, .workspace-content .table-pagination > div {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-width: 0;
+  }
+  .workspace .table-pagination .button, .workspace-content .table-pagination .button {
+    min-height: 31px;
+    padding: 5px 8px;
+    font-size: 11px;
+  }
+  .workspace .table-toolbar, .workspace-content .table-toolbar,
+  .workspace .table-filters, .workspace-content .table-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-width: 0;
+  }
+  .workspace .table-toolbar > *, .workspace-content .table-toolbar > *,
+  .workspace .table-filters > *, .workspace-content .table-filters > * {
+    flex: 1 1 140px;
+    min-width: 0;
+    max-width: 100%;
+  }
+}
+@media (max-width: 380px) {
+  .mobile-record-card { padding: 10px; }
+  .mobile-record-field { grid-template-columns: minmax(72px, 36%) minmax(0, 1fr); gap: 6px; }
+  .mobile-record-label { font-size: 10px; }
+  .mobile-record-value { font-size: 11px; }
+  .workspace button:not(.icon-button):not(.nav-icon),
+  .workspace .button,
+  .workspace-content button:not(.icon-button):not(.nav-icon),
+  .workspace-content .button {
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+}
