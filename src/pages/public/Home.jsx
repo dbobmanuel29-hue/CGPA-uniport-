@@ -151,7 +151,7 @@ function Testimonials() {
     <div className="container">
       <div className="section-heading" data-reveal>
         <div><span className="eyebrow">STUDENT FEEDBACK</span><h2>Built for the journey.<br />Better with your voice.</h2><span className="testimonial-disclosure">Illustrative testimonials · Real student reviews will appear as they are approved.</span></div>
-        <div className="testimonials-intro"><p>Student perspectives on using CGPA+ to keep track of academic progress and plan what comes next.</p><button type="button" className="testimonial-write-button" onClick={() => { setShowForm(value => !value); setError(''); }}>{showForm ? 'Close form' : 'Leave a review'} <Icon name="arrow" size={15} /></button></div>
+        <div className="testimonials-intro"><p>Student perspectives on using CGPA+ to keep track of academic progress and plan what comes next.</p><button type="button" className="testimonial-write-button" onClick={() => { setError(''); if (!user) { window.location.hash = '#/login'; return; } setShowForm(value => !value); }}>{showForm ? 'Close form' : user ? 'Leave a review' : 'Sign in to review'} <Icon name="arrow" size={15} /></button></div>
       </div>
       {message && <p className="testimonial-feedback success" role="status">{message}</p>}
       {error && !showForm && <p className="testimonial-feedback error" role="alert">{error}</p>}
