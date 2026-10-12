@@ -182,7 +182,7 @@ button:not(:disabled):active,
   overscroll-behavior: contain;
 }
 
-/* Tablet hero: show the complete photo instead of cropping its edges. */
+/* Tablet hero: fill the hero area like desktop, without shrinking the photo. */
 @media (min-width: 768px) and (max-width: 1024px) {
   .home-hero {
     height: clamp(560px, 68vw, 680px);
@@ -190,8 +190,8 @@ button:not(:disabled):active,
   }
 
   .home-hero .hero-photo {
-    object-fit: contain;
-    object-position: center center;
+    object-fit: cover;
+    object-position: center 41%;
     background-color: #193b2d;
   }
 }
@@ -402,7 +402,7 @@ button:not(:disabled):active,
 }
 
 
-/* Auth screens on tablets: keep the complete campus photo visible in the left panel. */
+/* Auth screens on tablets: fill the left panel with the campus photo, like desktop. */
 @media (min-width: 768px) and (max-width: 1024px) {
   .auth-page {
     grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
@@ -417,8 +417,8 @@ button:not(:disabled):active,
   }
 
   .auth-aside > img {
-    object-fit: contain;
-    object-position: center center;
+    object-fit: cover;
+    object-position: 70% center;
     background-color: #16372c;
   }
 
