@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 // Bump this key when the consent experience or policy materially changes.
 // This makes visitors review their choice once after this update.
-const KEY = 'cgpa-plus-cookie-consent-v2';
+const KEY = 'cgpa-plus-cookie-consent-v3';
 const SAVED_CHOICES = new Set(['accepted', 'declined']);
 
 export default function CookieConsent() {
