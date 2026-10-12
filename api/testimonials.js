@@ -1,6 +1,6 @@
 import admin from 'firebase-admin';
 
-const OWNER_ADMIN_UID = 'lmUB6IdhuaOlHjzkqBE7PH2';
+const OWNER_ADMIN_UID = 'lmUB6IdhuaOlHjzkqBEyoNkE7PH2';
 const NIGERIAN_STUDENT_PHOTOS = [
   "https://scholarshipsforafricans.com/assets/destination-nigeria-CPhuf6fW.jpg",
   "https://babcock.edu.ng/curator/media/6b56fa2e-3382-4fcb-b4f9-5c1204fdb004.jpg?h=700&s=f185d09c89ae7d6c1a1b0278c27cf607&w=896",
