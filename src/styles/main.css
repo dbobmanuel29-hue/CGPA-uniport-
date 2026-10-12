@@ -191,3 +191,29 @@ button,input,select,textarea{font-size:clamp(15px,.25vw + 14px,17px)}
 .academic-guide-trigger:focus-visible{outline:3px solid var(--green,#10b981);outline-offset:4px}
 .academic-guide-backdrop{overscroll-behavior:contain;touch-action:pan-y}
 @media(max-width:480px){.academic-guide-trigger{right:max(12px,env(safe-area-inset-right,0px));bottom:max(12px,env(safe-area-inset-bottom,0px));min-height:48px;padding:10px 13px}.academic-guide{max-height:calc(100dvh - 24px);border-radius:18px}.academic-guide__header{padding:22px 18px 18px;gap:12px}.academic-guide__body{padding:18px}.academic-guide__tabs{padding:10px 14px}.academic-guide__steps{grid-template-columns:minmax(0,1fr)}.academic-guide__excel-intro{align-items:flex-start;flex-direction:column}}
+
+
+/* Keep floating actions clear of the install prompt and cookie consent panel. */
+@media (min-width:1200px) {
+  #cgpa-install-button { bottom: 24px; }
+  .academic-guide-trigger { bottom: 88px; }
+}
+@media (min-width:481px) and (max-width:1199px) {
+  .academic-guide-trigger { bottom: 88px; }
+}
+@media (max-width:480px) {
+  .academic-guide-trigger { bottom: max(84px, calc(72px + env(safe-area-inset-bottom,0px))); }
+}
+body:has(.cookie-consent) .academic-guide-trigger {
+  bottom: calc(190px + env(safe-area-inset-bottom,0px));
+}
+@media (min-width:901px) {
+  body:has(.cookie-consent) .academic-guide-trigger { bottom: 132px; }
+}
+@media (max-width:480px) {
+  body:has(.cookie-consent) .academic-guide-trigger {
+    bottom: calc(235px + env(safe-area-inset-bottom,0px));
+  }
+}
+/* The cookie panel gets its own clear space; don't show a second floating prompt behind it. */
+body:has(.cookie-consent) #cgpa-install-button { display: none !important; }
