@@ -107,6 +107,17 @@ export default async function handler(req, res) {
       return json(res, 429, { ok: false, code: 'support/rate-limited', error: 'You have sent several support requests recently. Please wait a few minutes and try again.', retryAfterSeconds: result.retryAfterSeconds });
     }
 
+    await db.collection('notifications').add({
+      userId: 'lmUB6IdhuaOlHjzkqBE7PH2',
+      type: 'support',
+      title: 'New support request',
+      message: `${fullName} submitted a support request: ${subject}`,
+      relatedId: result.ticketId,
+      route: '/admin/support',
+      read: false,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
     return json(res, 201, { ok: true, ticketId: result.ticketId });
   } catch (error) {
     if (error?.code === 'auth/argument-error' || error?.code === 'auth/id-token-expired' || error?.code === 'auth/invalid-id-token') {
