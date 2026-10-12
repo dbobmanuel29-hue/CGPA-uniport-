@@ -182,17 +182,16 @@ button:not(:disabled):active,
   overscroll-behavior: contain;
 }
 
-/* Tablet hero: fill the hero area like desktop, without shrinking the photo. */
+/* Tablet hero: use the same image sizing and framing as the desktop version. */
 @media (min-width: 768px) and (max-width: 1024px) {
   .home-hero {
-    height: clamp(560px, 68vw, 680px);
+    height: 582px;
     min-height: 560px;
   }
 
   .home-hero .hero-photo {
     object-fit: cover;
     object-position: center 41%;
-    background-color: #193b2d;
   }
 }
 
@@ -402,7 +401,7 @@ button:not(:disabled):active,
 }
 
 
-/* Auth screens on tablets: fill the left panel with the campus photo, like desktop. */
+/* Keep tablet auth image framing identical to desktop; don't override its image fit. */
 @media (min-width: 768px) and (max-width: 1024px) {
   .auth-page {
     grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
@@ -413,12 +412,6 @@ button:not(:disabled):active,
     min-width: 0;
     min-height: 100dvh;
     padding: clamp(24px, 3.2vw, 40px);
-    background-color: #16372c;
-  }
-
-  .auth-aside > img {
-    object-fit: cover;
-    object-position: 70% center;
     background-color: #16372c;
   }
 
