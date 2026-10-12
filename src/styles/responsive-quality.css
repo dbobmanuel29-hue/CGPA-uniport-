@@ -109,6 +109,8 @@ button:not(:disabled):active,
 }
 
 .cookie-consent {
+  left: max(16px, env(safe-area-inset-left, 0px)) !important;
+  right: max(16px, env(safe-area-inset-right, 0px)) !important;
   bottom: max(92px, calc(var(--cgpa-safe-bottom) + 76px)) !important;
   max-height: min(48svh, 360px);
   overflow-y: auto;
