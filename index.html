@@ -143,9 +143,28 @@
           });
         }
 
+        // The install action belongs only on the public homepage, never on auth or workspace screens.
+        const isHomeRoute = () => {
+          const path = (window.location.hash.slice(1).split("?")[0] || "/").replace(/\/$/, "") || "/";
+          return path === "/";
+        };
+
+        const syncInstallButton = () => {
+          if (!isHomeRoute() || isStandalone) {
+            installButton.style.display = "none";
+            if (iosHelp) iosHelp.setAttribute("aria-hidden", "true");
+            return;
+          }
+          installButton.style.display = (isIOS || installPrompt) ? "inline-flex" : "none";
+        };
+
+        syncInstallButton();
+        window.addEventListener("hashchange", syncInstallButton);
+        window.addEventListener("popstate", syncInstallButton);
+
         if (!isStandalone && isIOS) {
-          installButton.style.display = "inline-flex";
           installButton.addEventListener("click", () => {
+            if (!isHomeRoute()) return;
             iosHelp.setAttribute("aria-hidden", "false");
             closeHelp.focus();
           });
@@ -154,15 +173,15 @@
         window.addEventListener("beforeinstallprompt", (event) => {
           event.preventDefault();
           installPrompt = event;
-          if (!isStandalone) installButton.style.display = "inline-flex";
+          syncInstallButton();
         });
 
         installButton.addEventListener("click", async () => {
-          if (isIOS || !installPrompt) return;
+          if (!isHomeRoute() || isIOS || !installPrompt) return;
           installPrompt.prompt();
           await installPrompt.userChoice;
           installPrompt = null;
-          installButton.style.display = "none";
+          syncInstallButton();
         });
 
         closeHelp.addEventListener("click", () => {
