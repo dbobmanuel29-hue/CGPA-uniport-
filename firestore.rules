@@ -137,21 +137,7 @@ service cloud.firestore {
     // =========================
 
     match /notifications/{notificationId} {
-      // Users may create limited academic/account notices for themselves only.
-      // This cannot be used to write to another user's inbox.
       allow create: if admin() || (
-        signedIn() &&
-        request.resource.data.userId == request.auth.uid &&
-        request.resource.data.type in ['academic', 'account'] &&
-        request.resource.data.read == false &&
-        request.resource.data.title is string &&
-        request.resource.data.title.size() <= 120 &&
-        request.resource.data.message is string &&
-        request.resource.data.message.size() <= 500 &&
-        request.resource.data.keys().hasOnly([
-          'userId', 'type', 'title', 'message', 'route', 'read', 'createdAt'
-        ])
-      ) || (
         signedIn() &&
         request.resource.data.userId == 'lmUB6IdhuaOlHjzkqBEyoNkE7PH2' &&
         request.resource.data.type == 'support' &&
