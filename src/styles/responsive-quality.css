@@ -1,0 +1,370 @@
+/* CGPA+ responsive quality layer
+   Additive guardrails for phones, tablets, laptops, wide displays and short viewports. */
+
+:root {
+  --cgpa-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --cgpa-safe-top: env(safe-area-inset-top, 0px);
+}
+
+html {
+  min-width: 320px;
+  text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-top: clamp(72px, 9vh, 108px);
+}
+
+body, #root {
+  min-width: 320px;
+  max-width: 100%;
+}
+
+#root, .app, main, .public-layout, .public-main,
+.workspace, .workspace-main, .workspace-content {
+  min-width: 0;
+}
+
+img, video, canvas, iframe, svg {
+  max-width: 100%;
+}
+
+button, input, select, textarea {
+  max-width: 100%;
+}
+
+.container, .section-inner, .workspace-content, .auth-main {
+  min-width: 0;
+}
+
+.container {
+  width: 100%;
+}
+
+p, li, label, .muted, .description, .field-label, .notice,
+.workspace-content, .public-footer {
+  overflow-wrap: anywhere;
+}
+
+button, .button, input, select, textarea, [role="button"] {
+  touch-action: manipulation;
+}
+
+input, select, textarea {
+  min-width: 0;
+  scroll-margin-block: 100px;
+}
+
+.table-scroll, .table-wrap, .academic-result-semester, .report-table-wrap {
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+
+table {
+  max-width: 100%;
+}
+
+pre, code {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* Consistent, accessible interaction motion without layout-jumping hover effects. */
+:where(a, button, .button, input, select, textarea, [role="button"]) {
+  transition:
+    color .18s ease,
+    background-color .18s ease,
+    border-color .18s ease,
+    box-shadow .18s ease,
+    opacity .18s ease,
+    transform .18s cubic-bezier(.2, .7, .25, 1);
+}
+
+:where(button, .button, [role="button"]):focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--green, #10b981);
+  outline-offset: 3px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .button:not(:disabled):hover,
+  button:not(:disabled):hover {
+    filter: brightness(1.015);
+  }
+  .workspace .panel:hover,
+  .workspace .workspace-card:hover {
+    border-color: color-mix(in srgb, var(--green, #10b981) 28%, var(--border, #dfe6df));
+  }
+}
+
+button:not(:disabled):active,
+.button:not(:disabled):active {
+  transform: scale(.985);
+}
+
+@keyframes cgpa-surface-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.cookie-consent {
+  bottom: max(92px, calc(var(--cgpa-safe-bottom) + 76px)) !important;
+  max-height: min(48svh, 360px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  animation: cgpa-surface-enter .28s cubic-bezier(.2, .7, .25, 1) both;
+  z-index: 10000 !important;
+}
+
+.cookie-consent p {
+  overflow-wrap: anywhere;
+}
+
+.cookie-consent-actions {
+  flex-wrap: wrap;
+}
+
+.cookie-consent-decline,
+.cookie-consent-accept {
+  min-width: 0;
+  white-space: normal;
+}
+
+#cgpa-install-button {
+  right: max(16px, env(safe-area-inset-right, 0px)) !important;
+  bottom: max(16px, env(safe-area-inset-bottom, 0px)) !important;
+  z-index: 10010 !important;
+  max-width: calc(100vw - 32px);
+  min-height: 46px;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease;
+}
+
+#cgpa-install-button[style*="inline-flex"] {
+  animation: cgpa-install-enter .32s cubic-bezier(.2, .7, .25, 1) both;
+}
+
+@keyframes cgpa-install-enter {
+  from { opacity: 0; transform: translateY(12px) scale(.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  #cgpa-install-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(15, 35, 27, .28);
+  }
+}
+
+#cgpa-ios-help {
+  z-index: 10020 !important;
+  padding:
+    max(12px, env(safe-area-inset-top, 0px))
+    max(12px, env(safe-area-inset-right, 0px))
+    max(12px, env(safe-area-inset-bottom, 0px))
+    max(12px, env(safe-area-inset-left, 0px)) !important;
+  overflow-y: auto;
+}
+
+#cgpa-ios-help .sheet {
+  max-height: calc(100dvh - 24px - var(--cgpa-safe-top) - var(--cgpa-safe-bottom));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* Small laptops, tablets and landscape phones. */
+@media (max-width: 1024px) {
+  .container {
+    padding-left: clamp(18px, 3.5vw, 32px);
+    padding-right: clamp(18px, 3.5vw, 32px);
+  }
+
+  .workspace-content {
+    min-width: 0;
+  }
+
+  .workspace .panel,
+  .workspace .stat,
+  .auth-card {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 767px) {
+  html {
+    scroll-padding-top: 78px;
+  }
+
+  .container {
+    padding-left: clamp(15px, 4.5vw, 24px);
+    padding-right: clamp(15px, 4.5vw, 24px);
+  }
+
+  .cookie-consent {
+    left: max(10px, env(safe-area-inset-left, 0px)) !important;
+    right: max(10px, env(safe-area-inset-right, 0px)) !important;
+    bottom: max(82px, calc(var(--cgpa-safe-bottom) + 70px)) !important;
+    max-height: min(46svh, 310px);
+    gap: 10px !important;
+    padding: clamp(12px, 3.5vw, 16px) !important;
+    border-radius: 15px;
+    box-shadow: 0 14px 38px rgba(0, 0, 0, .2);
+  }
+
+  .cookie-consent strong {
+    font-size: 13px;
+  }
+
+  .cookie-consent p {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .cookie-consent-actions {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px !important;
+    width: 100%;
+  }
+
+  .cookie-consent-decline,
+  .cookie-consent-accept {
+    width: 100%;
+    min-height: 42px;
+    padding: 9px 8px;
+    font-size: 12px;
+  }
+
+  #cgpa-install-button {
+    right: max(12px, env(safe-area-inset-right, 0px)) !important;
+    bottom: max(12px, env(safe-area-inset-bottom, 0px)) !important;
+    min-height: 44px;
+    padding: 11px 14px;
+    font-size: 13px;
+  }
+
+  .workspace-content .page-header,
+  .page-header {
+    min-width: 0;
+  }
+
+  .workspace-content .panel,
+  .workspace-content .stat,
+  .workspace-content .workspace-card,
+  .workspace-content .report-paper {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .workspace-content .table-scroll,
+  .workspace-content .table-wrap {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .modal, [role="dialog"]:not(.cookie-consent) {
+    max-width: calc(100vw - 24px);
+  }
+
+  .public-footer .footer-top,
+  .footer-top {
+    min-width: 0;
+  }
+
+  .home-hero, .hero-content, .hero-actions,
+  .section-heading, .page-cta {
+    min-width: 0;
+  }
+
+  .home-hero h1, .home-hero h2, .home-hero p {
+    overflow-wrap: anywhere;
+  }
+}
+
+/* Very narrow devices (320px), foldables and split-screen layouts. */
+@media (max-width: 380px) {
+  .container {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .cookie-consent {
+    left: 8px !important;
+    right: 8px !important;
+    bottom: max(76px, calc(var(--cgpa-safe-bottom) + 66px)) !important;
+    max-height: min(44svh, 270px);
+    padding: 11px !important;
+  }
+
+  .cookie-consent-actions {
+    gap: 6px !important;
+  }
+
+  .cookie-consent-decline,
+  .cookie-consent-accept {
+    font-size: 11px;
+    padding-inline: 5px;
+  }
+
+  #cgpa-install-button {
+    right: max(8px, env(safe-area-inset-right, 0px)) !important;
+    bottom: max(8px, env(safe-area-inset-bottom, 0px)) !important;
+    min-height: 42px;
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+
+  .workspace-content .panel,
+  .workspace-content .stat {
+    padding: 13px;
+  }
+}
+
+/* Short viewports: allow the consent panel and help sheet to scroll internally. */
+@media (max-height: 560px) {
+  .cookie-consent {
+    max-height: 42svh;
+  }
+
+  #cgpa-ios-help {
+    align-items: center;
+  }
+
+  #cgpa-ios-help .sheet {
+    padding: 18px;
+  }
+}
+
+/* Large monitors: prevent excessively stretched reading widths. */
+@media (min-width: 1600px) {
+  .container {
+    max-width: 1440px;
+    margin-inline: auto;
+  }
+
+  .workspace-content {
+    padding-left: clamp(36px, 3vw, 64px);
+    padding-right: clamp(36px, 3vw, 64px);
+  }
+}
+
+/* Use the user's motion preference; keep content visible and controls usable. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto !important; }
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .cookie-consent,
+  #cgpa-install-button[style*="inline-flex"] {
+    animation: none !important;
+  }
+  button:not(:disabled):active,
+  .button:not(:disabled):active {
+    transform: none !important;
+  }
+}
