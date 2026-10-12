@@ -150,8 +150,8 @@ function Testimonials() {
   return <section className="testimonials-section">
     <div className="container">
       <div className="section-heading" data-reveal>
-        <div><span className="eyebrow">STUDENT FEEDBACK</span><h2>Built for the journey.<br />Better with your voice.</h2></div>
-        <div className="testimonials-intro"><p>Real feedback from students using CGPA+ to keep track of their academic progress.</p><button type="button" className="testimonial-write-button" onClick={() => { setShowForm(value => !value); setError(''); }}>{showForm ? 'Close form' : 'Leave a review'} <Icon name="arrow" size={15} /></button></div>
+        <div><span className="eyebrow">STUDENT FEEDBACK</span><h2>Built for the journey.<br />Better with your voice.</h2><span className="testimonial-disclosure">Illustrative testimonials · Real student reviews will appear as they are approved.</span></div>
+        <div className="testimonials-intro"><p>Student perspectives on using CGPA+ to keep track of academic progress and plan what comes next.</p><button type="button" className="testimonial-write-button" onClick={() => { setShowForm(value => !value); setError(''); }}>{showForm ? 'Close form' : 'Leave a review'} <Icon name="arrow" size={15} /></button></div>
       </div>
       {message && <p className="testimonial-feedback success" role="status">{message}</p>}
       {error && !showForm && <p className="testimonial-feedback error" role="alert">{error}</p>}
@@ -166,7 +166,7 @@ function Testimonials() {
         {error && <p className="testimonial-feedback error" role="alert">{error}</p>}
       </form>}
       {loading ? <div className="testimonial-loading" role="status">Loading student feedback…</div> : items.length ? <div className="testimonial-grid">{items.map((item, index) => <article className="testimonial-card" key={item.id || index}>
-        <div className="testimonial-card-top"><span className="testimonial-avatar">{item.photoUrl ? <img src={item.photoUrl} alt={`Profile of ${item.name}`} loading="lazy" /> : (item.name || 'S').trim().slice(0,1).toUpperCase()}</span><div className="testimonial-person"><strong>{item.name || 'CGPA+ student'}</strong><span>Student review</span></div><span className="testimonial-quote-mark" aria-hidden="true">“</span></div>
+        <div className="testimonial-card-top"><span className="testimonial-avatar">{item.photoUrl ? <img src={item.photoUrl} alt={`Profile of ${item.name}`} loading="lazy" /> : (item.name || 'S').trim().slice(0,1).toUpperCase()}</span><div className="testimonial-person"><strong>{item.name || 'CGPA+ student'}</strong><span>CGPA+ community</span></div><span className="testimonial-quote-mark" aria-hidden="true">“</span></div>
         <div className="testimonial-rating" aria-label={`${item.rating} out of 5 stars`}>{'★'.repeat(Number(item.rating) || 0)}<span>{'★'.repeat(5 - (Number(item.rating) || 0))}</span></div>
         <p className="testimonial-text">{item.text}</p>
       </article>)}</div> : <div className="testimonial-empty"><img className="testimonial-empty-photo" src="https://images.pexels.com/photos/31437215/pexels-photo-31437215.jpeg?auto=compress&cs=tinysrgb&w=480&h=480&fit=crop" alt="Nigerian university graduate in academic attire" loading="lazy" /><div><strong>Your experience can help another student.</strong><p>There are no published reviews yet. If CGPA+ has helped you, share your honest feedback.</p><button type="button" className="testimonial-write-button" onClick={() => { setShowForm(true); setError(""); }}>Be the first to review <Icon name="arrow" size={15} /></button></div></div>}

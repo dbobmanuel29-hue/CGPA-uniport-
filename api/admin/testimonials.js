@@ -1,6 +1,12 @@
 import admin from 'firebase-admin';
 
 const OWNER_ADMIN_UID = 'lmUB6IdhuaOlHjzkqBEyoNkE7PH2';
+const SAMPLE_TESTIMONIALS = [
+  { id: 'sample-1', name: 'Chisom N.', rating: 5, text: 'CGPA+ makes it easier for me to keep my semester results together and see how my CGPA is moving. The dashboard is simple to understand.', photoUrl: 'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=160&h=160&fit=crop', isSample: true, status: 'approved' },
+  { id: 'sample-2', name: 'David O.', rating: 4, text: 'I like having the GPA calculator and academic planning tools in one place. I would love to see more university grading systems added as CGPA+ grows.', photoUrl: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=160&h=160&fit=crop', isSample: true, status: 'approved' },
+  { id: 'sample-3', name: 'Amara E.', rating: 3, text: 'The idea is really useful, especially for students trying to plan their grades. A few more tips for first-time users would make getting started even easier.', photoUrl: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=160&h=160&fit=crop', isSample: true, status: 'approved' },
+  { id: 'sample-4', name: 'Precious W.', rating: 4, text: 'I like that I can check my academic progress without doing all the calculations manually. It would be nice to have even more course-planning options.', photoUrl: 'https://images.pexels.com/photos/31437215/pexels-photo-31437215.jpeg?auto=compress&cs=tinysrgb&w=160&h=160&fit=crop', isSample: true, status: 'approved' },
+];
 function json(res, status, body) { res.status(status).setHeader('Content-Type', 'application/json'); res.setHeader('Cache-Control', 'no-store'); return res.end(JSON.stringify(body)); }
 function getApp() {
   if (admin.apps.length) return admin.app();
@@ -31,8 +37,11 @@ export default async function handler(req, res) {
   try {
     const { db, token } = await requireAdmin(req);
     if (req.method === 'GET') {
-      const reviews = await db.collection('testimonials').get();
-      const all = reviews.docs.map(row).sort((a,b) => {
+      const [reviews, controls] = await Promise.all([db.collection('testimonials').get(), db.collection('testimonialSampleControls').get()]);
+      const hidden = new Set(controls.docs.filter(doc => doc.data()?.hidden === true).map(doc => doc.id));
+      const stored = reviews.docs.map(row);
+      const defaults = SAMPLE_TESTIMONIALS.filter(item => !hidden.has(item.id)).map(item => ({ ...item, isHidden: false }));
+      const all = [...stored, ...defaults.filter(item => !stored.some(row => row.id === item.id))].sort((a,b) => {
         const rank = item => item.status === 'pending' ? 0 : item.status === 'approved' ? 1 : 2;
         return rank(a) - rank(b) || String(b.createdAt || '').localeCompare(String(a.createdAt || ''));
       });
@@ -53,10 +62,14 @@ export default async function handler(req, res) {
     }
     if (!id) return json(res, 400, { ok: false, error: 'A testimonial ID is required.' });
     if (action === 'delete') {
-      const ref = db.collection('testimonials').doc(id);
-      const snap = await ref.get();
-      if (!snap.exists) return json(res, 404, { ok: false, error: 'That testimonial no longer exists.' });
-      await ref.delete();
+      if (SAMPLE_TESTIMONIALS.some(item => item.id === id)) {
+        await db.collection('testimonialSampleControls').doc(id).set({ hidden: true, updatedBy: token.uid, updatedAt: admin.firestore.FieldValue.serverTimestamp() }, { merge: true });
+      } else {
+        const ref = db.collection('testimonials').doc(id);
+        const snap = await ref.get();
+        if (!snap.exists) return json(res, 404, { ok: false, error: 'That testimonial no longer exists.' });
+        await ref.delete();
+      }
       return json(res, 200, { ok: true });
     }
     if (action === 'approve' || action === 'reject') {
