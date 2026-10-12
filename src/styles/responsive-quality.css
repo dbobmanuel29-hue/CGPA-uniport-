@@ -509,3 +509,51 @@ button:not(:disabled):active,
   }
 }
 
+
+
+/* Tablet hero correction: keep the full people/photo composition visible beside the copy.
+   The desktop full-bleed crop can cut the students off on narrower tablet screens. */
+@media (min-width: 768px) and (max-width: 1199px) {
+  .home-hero {
+    height: 582px !important;
+    min-height: 582px !important;
+    display: block !important;
+    isolation: isolate !important;
+    background: #193b2d !important;
+  }
+
+  .home-hero > .hero-photo {
+    inset: 0 0 0 auto !important;
+    width: 68% !important;
+    height: 100% !important;
+    min-width: 0 !important;
+    min-height: 100% !important;
+    max-width: none !important;
+    object-fit: cover !important;
+    object-position: center 38% !important;
+    z-index: 0 !important;
+  }
+
+  .home-hero > .hero-shade {
+    inset: 0 !important;
+    z-index: 1 !important;
+    background: linear-gradient(90deg,
+      #193b2d 0%,
+      rgba(25, 59, 45, .98) 28%,
+      rgba(25, 59, 45, .86) 43%,
+      rgba(25, 59, 45, .24) 66%,
+      rgba(25, 59, 45, .02) 100%) !important;
+  }
+
+  .home-hero .hero-content.container {
+    position: relative !important;
+    z-index: 2 !important;
+    width: 100% !important;
+    max-width: none !important;
+    padding: 64px clamp(28px, 5vw, 60px) 48px !important;
+  }
+
+  .home-hero .hero-content > * {
+    max-width: min(52%, 560px);
+  }
+}
