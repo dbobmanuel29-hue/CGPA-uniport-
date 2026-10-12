@@ -109,7 +109,7 @@ export default async function handler(req, res) {
 
     try {
       await db.collection('notifications').add({
-        userId: 'lmUB6IdhuaOlHjzkqBE7PH2',
+        userId: 'lmUB6IdhuaOlHjzkqBEyoNkE7PH2',
         type: 'support',
         title: 'New support request',
         message: `${fullName} submitted a support request: ${subject}`,
