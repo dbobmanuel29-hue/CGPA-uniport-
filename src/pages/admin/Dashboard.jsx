@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { PageHeader, Stat, Panel, Button, Badge, Notice } from '../../components/ui';
 import { ConnectionState } from '../../components/feedback';
 import { LineChart, BarChart } from '../../components/charts';
