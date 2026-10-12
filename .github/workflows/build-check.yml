@@ -22,5 +22,7 @@ jobs:
       - name: Dependency security audit (report only)
         run: npm audit --audit-level=high
         continue-on-error: true
+      - name: Run automated tests
+        run: npm test
       - name: Build
         run: npm run build
