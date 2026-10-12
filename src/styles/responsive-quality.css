@@ -301,6 +301,10 @@ button:not(:disabled):active,
   .cookie-consent {
     left: 8px !important;
     right: 8px !important;
+    width: calc(100% - 16px) !important;
+    max-width: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
     bottom: max(76px, calc(var(--cgpa-safe-bottom) + 66px)) !important;
     max-height: min(44svh, 270px);
     padding: 11px !important;
