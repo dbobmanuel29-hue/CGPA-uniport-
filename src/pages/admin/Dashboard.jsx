@@ -6,6 +6,7 @@ import { Icon } from '../../components/Icon';
 import { adminService } from '../../services/admin-service';
 import { useResource } from '../../hooks/useResource';
 import { dateTime, number } from '../../utils/formatting';
+import { getFirebase } from '../../integration/firebase-client.js';
 
 const monthKey = value => {
   const d = new Date(value || 0);
@@ -22,6 +23,83 @@ const lastSixMonths = () => {
     return { key: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`, label: d.toLocaleString(undefined, { month: 'short' }) };
   });
 };
+
+
+function TestimonialsAdmin() {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [busyId, setBusyId] = useState('');
+  const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
+  const [name, setName] = useState('');
+  const [textValue, setTextValue] = useState('');
+  const [rating, setRating] = useState(5);
+  const [photoUrl, setPhotoUrl] = useState('');
+  const [showForm, setShowForm] = useState(false);
+
+  async function request(path, method = 'GET', body) {
+    const sdk = await getFirebase();
+    const currentUser = sdk?.auth?.currentUser;
+    if (!currentUser) throw new Error('Please sign in again to manage testimonials.');
+    const token = await currentUser.getIdToken();
+    const response = await fetch(path, {
+      method,
+      headers: { Authorization: `Bearer ${token}`, ...(body ? { 'Content-Type': 'application/json' } : {}) },
+      ...(body ? { body: JSON.stringify(body) } : {}),
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok || !payload.ok) throw new Error(payload.error || 'The testimonial request failed.');
+    return payload;
+  }
+
+  async function refresh() {
+    setLoading(true);
+    try { const payload = await request('/api/admin/testimonials'); setItems(payload.testimonials || []); setError(''); }
+    catch (e) { setError(e.message || 'Could not load testimonials.'); }
+    finally { setLoading(false); }
+  }
+
+  useEffect(() => { refresh(); }, []);
+
+  async function act(item, action) {
+    setBusyId(item.id); setError(''); setNotice('');
+    try {
+      await request('/api/admin/testimonials', 'POST', { action, id: item.id });
+      setNotice(action === 'delete' ? 'Testimonial deleted.' : action === 'approve' ? 'Review approved and now eligible to appear publicly.' : 'Review rejected.');
+      await refresh();
+    } catch (e) { setError(e.message || 'That action could not be completed.'); }
+    finally { setBusyId(''); }
+  }
+
+  async function addSample(event) {
+    event.preventDefault(); setError(''); setNotice(''); setBusyId('new');
+    try {
+      await request('/api/admin/testimonials', 'POST', { action: 'create', name, text: textValue, rating, photoUrl });
+      setName(''); setTextValue(''); setRating(5); setPhotoUrl(''); setShowForm(false);
+      setNotice('Sample testimonial added. It will be clearly labelled as sample content on the homepage.');
+      await refresh();
+    } catch (e) { setError(e.message || 'The sample testimonial could not be added.'); }
+    finally { setBusyId(''); }
+  }
+
+  return <section className="admin-testimonials-section">
+    <div className="admin-testimonials-heading"><div><span className="eyebrow">HOMEPAGE CONTENT</span><h2>Testimonials & student reviews</h2><p>Add or remove sample cards, and approve real student feedback before it appears publicly.</p></div><div className="admin-testimonials-actions"><Button variant="outline" icon="refresh" onClick={refresh} busy={loading}>Refresh</Button><Button variant="lime" icon="plus" onClick={() => setShowForm(value => !value)}>{showForm ? 'Close form' : 'Add testimonial'}</Button></div></div>
+    {error && <Notice tone="error" icon="alert">{error}</Notice>}
+    {notice && <Notice tone="success" icon="check">{notice}</Notice>}
+    {showForm && <form className="admin-testimonial-form" onSubmit={addSample}>
+      <div className="admin-testimonial-form-title"><strong>Add a sample testimonial</strong><span>It will be marked as sample content, not a real student quote.</span></div>
+      <label>Name shown<input value={name} onChange={e => setName(e.target.value)} minLength={2} maxLength={80} required placeholder="e.g. UniPort student" /></label>
+      <label>Review text<textarea value={textValue} onChange={e => setTextValue(e.target.value)} minLength={10} maxLength={1000} rows={3} required placeholder="Write illustrative feedback..." /></label>
+      <div className="admin-testimonial-form-row"><label>Star rating<select value={rating} onChange={e => setRating(Number(e.target.value))}>{[5,4,3,2,1].map(value => <option key={value} value={value}>{value} star{value === 1 ? '' : 's'}</option>)}</select></label><label>Photo URL (optional)<input type="url" value={photoUrl} onChange={e => setPhotoUrl(e.target.value)} placeholder="https://..." /></label></div>
+      <button type="submit" disabled={busyId === 'new'}>{busyId === 'new' ? 'Adding…' : 'Save sample testimonial'}</button>
+    </form>}
+    {loading ? <p className="admin-testimonial-loading">Loading testimonials…</p> : !items.length ? <p className="admin-testimonial-loading">No testimonials to manage yet.</p> : <div className="admin-testimonial-list">{items.map(item => <article className="admin-testimonial-row" key={item.id}>
+      <span className="admin-testimonial-avatar">{item.photoUrl ? <img src={item.photoUrl} alt="" loading="lazy" /> : (item.name || 'S').slice(0,1).toUpperCase()}</span>
+      <div className="admin-testimonial-main"><div className="admin-testimonial-person"><strong>{item.name}</strong><span className={item.isSample ? 'is-sample' : item.status === 'approved' ? 'is-approved' : item.status === 'rejected' ? 'is-rejected' : 'is-pending'}>{item.isSample ? 'Sample' : (item.status || 'pending')}</span><span className="admin-testimonial-stars">{'★'.repeat(Number(item.rating) || 0)}</span></div><p>{item.text}</p><small>{item.isSample ? 'Clearly labelled on the homepage' : item.email || 'Student review'}</small></div>
+      <div className="admin-testimonial-row-actions">{!item.isSample && item.status !== 'approved' && <button type="button" disabled={!!busyId} onClick={() => act(item,'approve')}>Approve</button>}{!item.isSample && item.status !== 'rejected' && <button type="button" disabled={!!busyId} onClick={() => act(item,'reject')}>Reject</button>}<button type="button" className="delete" disabled={!!busyId} onClick={() => { if (window.confirm(`Delete this ${item.isSample ? 'sample testimonial' : 'student review'}?`)) act(item,'delete'); }}>{busyId === item.id ? 'Working…' : 'Delete'}</button></div>
+    </article>)}</div>}
+  </section>;
+}
 
 export default function AdminDashboard() {
   const resource = useResource(() => adminService.getDashboard());
@@ -105,7 +183,7 @@ export default function AdminDashboard() {
 
   const chart = (title, render) => <Panel title={title}><ConnectionState resource={{ ...resource, data: students }} title={title.toLowerCase()} emptyTitle="No platform analytics yet.">{render}</ConnectionState></Panel>;
   const chartLabels = months.map(month => month.label);
-  return <><PageHeader eyebrow="CGPA+ UNIPORT ADMINISTRATION" title="A clear view of the platform." description="Students, academic data, notifications and support. The operational picture, in one place." actions={<Button variant="outline" icon="refresh" busy={resource.status === 'loading'} onClick={() => resource.refresh()} aria-label={resource.status === 'loading' ? 'Refreshing overview' : 'Refresh overview'}>{resource.status === 'loading' ? 'Refreshing overview…' : 'Refresh overview'}</Button>} />{resource.error && <Notice tone="error" icon="alert">The overview could not be refreshed. {resource.error?.message || 'Check your connection and try again.'} <button type="button" className="small-link" onClick={() => resource.refresh()}>Try again</button></Notice>}<div className="stats-grid stats-three">{labels.map(([key, label, icon, value], i) => <button type="button" className={`admin-stat-trigger ${i === 0 ? 'is-accent' : ''}`} key={key} onClick={() => setDetailKey(key)} aria-label={`Open ${label.toLowerCase()} details`}><Stat label={label} value={number(value, 0)} icon={icon} accent={i === 0} hint="Click to view details" /></button>)}</div><div className="two-panel-grid">{chart('User growth', <LineChart values={analytics.userGrowth} labels={chartLabels} max={Math.max(1, ...analytics.userGrowth)} />)}{chart('Registration trends', <BarChart values={analytics.registrations} labels={chartLabels} />)}{chart('Active users', <LineChart values={analytics.activeUsers} labels={chartLabels} max={Math.max(1, ...analytics.activeUsers)} color="var(--chart-blue)" />)}</div><div className="admin-recent-grid">{[['recentStudents', 'Recent students', '/admin/students', 'user'], ['recentTickets', 'Recent support requests', '/admin/support', 'message'], ['activity', 'Recent system activity', '/admin/logs', 'shield']].map(([key, title, href, icon]) => <Panel title={title} key={key} action={<a className="small-link" href={`#${href}`}><Icon name="arrow" size={14} /></a>}><ConnectionState resource={{ ...resource, data: resource.data?.[key] }} title={title.toLowerCase()} emptyTitle="Nothing to show yet." emptyDescription="Activity will appear when supplied by the backend.">{rows => <div className="admin-activity-list">{rows.slice(0, 5).map(row => <a href={`#${href}`} key={row.id}><Icon name={icon} size={18} /><span><strong>{row.fullName || row.subject || row.action}</strong><small>{row.email || dateTime(row.createdAt)}</small></span>{row.status && <Badge>{row.status}</Badge>}</a>)}</div>}</ConnectionState></Panel>)}</div><div className="admin-non-active-panel"><Panel title={`Non-active students (${nonActiveStudents.length})`} action={<a className="small-link" href="#/admin/students">View directory <Icon name="arrow" size={14} /></a>}><ConnectionState resource={{ status: resource.status, data: nonActiveStudents, error: resource.error }} title="non-active students" emptyTitle="No non-active students." emptyDescription="When every student account is active, this section clears automatically."><div className="admin-non-active-list">{nonActiveStudents.map(row => <a className="admin-non-active-row" href="#/admin/students" key={row.id}><span className="admin-non-active-main"><strong>{row.fullName || 'Unnamed student'}</strong><small>{row.email || 'No email available'}</small><small>{row.statusReason}</small></span><Badge tone={row.accountStatus === 'suspended' ? 'danger' : 'neutral'}>{row.accountStatus || 'unknown'}</Badge></a>)}</div></ConnectionState></Panel></div><div className="admin-quick-links"><a href="#/admin/students"><Icon name="users" size={19} /><span>View student directory</span><Icon name="arrow" size={16} /></a><a href="#/admin/academic"><Icon name="book" size={19} /><span>Manage academic data</span><Icon name="arrow" size={16} /></a><a href="#/admin/notifications"><Icon name="bell" size={19} /><span>Compose an announcement</span><Icon name="arrow" size={16} /></a></div>{detailKey && <div className="admin-stat-overlay" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) closeDetail(); }}>
+  return <><PageHeader eyebrow="CGPA+ UNIPORT ADMINISTRATION" title="A clear view of the platform." description="Students, academic data, notifications and support. The operational picture, in one place." actions={<Button variant="outline" icon="refresh" busy={resource.status === 'loading'} onClick={() => resource.refresh()} aria-label={resource.status === 'loading' ? 'Refreshing overview' : 'Refresh overview'}>{resource.status === 'loading' ? 'Refreshing overview…' : 'Refresh overview'}</Button>} />{resource.error && <Notice tone="error" icon="alert">The overview could not be refreshed. {resource.error?.message || 'Check your connection and try again.'} <button type="button" className="small-link" onClick={() => resource.refresh()}>Try again</button></Notice>}<div className="stats-grid stats-three">{labels.map(([key, label, icon, value], i) => <button type="button" className={`admin-stat-trigger ${i === 0 ? 'is-accent' : ''}`} key={key} onClick={() => setDetailKey(key)} aria-label={`Open ${label.toLowerCase()} details`}><Stat label={label} value={number(value, 0)} icon={icon} accent={i === 0} hint="Click to view details" /></button>)}</div><div className="two-panel-grid">{chart('User growth', <LineChart values={analytics.userGrowth} labels={chartLabels} max={Math.max(1, ...analytics.userGrowth)} />)}{chart('Registration trends', <BarChart values={analytics.registrations} labels={chartLabels} />)}{chart('Active users', <LineChart values={analytics.activeUsers} labels={chartLabels} max={Math.max(1, ...analytics.activeUsers)} color="var(--chart-blue)" />)}</div><div className="admin-recent-grid">{[['recentStudents', 'Recent students', '/admin/students', 'user'], ['recentTickets', 'Recent support requests', '/admin/support', 'message'], ['activity', 'Recent system activity', '/admin/logs', 'shield']].map(([key, title, href, icon]) => <Panel title={title} key={key} action={<a className="small-link" href={`#${href}`}><Icon name="arrow" size={14} /></a>}><ConnectionState resource={{ ...resource, data: resource.data?.[key] }} title={title.toLowerCase()} emptyTitle="Nothing to show yet." emptyDescription="Activity will appear when supplied by the backend.">{rows => <div className="admin-activity-list">{rows.slice(0, 5).map(row => <a href={`#${href}`} key={row.id}><Icon name={icon} size={18} /><span><strong>{row.fullName || row.subject || row.action}</strong><small>{row.email || dateTime(row.createdAt)}</small></span>{row.status && <Badge>{row.status}</Badge>}</a>)}</div>}</ConnectionState></Panel>)}</div><div className="admin-non-active-panel"><Panel title={`Non-active students (${nonActiveStudents.length})`} action={<a className="small-link" href="#/admin/students">View directory <Icon name="arrow" size={14} /></a>}><ConnectionState resource={{ status: resource.status, data: nonActiveStudents, error: resource.error }} title="non-active students" emptyTitle="No non-active students." emptyDescription="When every student account is active, this section clears automatically."><div className="admin-non-active-list">{nonActiveStudents.map(row => <a className="admin-non-active-row" href="#/admin/students" key={row.id}><span className="admin-non-active-main"><strong>{row.fullName || 'Unnamed student'}</strong><small>{row.email || 'No email available'}</small><small>{row.statusReason}</small></span><Badge tone={row.accountStatus === 'suspended' ? 'danger' : 'neutral'}>{row.accountStatus || 'unknown'}</Badge></a>)}</div></ConnectionState></Panel></div><div className="admin-quick-links"><a href="#/admin/students"><Icon name="users" size={19} /><span>View student directory</span><Icon name="arrow" size={16} /></a><a href="#/admin/academic"><Icon name="book" size={19} /><span>Manage academic data</span><Icon name="arrow" size={16} /></a><a href="#/admin/notifications"><Icon name="bell" size={19} /><span>Compose an announcement</span><Icon name="arrow" size={16} /></a></div><TestimonialsAdmin />{detailKey && <div className="admin-stat-overlay" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) closeDetail(); }}>
     <section className="admin-stat-dialog" role="dialog" aria-modal="true" aria-labelledby="admin-stat-dialog-title">
       <header className="admin-stat-dialog-header">
         <div>

@@ -387,5 +387,18 @@ service cloud.firestore {
       allow read: if signedIn();
       allow write: if admin();
     }
+    // =========================
+    // TESTIMONIALS (server-managed)
+    // =========================
+    // All testimonial reads/writes go through API routes. Those routes verify
+    // Firebase ID tokens and enforce moderation/admin permissions.
+    match /testimonials/{id} {
+      allow read, create, update, delete: if false;
+    }
+
+    match /testimonialSampleControls/{id} {
+      allow read, write: if false;
+    }
+
   }
 }

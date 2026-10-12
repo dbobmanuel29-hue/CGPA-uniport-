@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Icon } from '../../components/Icon';
 import { Badge, Button } from '../../components/ui';
 import { LineChart, DonutChart, Progress } from '../../components/charts';
@@ -7,6 +7,7 @@ import { number } from '../../utils/formatting';
 import { useCountUp } from '../../hooks/useReveal';
 import { FAQ } from '../../data/features';
 import { useSession } from '../../state/session';
+import { getFirebase } from '../../integration/firebase-client.js';
 
 const HERO = '/images/uniport-campus-hero.jpg';
 const STUDY = 'https://images.pexels.com/photos/8199762/pexels-photo-8199762.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200';
@@ -80,6 +81,105 @@ const TRUST = [
   ['graduation', 'UniPort remains the academic authority', 'Official grading policy, classification and graduation eligibility remain subject to verified University of Port Harcourt rules.'],
   ['cloud', 'Honest about what is connected', 'If a feature needs a backend that is not live yet, we say so plainly instead of faking success.'],
 ];
+
+
+const SAMPLE_AVATARS = [
+  'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=160&h=160&fit=crop',
+  'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=160&h=160&fit=crop',
+  'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=160&h=160&fit=crop',
+];
+
+function Testimonials() {
+  const { user } = useSession();
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [rating, setRating] = useState(5);
+  const [reviewText, setReviewText] = useState('');
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  async function loadReviews() {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/testimonials');
+      const payload = await response.json();
+      if (!response.ok || !payload.ok) throw new Error(payload.error || 'Reviews could not be loaded.');
+      setItems(Array.isArray(payload.testimonials) ? payload.testimonials : []);
+    } catch (e) {
+      setError(e.message || 'Reviews could not be loaded right now.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => { loadReviews(); }, []);
+
+  async function submitReview(event) {
+    event.preventDefault();
+    setError('');
+    setMessage('');
+    if (!user) {
+      setError('Please sign in to your CGPA+ account before leaving a review.');
+      return;
+    }
+    if (reviewText.trim().length < 10) {
+      setError('Please write at least 10 characters so your feedback is useful.');
+      return;
+    }
+    setSaving(true);
+    try {
+      const sdk = await getFirebase();
+      const currentUser = sdk?.auth?.currentUser;
+      if (!currentUser) throw new Error('Your sign-in session could not be found. Please sign in again.');
+      const token = await currentUser.getIdToken();
+      const response = await fetch('/api/testimonials', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ rating, text: reviewText.trim() }),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok || !payload.ok) throw new Error(payload.error || 'Your review could not be submitted.');
+      setReviewText('');
+      setRating(5);
+      setShowForm(false);
+      setMessage('Thanks for sharing your feedback! Your review is pending admin approval.');
+      await loadReviews();
+    } catch (e) {
+      setError(e.message || 'Your review could not be submitted. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return <section className="testimonials-section">
+    <div className="container">
+      <div className="section-heading" data-reveal>
+        <div><span className="eyebrow">STUDENT FEEDBACK</span><h2>Built for the journey.<br />Better with your voice.</h2></div>
+        <div className="testimonials-intro"><p>See what students say about using CGPA+. Sample cards are marked clearly until real student reviews are approved.</p><button type="button" className="testimonial-write-button" onClick={() => { setShowForm(value => !value); setError(''); }}>{showForm ? 'Close form' : 'Leave a review'} <Icon name="arrow" size={15} /></button></div>
+      </div>
+      {message && <p className="testimonial-feedback success" role="status">{message}</p>}
+      {error && !showForm && <p className="testimonial-feedback error" role="alert">{error}</p>}
+      {showForm && <form className="testimonial-form" onSubmit={submitReview}>
+        <div className="testimonial-form-head"><div><strong>Share your CGPA+ experience</strong><p>Your review will appear publicly only after admin approval.</p></div><span className="testimonial-form-user">{user?.photoUrl ? <img src={user.photoUrl} alt="" /> : <Icon name="user" size={19} />}{user ? (user.fullName || 'Signed-in student') : 'Sign-in required'}</span></div>
+        {!user && <p className="testimonial-feedback">You need to <a href="#/login">sign in</a> before you can submit a review.</p>}
+        <label className="testimonial-label">Your rating</label>
+        <div className="testimonial-stars" role="radiogroup" aria-label="Choose a rating">{[1,2,3,4,5].map(value => <button key={value} type="button" role="radio" aria-checked={rating === value} aria-label={`${value} star${value === 1 ? '' : 's'}`} className={value <= rating ? 'is-selected' : ''} onClick={() => setRating(value)}>★</button>)}</div>
+        <label className="testimonial-label" htmlFor="testimonial-review-text">Your review</label>
+        <textarea id="testimonial-review-text" value={reviewText} onChange={event => setReviewText(event.target.value)} minLength={10} maxLength={1000} rows={4} placeholder="What has CGPA+ helped you do? Please share your honest experience." required />
+        <div className="testimonial-form-bottom"><span>{reviewText.length}/1000 characters</span><button type="submit" disabled={saving || !user}>{saving ? 'Submitting…' : 'Submit for approval'}</button></div>
+        {error && <p className="testimonial-feedback error" role="alert">{error}</p>}
+      </form>}
+      {loading ? <div className="testimonial-loading" role="status">Loading student feedback…</div> : items.length ? <div className="testimonial-grid">{items.map((item, index) => <article className="testimonial-card" key={item.id || index}>
+        <div className="testimonial-card-top"><span className="testimonial-avatar">{item.photoUrl ? <img src={item.photoUrl} alt={`Profile of ${item.name}`} loading="lazy" /> : (item.name || 'S').trim().slice(0,1).toUpperCase()}</span><div className="testimonial-person"><strong>{item.name || 'CGPA+ student'}</strong><span>{item.isSample ? 'Illustrative sample' : 'Student review'}</span></div><span className="testimonial-quote-mark" aria-hidden="true">“</span></div>
+        <div className="testimonial-rating" aria-label={`${item.rating} out of 5 stars`}>{'★'.repeat(Number(item.rating) || 0)}<span>{'★'.repeat(5 - (Number(item.rating) || 0))}</span></div>
+        <p className="testimonial-text">{item.text}</p>
+        {item.isSample && <span className="testimonial-sample-note">Sample content — not a real student quote</span>}
+      </article>)}</div> : <div className="testimonial-empty"><strong>No approved reviews yet.</strong><p>Be one of the first students to share feedback about CGPA+.</p></div>}
+    </div>
+  </section>;
+}
 
 function Metric({ value, decimals = 0, suffix = '', label, detail }) {
   const [ref, display] = useCountUp(value, { decimals });
@@ -346,6 +446,8 @@ export default function Home() {
         ))}
       </div>
     </section>
+
+    <Testimonials />
 
     <section className="how-section container">
       <div className="section-heading" data-reveal>
