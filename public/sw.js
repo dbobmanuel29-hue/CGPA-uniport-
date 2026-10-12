@@ -1,4 +1,4 @@
-const CACHE_NAME = "cgpaplus-pwa-v1";
+const CACHE_NAME = "cgpaplus-pwa-v2";
 const OFFLINE_URL = "/offline.html";
 const CORE_ASSETS = [OFFLINE_URL, "/pwa-icon.svg", "/pwa-icon-maskable.svg"];
 
