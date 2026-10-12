@@ -182,98 +182,125 @@ button:not(:disabled):active,
   overscroll-behavior: contain;
 }
 
-/* Tablet layouts should preserve the desktop composition: copy on the left, full-height photo on the right. */
+/* Tablet: keep the desktop hero composition stable across reloads. */
 @media (min-width: 768px) and (max-width: 1024px) {
   .home-hero {
-    position: relative;
-    height: 582px;
-    min-height: 560px;
-    overflow: hidden;
+    position: relative !important;
+    display: block !important;
+    height: 582px !important;
+    min-height: 560px !important;
+    overflow: hidden !important;
   }
 
   .home-hero .hero-photo {
-    position: absolute;
-    inset: 0;
-    display: block;
-    width: 100%;
-    height: 100%;
-    max-width: none;
-    max-height: none;
-    object-fit: cover;
-    object-position: right center;
+    position: absolute !important;
+    inset: 0 !important;
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-width: 100% !important;
+    min-height: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+    object-fit: cover !important;
+    object-position: right center !important;
   }
 
   .home-hero .hero-shade {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(90deg, rgba(15,36,29,.92) 0%, rgba(15,36,29,.72) 35%, rgba(15,36,29,.24) 62%, rgba(15,36,29,.04) 100%);
+    position: absolute !important;
+    inset: 0 !important;
+    background: linear-gradient(90deg, rgba(15,36,29,.92) 0%, rgba(15,36,29,.72) 35%, rgba(15,36,29,.24) 62%, rgba(15,36,29,.04) 100%) !important;
   }
 
-  .home-hero .hero-content {
-    position: relative;
-    z-index: 1;
-    width: 100%;
-    max-width: none;
-    padding: 64px clamp(28px, 5vw, 64px) 48px;
+  .home-hero .hero-content.container {
+    position: relative !important;
+    z-index: 1 !important;
+    width: 100% !important;
+    max-width: none !important;
+    padding: 64px clamp(28px, 5vw, 64px) 48px !important;
   }
 
+  /* Auth: campus photo and its message on the left, form on the right. */
   .auth-page {
     display: grid !important;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
-    align-items: stretch;
-    min-height: 100dvh;
-    height: 100dvh;
-    overflow: hidden;
-  }
-
-  .auth-main {
-    grid-column: 1;
-    grid-row: 1;
-    min-width: 0;
-    min-height: 100dvh;
-    height: 100%;
-    overflow-y: auto;
-    padding: 48px clamp(24px, 3vw, 42px) 36px;
+    grid-template-rows: minmax(100dvh, auto) !important;
+    align-items: stretch !important;
+    min-height: 100dvh !important;
+    height: 100dvh !important;
+    overflow: hidden !important;
   }
 
   .auth-aside {
     display: flex !important;
-    grid-column: 2;
-    grid-row: 1;
-    position: relative;
-    align-self: stretch;
-    min-width: 0;
-    min-height: 100dvh;
-    height: 100%;
-    padding: 0 !important;
-    overflow: hidden;
-    background: #16372c;
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    position: relative !important;
+    align-self: stretch !important;
+    min-width: 0 !important;
+    min-height: 100dvh !important;
+    height: 100% !important;
+    padding: clamp(24px, 3.2vw, 38px) !important;
+    overflow: hidden !important;
+    background: #16372c !important;
   }
 
   .auth-aside > img {
-    position: absolute;
-    inset: 0;
-    display: block;
-    width: 100%;
-    height: 100%;
-    min-width: 100%;
-    min-height: 100%;
-    max-width: none;
-    max-height: none;
-    object-fit: cover;
-    object-position: 70% center;
+    position: absolute !important;
+    inset: 0 !important;
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-width: 100% !important;
+    min-height: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+    object-fit: cover !important;
+    object-position: 70% center !important;
+  }
+
+  .auth-aside:after {
+    position: absolute !important;
+    inset: 0 !important;
+    z-index: 0 !important;
+  }
+
+  .auth-aside > div,
+  .auth-aside > .brand {
+    position: relative !important;
+    z-index: 1 !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
   }
 
   .auth-aside h2 {
-    position: relative;
-    z-index: 1;
-    font-size: clamp(30px, 3.4vw, 40px);
+    max-width: 13ch !important;
+    font-size: clamp(27px, 3.2vw, 36px) !important;
+    line-height: 1.16 !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  .auth-aside p {
+    max-width: 32ch !important;
+    font-size: clamp(11px, 1.1vw, 13px) !important;
+    line-height: 1.7 !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  .auth-main {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    min-width: 0 !important;
+    min-height: 100dvh !important;
+    height: 100% !important;
+    overflow-y: auto !important;
+    padding: 48px clamp(24px, 3vw, 42px) 36px !important;
   }
 
   .auth-box {
-    width: 100%;
-    max-width: 440px;
-    margin-inline: auto;
+    width: 100% !important;
+    max-width: 400px !important;
+    margin-inline: auto !important;
   }
 }
 
@@ -482,31 +509,3 @@ button:not(:disabled):active,
   }
 }
 
-
-/* Keep tablet auth image framing identical to desktop; don't override its image fit. */
-@media (min-width: 768px) and (max-width: 1024px) {
-  .auth-page {
-    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-    min-height: 100dvh;
-  }
-
-  .auth-aside {
-    min-width: 0;
-    min-height: 100dvh;
-    padding: clamp(24px, 3.2vw, 40px);
-    background-color: #16372c;
-  }
-
-  .auth-aside h2 {
-    font-size: clamp(30px, 3.6vw, 38px);
-  }
-
-  .auth-main {
-    min-width: 0;
-    padding: 64px clamp(24px, 3.5vw, 42px) 36px;
-  }
-
-  .auth-box {
-    max-width: 400px;
-  }
-}
