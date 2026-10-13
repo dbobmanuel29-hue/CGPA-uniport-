@@ -209,7 +209,7 @@ export default function Home() {
   useEffect(() => {
     const headlineTimer = window.setInterval(() => {
       setHeroHeadlineIndex(current => (current + 1) % HERO_HEADLINES.length);
-    }, 30000);
+    }, 5000);
     return () => window.clearInterval(headlineTimer);
   }, []);
   const [analytics, setAnalytics] = useState('gpa');
