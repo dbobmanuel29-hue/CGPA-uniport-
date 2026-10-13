@@ -1088,3 +1088,41 @@ img, video, canvas, iframe {
     min-width: 210px;
   }
 }
+
+
+/* Compact the hero controls and headline on phones without changing desktop sizing. */
+@media (max-width: 767px) {
+  .home-hero .hero-title {
+    font-size: clamp(25px, 7.2vw, 32px) !important;
+    line-height: 1.12;
+    letter-spacing: -0.7px;
+  }
+
+  .home-hero .hero-actions {
+    gap: 9px;
+  }
+
+  .home-hero .hero-actions .button {
+    min-height: 42px;
+    padding: 10px 14px;
+    font-size: 14px;
+    line-height: 1.2;
+    border-radius: 12px;
+  }
+
+  .home-hero .hero-sign-in {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 420px) {
+  .home-hero .hero-title {
+    font-size: clamp(24px, 7vw, 29px) !important;
+  }
+
+  .home-hero .hero-actions .button {
+    min-height: 40px;
+    padding: 9px 12px;
+    font-size: 13px;
+  }
+}
