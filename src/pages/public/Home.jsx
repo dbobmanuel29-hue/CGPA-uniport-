@@ -237,9 +237,10 @@ export default function Home() {
       <img className="hero-photo" src={HERO} alt="Two university students sharing a moment on a tropical campus" fetchPriority="high" />
       <div className="hero-shade" />
       <div className="container hero-content">
+        <div className="hero-university-mark animate-in"><span className="hero-university-crest" aria-hidden="true">U</span><span><strong>UNIVERSITY OF PORT HARCOURT</strong><small>FOR ENLIGHTENMENT &amp; SELF-RELIANCE</small></span></div>
         <p className="hero-eyebrow animate-in">YOUR AMBITION. YOUR NEXT CHAPTER.</p>
         <h1 className="hero-wordmark animate-in stagger-1" data-page-heading tabIndex={-1}>CGPA<span>+</span></h1>
-        <h2 className="hero-title animate-in stagger-2" aria-live="polite"><span>{HERO_HEADLINES[heroHeadlineIndex][0].slice(0, Math.min(heroTypedCount, HERO_HEADLINES[heroHeadlineIndex][0].length))}</span><br />{heroTypedCount > HERO_HEADLINES[heroHeadlineIndex][0].length ? HERO_HEADLINES[heroHeadlineIndex][1].slice(0, heroTypedCount - HERO_HEADLINES[heroHeadlineIndex][0].length - 1) : ""}<span className="hero-typing-caret" aria-hidden="true" /></h2>
+        <h2 className="hero-title animate-in stagger-2" aria-live="polite"><span>{HERO_HEADLINES[heroHeadlineIndex][0].slice(0, Math.min(heroTypedCount, HERO_HEADLINES[heroHeadlineIndex][0].length))}{heroTypedCount <= HERO_HEADLINES[heroHeadlineIndex][0].length && <span className="hero-typing-caret" aria-hidden="true" />}</span><br /><span>{heroTypedCount > HERO_HEADLINES[heroHeadlineIndex][0].length ? HERO_HEADLINES[heroHeadlineIndex][1].slice(0, heroTypedCount - HERO_HEADLINES[heroHeadlineIndex][0].length - 1) : ""}{heroTypedCount > HERO_HEADLINES[heroHeadlineIndex][0].length && <span className="hero-typing-caret" aria-hidden="true" />}</span></h2>
         <p className="hero-description animate-in stagger-2">CGPA+ is an academic companion built for University of Port Harcourt students to calculate GPA and CGPA, organize results and plan academic progress.</p>
         <div className="hero-actions animate-in stagger-3">
           {loggedIn
