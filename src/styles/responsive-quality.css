@@ -874,3 +874,74 @@ img, video, canvas, iframe {
     padding-top: clamp(90px, 6vw, 108px) !important;
   }
 }
+
+
+/* Mobile: preserve full table columns and let users swipe horizontally instead of
+   squeezing wide tables until headers and values disappear. */
+@media (max-width: 767px) {
+  .workspace .table-scroll,
+  .workspace .table-wrap,
+  .workspace .data-table .table-scroll,
+  .report-paper .table-scroll,
+  .table-scroll,
+  .table-wrap {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto !important;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: thin;
+    touch-action: pan-x pan-y;
+  }
+
+  .data-table .table-scroll > table,
+  .workspace .data-table table {
+    width: max-content;
+    min-width: 1180px;
+    table-layout: auto;
+  }
+
+  .data-table th,
+  .data-table td {
+    min-width: 100px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    vertical-align: top;
+  }
+
+  .data-table th {
+    min-width: 110px;
+  }
+
+  /* The report's six course columns also remain side-by-side and swipeable. */
+  .report-paper .table-scroll > table,
+  .report-paper table {
+    width: max-content;
+    min-width: 820px;
+    table-layout: auto;
+  }
+
+  .report-paper th,
+  .report-paper td {
+    min-width: 95px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    vertical-align: top;
+  }
+
+  .report-paper th:nth-child(2),
+  .report-paper td:nth-child(2) {
+    min-width: 210px;
+  }
+
+  /* Keep wide tables inside their own panel; do not widen the whole phone page. */
+  .workspace .panel,
+  .workspace-content,
+  .workspace-main,
+  .report-paper {
+    min-width: 0;
+    max-width: 100%;
+  }
+}
