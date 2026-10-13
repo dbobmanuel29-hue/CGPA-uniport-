@@ -205,6 +205,7 @@ export function DashboardPreview() {
 export default function Home() {
   const [scenario, setScenario] = useState(4.5);
   const [heroHeadlineIndex, setHeroHeadlineIndex] = useState(0);
+  const [heroTypedCount, setHeroTypedCount] = useState(0);
 
   useEffect(() => {
     const headlineTimer = window.setInterval(() => {
@@ -212,6 +213,18 @@ export default function Home() {
     }, 5000);
     return () => window.clearInterval(headlineTimer);
   }, []);
+
+  useEffect(() => {
+    setHeroTypedCount(0);
+    const headline = HERO_HEADLINES[heroHeadlineIndex].join(' ');
+    let count = 0;
+    const typingTimer = window.setInterval(() => {
+      count += 1;
+      setHeroTypedCount(count);
+      if (count >= headline.length) window.clearInterval(typingTimer);
+    }, 55);
+    return () => window.clearInterval(typingTimer);
+  }, [heroHeadlineIndex]);
   const [analytics, setAnalytics] = useState('gpa');
   const [showcase, setShowcase] = useState('calculate');
   const { user, status: sessionStatus } = useSession();
@@ -226,7 +239,7 @@ export default function Home() {
       <div className="container hero-content">
         <p className="hero-eyebrow animate-in">YOUR AMBITION. YOUR NEXT CHAPTER.</p>
         <h1 className="hero-wordmark animate-in stagger-1" data-page-heading tabIndex={-1}>CGPA<span>+</span></h1>
-        <h2 className="hero-title animate-in stagger-2" aria-live="polite"><span>{HERO_HEADLINES[heroHeadlineIndex][0]}</span><br />{HERO_HEADLINES[heroHeadlineIndex][1]}</h2>
+        <h2 className="hero-title animate-in stagger-2" aria-live="polite"><span>{HERO_HEADLINES[heroHeadlineIndex][0].slice(0, Math.min(heroTypedCount, HERO_HEADLINES[heroHeadlineIndex][0].length))}</span><br />{heroTypedCount > HERO_HEADLINES[heroHeadlineIndex][0].length ? HERO_HEADLINES[heroHeadlineIndex][1].slice(0, heroTypedCount - HERO_HEADLINES[heroHeadlineIndex][0].length - 1) : ""}<span className="hero-typing-caret" aria-hidden="true" /></h2>
         <p className="hero-description animate-in stagger-2">CGPA+ is an academic companion built for University of Port Harcourt students to calculate GPA and CGPA, organize results and plan academic progress.</p>
         <div className="hero-actions animate-in stagger-3">
           {loggedIn
