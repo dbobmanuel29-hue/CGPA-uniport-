@@ -867,3 +867,10 @@ img, video, canvas, iframe {
 @media (prefers-reduced-motion: reduce) {
   .auth-main .input { transition: none; }
 }
+
+/* Align the desktop and tablet hero eyebrow lower, closer to the phone composition. */
+@media (min-width: 768px) {
+  .home-hero .hero-content.container {
+    padding-top: clamp(90px, 6vw, 108px) !important;
+  }
+}
