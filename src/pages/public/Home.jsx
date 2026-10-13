@@ -222,7 +222,7 @@ export default function Home() {
       count += 1;
       setHeroTypedCount(count);
       if (count >= headline.length) window.clearInterval(typingTimer);
-    }, 55);
+    }, 75);
     return () => window.clearInterval(typingTimer);
   }, [heroHeadlineIndex]);
   const [analytics, setAnalytics] = useState('gpa');
@@ -237,7 +237,7 @@ export default function Home() {
       <img className="hero-photo" src={HERO} alt="Two university students sharing a moment on a tropical campus" fetchPriority="high" />
       <div className="hero-shade" />
       <div className="container hero-content">
-        <div className="hero-university-mark animate-in"><span className="hero-university-crest" aria-hidden="true">U</span><span><strong>UNIVERSITY OF PORT HARCOURT</strong><small>FOR ENLIGHTENMENT &amp; SELF-RELIANCE</small></span></div>
+        <div className="hero-university-mark animate-in"><img className="hero-university-logo" src="https://www.uniport.edu.ng/wp-content/themes/unipix/assets/images/logo/uniport_logo.png" alt="University of Port Harcourt official crest" width="48" height="56" fetchPriority="high" /><span><strong>UNIVERSITY OF PORT HARCOURT</strong><small>FOR ENLIGHTENMENT &amp; SELF-RELIANCE</small></span></div>
         <p className="hero-eyebrow animate-in">YOUR AMBITION. YOUR NEXT CHAPTER.</p>
         <h1 className="hero-wordmark animate-in stagger-1" data-page-heading tabIndex={-1}>CGPA<span>+</span></h1>
         <h2 className="hero-title animate-in stagger-2" aria-live="polite"><span>{HERO_HEADLINES[heroHeadlineIndex][0].slice(0, Math.min(heroTypedCount, HERO_HEADLINES[heroHeadlineIndex][0].length))}{heroTypedCount <= HERO_HEADLINES[heroHeadlineIndex][0].length && <span className="hero-typing-caret" aria-hidden="true" />}</span><br /><span>{heroTypedCount > HERO_HEADLINES[heroHeadlineIndex][0].length ? HERO_HEADLINES[heroHeadlineIndex][1].slice(0, heroTypedCount - HERO_HEADLINES[heroHeadlineIndex][0].length - 1) : ""}{heroTypedCount > HERO_HEADLINES[heroHeadlineIndex][0].length && <span className="hero-typing-caret" aria-hidden="true" />}</span></h2>
