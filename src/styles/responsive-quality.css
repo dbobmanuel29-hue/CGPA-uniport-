@@ -1174,3 +1174,54 @@ img, video, canvas, iframe {
     transition: none !important;
   }
 }
+
+
+/* Tighten the trust-chip spacing beneath the hero actions on every screen size. */
+.home-hero .hero-chips {
+  margin-top: 15px !important;
+  gap: 7px;
+}
+
+.home-hero .hero-chips > span {
+  padding: 6px 9px;
+}
+
+@media (max-width: 1024px) {
+  .home-hero .hero-chips {
+    margin-top: 12px !important;
+    gap: 6px;
+  }
+}
+
+@media (max-width: 767px) {
+  .home-hero .hero-chips {
+    margin-top: 10px !important;
+    gap: 5px;
+  }
+
+  .home-hero .hero-chips > span {
+    padding: 5px 8px;
+    line-height: 1.25;
+  }
+}
+
+/* Blinking cursor makes the hero headline feel like it is being typed live. */
+.hero-typing-caret {
+  display: inline-block;
+  width: 2px;
+  height: 0.9em;
+  margin-left: 3px;
+  vertical-align: -0.04em;
+  background: currentColor;
+  animation: hero-caret-blink 0.8s steps(2, start) infinite;
+}
+
+@keyframes hero-caret-blink {
+  to { visibility: hidden; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-typing-caret {
+    animation: none;
+  }
+}
