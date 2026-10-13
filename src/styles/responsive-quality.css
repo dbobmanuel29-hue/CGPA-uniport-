@@ -1656,3 +1656,114 @@ img, video, canvas, iframe {
   .home-hero > .hero-photo { animation: none !important; transform: none !important; }
   .home-hero .scroll-cue { transition: none !important; }
 }
+
+
+/* Tablet-to-desktop hero scale-up: larger typography and controls, with vertical rhythm
+   tuned so the complete story from university mark through primary actions stays together. */
+@media (min-width: 768px) {
+  .home-hero {
+    min-height: clamp(720px, 90svh, 900px) !important;
+  }
+  .home-hero .hero-content.container {
+    padding-top: clamp(34px, 4.2vh, 54px) !important;
+    padding-bottom: clamp(58px, 6.2vh, 76px) !important;
+  }
+  .home-hero .hero-university-mark {
+    gap: 16px !important;
+    margin-bottom: clamp(16px, 2vh, 23px) !important;
+  }
+  .home-hero .hero-university-logo {
+    width: clamp(52px, 5.4vw, 68px) !important;
+    height: clamp(62px, 6.4vw, 78px) !important;
+  }
+  .home-hero .hero-university-mark strong {
+    font-size: clamp(12px, 1.15vw, 15px) !important;
+  }
+  .home-hero .hero-university-mark small {
+    font-size: clamp(10px, .9vw, 12px) !important;
+  }
+  .home-hero .hero-eyebrow {
+    font-size: clamp(11px, 1vw, 13px) !important;
+    margin-bottom: clamp(10px, 1.4vh, 16px) !important;
+  }
+  .home-hero .hero-wordmark {
+    font-size: clamp(84px, 8vw, 116px) !important;
+    margin-bottom: clamp(12px, 1.7vh, 20px) !important;
+  }
+  .home-hero .hero-title {
+    font-size: clamp(40px, 4.2vw, 58px) !important;
+    line-height: 1.08 !important;
+    min-height: 0 !important;
+  }
+  .home-hero .hero-description {
+    font-size: clamp(16px, 1.35vw, 19px) !important;
+    line-height: 1.6 !important;
+    margin-top: clamp(12px, 1.6vh, 18px) !important;
+    max-width: 46ch !important;
+  }
+  .home-hero .hero-actions {
+    margin-top: clamp(18px, 2.2vh, 25px) !important;
+    gap: 14px !important;
+  }
+  .home-hero .hero-actions .button {
+    min-height: 56px !important;
+    padding: 16px 23px !important;
+    font-size: 15px !important;
+    border-radius: 14px !important;
+  }
+  .home-hero .hero-sign-in {
+    min-height: 50px !important;
+    font-size: 15px !important;
+  }
+  .home-hero .hero-chips {
+    margin-top: clamp(14px, 1.8vh, 21px) !important;
+    gap: 9px !important;
+  }
+  .home-hero .hero-chips > span {
+    padding: 9px 13px !important;
+    font-size: 12px !important;
+  }
+}
+
+/* Tablet: enlarge the content while keeping the full block inside the hero. */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .home-hero {
+    min-height: clamp(760px, 94svh, 900px) !important;
+  }
+  .home-hero .hero-content.container {
+    padding: 34px clamp(28px, 5vw, 54px) 70px !important;
+  }
+  .home-hero .hero-content > * { max-width: min(660px, 88%) !important; }
+  .home-hero .hero-wordmark { font-size: clamp(88px, 10vw, 112px) !important; }
+  .home-hero .hero-title { font-size: clamp(42px, 5.3vw, 54px) !important; }
+  .home-hero .hero-description { font-size: clamp(16px, 1.8vw, 18px) !important; }
+}
+
+/* Desktop: stronger headline scale without stretching text across the photo. */
+@media (min-width: 1025px) {
+  .home-hero {
+    min-height: clamp(760px, 92svh, 920px) !important;
+  }
+  .home-hero .hero-content.container {
+    padding-top: clamp(38px, 5vh, 60px) !important;
+    padding-bottom: clamp(64px, 7vh, 82px) !important;
+  }
+  .home-hero .hero-content > * { max-width: 700px !important; }
+  .home-hero .hero-wordmark { font-size: clamp(100px, 8.2vw, 132px) !important; }
+  .home-hero .hero-title { font-size: clamp(48px, 4.1vw, 64px) !important; }
+  .home-hero .hero-description { font-size: clamp(17px, 1.25vw, 20px) !important; }
+}
+
+/* Compact-height tablet/laptop viewports: keep the CTA visible without shrinking type. */
+@media (min-width: 768px) and (max-height: 820px) {
+  .home-hero { min-height: 760px !important; }
+  .home-hero .hero-content.container {
+    padding-top: 30px !important;
+    padding-bottom: 58px !important;
+  }
+  .home-hero .hero-university-mark { margin-bottom: 14px !important; }
+  .home-hero .hero-wordmark { margin-bottom: 10px !important; }
+  .home-hero .hero-description { margin-top: 10px !important; }
+  .home-hero .hero-actions { margin-top: 16px !important; }
+  .home-hero .hero-chips { margin-top: 12px !important; }
+}
