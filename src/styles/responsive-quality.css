@@ -1306,3 +1306,80 @@ img, video, canvas, iframe {
   .home-hero .hero-university-mark { margin-bottom: 15px; }
   .home-hero .hero-chips { margin-top: 18px !important; }
 }
+
+
+/* Hero refinement: use the University's official crest and remove the artificial mobile blank space. */
+.hero-university-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+.hero-university-logo {
+  display: block;
+  flex: 0 0 auto;
+  width: 44px;
+  height: 52px;
+  max-width: none;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, .2));
+}
+.hero-university-mark > span:last-child { min-width: 0; }
+.hero-university-mark strong { line-height: 1.35; }
+.hero-university-mark small { line-height: 1.45; }
+
+@media (max-width: 767px) {
+  .home-hero {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    padding-bottom: 0 !important;
+  }
+  .home-hero .hero-content.container {
+    padding-top: 28px !important;
+    padding-bottom: 72px !important;
+  }
+  .home-hero .hero-university-mark {
+    gap: 10px;
+    margin-bottom: 12px !important;
+  }
+  .home-hero .hero-university-logo {
+    width: 40px;
+    height: 48px;
+  }
+  .home-hero .hero-university-mark strong {
+    font-size: 10px;
+    letter-spacing: .7px;
+  }
+  .home-hero .hero-university-mark small {
+    font-size: 8px;
+    letter-spacing: .35px;
+  }
+  .home-hero .hero-eyebrow { margin-bottom: 11px !important; }
+  .home-hero .hero-wordmark { margin-bottom: 12px !important; }
+  .home-hero .hero-title {
+    min-height: 0 !important;
+    margin-bottom: 0 !important;
+    line-height: 1.2 !important;
+  }
+  .home-hero .hero-description {
+    margin-top: 11px !important;
+    line-height: 1.6 !important;
+  }
+  .home-hero .hero-actions { margin-top: 16px !important; }
+  .home-hero .hero-chips {
+    margin-top: 13px !important;
+    padding-bottom: 0 !important;
+  }
+  .home-hero .scroll-cue { bottom: 18px !important; }
+}
+
+@media (max-width: 420px) {
+  .home-hero .hero-content.container {
+    padding-top: 24px !important;
+    padding-bottom: 66px !important;
+  }
+  .home-hero .hero-university-mark { margin-bottom: 10px !important; }
+  .home-hero .hero-university-logo { width: 36px; height: 44px; }
+  .home-hero .hero-wordmark { font-size: 58px !important; }
+  .home-hero .hero-title { font-size: 28px !important; }
+}
