@@ -1126,3 +1126,51 @@ img, video, canvas, iframe {
     font-size: 13px;
   }
 }
+
+
+/* Make hero headline changes feel smooth and keep mobile calls to action compact. */
+.home-hero .hero-title {
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+
+@media (max-width: 767px) {
+  .home-hero .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .home-hero .hero-actions > .button {
+    flex: 0 1 auto !important;
+    width: auto !important;
+    min-width: 0;
+    max-width: 100%;
+    min-height: 38px;
+    padding: 8px 11px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .home-hero .hero-title {
+    animation: hero-headline-arrive 420ms ease both;
+  }
+}
+
+@keyframes hero-headline-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-hero .hero-title {
+    animation: none !important;
+    transition: none !important;
+  }
+}
