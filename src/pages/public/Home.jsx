@@ -13,6 +13,13 @@ const HERO = '/images/uniport-campus-hero.jpg';
 const STUDY = 'https://campex.ng/assets/img/hero_placeholder.jpg';
 const CAMPUS = 'https://claretianuniversity.edu.ng/img/ijmb-aspect-img.jpg';
 
+const HERO_HEADLINES = [
+  ['Your Academic', 'Journey, Simplified.'],
+  ['Your Results,', 'Understood.'],
+  ['Your Goals,', 'Within Reach.'],
+  ['Your Progress,', 'All in One Place.'],
+];
+
 const RIBBON = ['For UniPort students', 'GPA calculator', 'CGPA tracking', 'Target planning', 'Academic timeline', 'Graduation progress', 'Performance analytics', 'Semester records', 'Course attention', 'Academic reports'];
 
 const SHOWCASE = {
@@ -197,6 +204,14 @@ export function DashboardPreview() {
 
 export default function Home() {
   const [scenario, setScenario] = useState(4.5);
+  const [heroHeadlineIndex, setHeroHeadlineIndex] = useState(0);
+
+  useEffect(() => {
+    const headlineTimer = window.setInterval(() => {
+      setHeroHeadlineIndex(current => (current + 1) % HERO_HEADLINES.length);
+    }, 30000);
+    return () => window.clearInterval(headlineTimer);
+  }, []);
   const [analytics, setAnalytics] = useState('gpa');
   const [showcase, setShowcase] = useState('calculate');
   const { user, status: sessionStatus } = useSession();
@@ -211,7 +226,7 @@ export default function Home() {
       <div className="container hero-content">
         <p className="hero-eyebrow animate-in">YOUR AMBITION. YOUR NEXT CHAPTER.</p>
         <h1 className="hero-wordmark animate-in stagger-1" data-page-heading tabIndex={-1}>CGPA<span>+</span></h1>
-        <h2 className="hero-title animate-in stagger-2">Your Academic<br />Journey, Simplified.</h2>
+        <h2 className="hero-title animate-in stagger-2" aria-live="polite"><span>{HERO_HEADLINES[heroHeadlineIndex][0]}</span><br />{HERO_HEADLINES[heroHeadlineIndex][1]}</h2>
         <p className="hero-description animate-in stagger-2">CGPA+ is an academic companion built for University of Port Harcourt students to calculate GPA and CGPA, organize results and plan academic progress.</p>
         <div className="hero-actions animate-in stagger-3">
           {loggedIn
