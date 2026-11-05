@@ -239,13 +239,6 @@ export default function Home() {
       <span className="cgpa-christmas-tree cgpa-christmas-tree--left" aria-hidden="true">🎄</span>
       <span className="cgpa-christmas-gifts cgpa-christmas-gifts--left" aria-hidden="true">🎁</span>
       <div className="cgpa-christmas-center">
-        <div className="cgpa-holiday-santa" aria-hidden="true">
-          <span className="cgpa-holiday-santa__hat"><i /></span>
-          <span className="cgpa-holiday-santa__face" />
-          <span className="cgpa-holiday-santa__beard" />
-          <span className="cgpa-holiday-santa__body"><i /><b /></span>
-          <span className="cgpa-holiday-santa__boots" />
-        </div>
         <span className="cgpa-christmas-kicker">SEASON'S GREETINGS FROM CGPA+</span>
         <h2>Merry Christmas <span>&amp;</span> Happy New Year!</h2>
         <p>Wishing you joy, peace and a brilliant year ahead.</p>
