@@ -233,7 +233,8 @@ export default function Home() {
   const active = SHOWCASE[showcase];
 
   return <>
-    {new Date() >= new Date(2026, 10, 5) && new Date() < new Date(2027, 0, 6) && (\n    <section className="cgpa-christmas-banner" aria-label="CGPA Plus Christmas and New Year greeting">
+    {new Date() >= new Date(2026, 10, 5) && new Date() < new Date(2027, 0, 6) && (
+    <section className="cgpa-christmas-banner" aria-label="CGPA Plus Christmas and New Year greeting">
       <div className="cgpa-christmas-snowbank" aria-hidden="true" />
       <span className="cgpa-christmas-tree cgpa-christmas-tree--left" aria-hidden="true">🎄</span>
       <span className="cgpa-christmas-gifts cgpa-christmas-gifts--left" aria-hidden="true">🎁</span>
@@ -252,6 +253,7 @@ export default function Home() {
       <span className="cgpa-christmas-tree cgpa-christmas-tree--right" aria-hidden="true">🎄</span>
       <span className="cgpa-christmas-gifts cgpa-christmas-gifts--right" aria-hidden="true">🎁</span>
     </section>
+    )}
     <section className="home-hero">
       <img className="hero-photo" src={HERO} alt="Two university students sharing a moment on a tropical campus" fetchPriority="high" />
       <div className="hero-shade" />
