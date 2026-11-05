@@ -1,7 +1,29 @@
-/* Christmas corner artwork — stays above page chrome without intercepting taps. */
+/* CGPA+ seasonal celebration — automatically ends after 5 January 2027. */
+.seasonal-banner {
+  position: relative;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(8px, 2vw, 18px);
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 14px;
+  color: #fffdf4;
+  text-align: center;
+  font-size: clamp(12px, 1.6vw, 15px);
+  line-height: 1.4;
+  letter-spacing: .015em;
+  background: linear-gradient(100deg, #123d2d 0%, #1d6245 48%, #123d2d 100%);
+  border-bottom: 2px solid #d9e9a1;
+  box-shadow: 0 3px 12px rgba(12, 40, 27, .16);
+}
+.seasonal-banner strong { color: #e5f5a8; font-weight: 800; }
+.seasonal-banner__sparkle { color: #f5d77a; font-size: 18px; flex: 0 0 auto; }
+
 .seasonal-corner {
   position: fixed !important;
-  z-index: 9990 !important;
+  z-index: 25 !important;
   display: grid;
   place-items: center;
   width: clamp(42px, 5.2vw, 66px);
@@ -10,7 +32,7 @@
   user-select: none;
   -webkit-user-select: none;
   line-height: 1;
-  opacity: 1;
+  opacity: .98;
   filter: drop-shadow(0 3px 7px rgba(10, 25, 18, .22));
 }
 .seasonal-corner__art {
@@ -21,17 +43,47 @@
 }
 .seasonal-corner--tree {
   left: max(8px, env(safe-area-inset-left, 0px));
-  bottom: max(10px, env(safe-area-inset-bottom, 0px));
+  bottom: max(12px, env(safe-area-inset-bottom, 0px));
 }
 .seasonal-corner--santa {
   right: max(10px, env(safe-area-inset-right, 0px));
-  top: max(8px, env(safe-area-inset-top, 0px));
+  /* Keep Santa in the hero area, clear of the announcement strip and site header. */
+  top: clamp(178px, 23vh, 260px);
+}
+.seasonal-snow {
+  position: fixed;
+  inset: 0;
+  z-index: 24;
+  overflow: hidden;
+  pointer-events: none;
+}
+.seasonal-snow span {
+  position: absolute;
+  top: -8vh;
+  color: rgba(220, 242, 247, .78);
+  text-shadow: 0 1px 5px rgba(255,255,255,.45);
+  font-size: clamp(13px, 2vw, 21px);
+  animation: cgpa-snow-fall 13s linear infinite;
+}
+.seasonal-snow span:nth-child(1) { left: 7%; animation-delay: -2s; animation-duration: 15s; }
+.seasonal-snow span:nth-child(2) { left: 19%; animation-delay: -9s; animation-duration: 18s; font-size: 13px; }
+.seasonal-snow span:nth-child(3) { left: 34%; animation-delay: -5s; animation-duration: 12s; }
+.seasonal-snow span:nth-child(4) { left: 49%; animation-delay: -12s; animation-duration: 17s; font-size: 16px; }
+.seasonal-snow span:nth-child(5) { left: 64%; animation-delay: -7s; animation-duration: 14s; }
+.seasonal-snow span:nth-child(6) { left: 76%; animation-delay: -3s; animation-duration: 19s; font-size: 15px; }
+.seasonal-snow span:nth-child(7) { left: 88%; animation-delay: -11s; animation-duration: 13s; }
+.seasonal-snow span:nth-child(8) { left: 96%; animation-delay: -6s; animation-duration: 16s; font-size: 14px; }
+@keyframes cgpa-snow-fall {
+  0% { transform: translate3d(0, -5vh, 0) rotate(0deg); opacity: 0; }
+  10% { opacity: .8; }
+  50% { transform: translate3d(18px, 52vh, 0) rotate(150deg); }
+  90% { opacity: .7; }
+  100% { transform: translate3d(-12px, 108vh, 0) rotate(300deg); opacity: 0; }
 }
 @media (max-width: 767px) {
-  .seasonal-corner {
-    width: 42px;
-    height: 48px;
-  }
+  .seasonal-banner { padding: 9px 8px; gap: 7px; font-size: 12px; }
+  .seasonal-banner__sparkle { font-size: 15px; }
+  .seasonal-corner { width: 42px; height: 48px; }
   .seasonal-corner__art { font-size: 38px; }
   .seasonal-corner--tree {
     left: max(5px, env(safe-area-inset-left, 0px));
@@ -39,13 +91,16 @@
   }
   .seasonal-corner--santa {
     right: max(6px, env(safe-area-inset-right, 0px));
-    top: max(5px, env(safe-area-inset-top, 0px));
+    top: clamp(178px, 23vh, 220px);
   }
+  .seasonal-snow span { font-size: 14px; }
 }
-@media (max-width: 360px) {
+@media (max-width: 380px) {
+  .seasonal-banner { padding-inline: 5px; font-size: 11px; gap: 5px; }
   .seasonal-corner { width: 34px; height: 40px; }
   .seasonal-corner__art { font-size: 32px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .seasonal-corner, .seasonal-corner__art { animation: none !important; transition: none !important; }
+  .seasonal-snow span { animation: none !important; }
 }
