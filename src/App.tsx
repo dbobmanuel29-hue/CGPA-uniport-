@@ -6,26 +6,22 @@ export default function App() {
   return (
     <>
       {christmasActive && (
-        <div className="seasonal-banner" role="status">
-          <span className="seasonal-banner__sparkle" aria-hidden="true">✦</span>
-          <span><strong>CGPA+ wishes you a Merry Christmas</strong> and a Happy New Year!</span>
-          <span className="seasonal-banner__sparkle" aria-hidden="true">✦</span>
+        <div className="seasonal-banner" role="status" aria-label="CGPA Plus Christmas and New Year wishes">
+          <span className="seasonal-banner__decoration seasonal-banner__tree" aria-hidden="true">🎄</span>
+          <div className="seasonal-banner__message">
+            <span className="seasonal-banner__eyebrow">SEASON'S GREETINGS FROM CGPA+</span>
+            <strong className="seasonal-banner__headline">Merry Christmas &amp; Happy New Year!</strong>
+            <span className="seasonal-banner__expiry">Celebrating with you until <b>January 5, 2027</b></span>
+          </div>
+          <span className="seasonal-banner__decoration seasonal-banner__santa" aria-hidden="true">🎅🏻</span>
         </div>
       )}
       <Application />
       {christmasActive && (
-        <>
-          <div className="seasonal-corner seasonal-corner--tree" aria-hidden="true">
-            <span className="seasonal-corner__art">🎄</span>
-          </div>
-          <div className="seasonal-corner seasonal-corner--santa" aria-hidden="true">
-            <span className="seasonal-corner__art">🎅🏻</span>
-          </div>
-          <div className="seasonal-snow" aria-hidden="true">
-            <span>❄</span><span>✻</span><span>❅</span><span>❄</span>
-            <span>✼</span><span>❅</span><span>❄</span><span>✻</span>
-          </div>
-        </>
+        <div className="seasonal-snow" aria-hidden="true">
+          <span>❄</span><span>✻</span><span>❅</span><span>❄</span>
+          <span>✼</span><span>❅</span><span>❄</span><span>✻</span>
+        </div>
       )}
     </>
   );
