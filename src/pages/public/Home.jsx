@@ -233,6 +233,25 @@ export default function Home() {
   const active = SHOWCASE[showcase];
 
   return <>
+    <section className="cgpa-christmas-banner" aria-label="CGPA Plus Christmas and New Year greeting">
+      <div className="cgpa-christmas-snowbank" aria-hidden="true" />
+      <span className="cgpa-christmas-tree cgpa-christmas-tree--left" aria-hidden="true">🎄</span>
+      <span className="cgpa-christmas-gifts cgpa-christmas-gifts--left" aria-hidden="true">🎁</span>
+      <div className="cgpa-christmas-center">
+        <div className="cgpa-holiday-santa" aria-hidden="true">
+          <span className="cgpa-holiday-santa__hat"><i /></span>
+          <span className="cgpa-holiday-santa__face" />
+          <span className="cgpa-holiday-santa__beard" />
+          <span className="cgpa-holiday-santa__body"><i /><b /></span>
+          <span className="cgpa-holiday-santa__boots" />
+        </div>
+        <span className="cgpa-christmas-kicker">SEASON'S GREETINGS FROM CGPA+</span>
+        <h2>Merry Christmas <span>&amp;</span> Happy New Year!</h2>
+        <p>Wishing you joy, peace and a brilliant year ahead.</p>
+      </div>
+      <span className="cgpa-christmas-tree cgpa-christmas-tree--right" aria-hidden="true">🎄</span>
+      <span className="cgpa-christmas-gifts cgpa-christmas-gifts--right" aria-hidden="true">🎁</span>
+    </section>
     <section className="home-hero">
       <img className="hero-photo" src={HERO} alt="Two university students sharing a moment on a tropical campus" fetchPriority="high" />
       <div className="hero-shade" />
