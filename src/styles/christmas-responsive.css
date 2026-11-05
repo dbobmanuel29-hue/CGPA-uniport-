@@ -1,106 +1,138 @@
-/* CGPA+ seasonal celebration — automatically ends after 5 January 2027. */
+/* CGPA+ Christmas and New Year treatment — expires after 5 January 2027. */
 .seasonal-banner {
   position: relative;
-  z-index: 20;
-  display: flex;
+  z-index: 30;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(52px, 92px) minmax(0, 1fr) minmax(52px, 92px);
   align-items: center;
-  justify-content: center;
-  gap: clamp(8px, 2vw, 18px);
+  justify-items: center;
+  gap: clamp(8px, 2vw, 22px);
   width: 100%;
+  min-height: 104px;
   box-sizing: border-box;
-  padding: 11px 14px;
+  padding: 12px clamp(12px, 3vw, 30px);
+  overflow: hidden;
   color: #fffdf4;
   text-align: center;
-  font-size: clamp(12px, 1.6vw, 15px);
-  line-height: 1.4;
-  letter-spacing: .015em;
-  background: linear-gradient(100deg, #123d2d 0%, #1d6245 48%, #123d2d 100%);
-  border-bottom: 2px solid #d9e9a1;
-  box-shadow: 0 3px 12px rgba(12, 40, 27, .16);
+  background:
+    radial-gradient(ellipse at 50% -30%, rgba(80, 153, 94, .38), transparent 62%),
+    linear-gradient(112deg, #082c20 0%, #145238 48%, #082c20 100%);
+  border-bottom: 2px solid #c9a75a;
+  box-shadow: 0 4px 16px rgba(8, 31, 22, .18);
 }
-.seasonal-banner strong { color: #e5f5a8; font-weight: 800; }
-.seasonal-banner__sparkle { color: #f5d77a; font-size: 18px; flex: 0 0 auto; }
-
-.seasonal-corner {
-  position: fixed !important;
-  z-index: 25 !important;
+.seasonal-banner::before,
+.seasonal-banner::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  width: 170px;
+  height: 170px;
+  border: 1px solid rgba(233, 204, 133, .18);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.seasonal-banner::before { left: -105px; top: -105px; }
+.seasonal-banner::after { right: -105px; bottom: -125px; }
+.seasonal-banner__decoration {
   display: grid;
   place-items: center;
-  width: clamp(42px, 5.2vw, 66px);
-  height: clamp(48px, 6vw, 74px);
-  pointer-events: none !important;
-  user-select: none;
-  -webkit-user-select: none;
-  line-height: 1;
-  opacity: .98;
-  filter: drop-shadow(0 3px 7px rgba(10, 25, 18, .22));
-}
-.seasonal-corner__art {
-  display: block;
+  width: 100%;
   font-family: system-ui, sans-serif;
-  font-size: clamp(38px, 4.5vw, 56px);
   line-height: 1;
+  filter: drop-shadow(0 3px 5px rgba(0,0,0,.3));
 }
-.seasonal-corner--tree {
-  left: max(8px, env(safe-area-inset-left, 0px));
-  bottom: max(12px, env(safe-area-inset-bottom, 0px));
+.seasonal-banner__tree { font-size: clamp(42px, 5vw, 62px); }
+.seasonal-banner__santa { font-size: clamp(40px, 4.8vw, 58px); }
+.seasonal-banner__message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  gap: 4px;
 }
-.seasonal-corner--santa {
-  right: max(10px, env(safe-area-inset-right, 0px));
-  /* Keep Santa in the hero area, clear of the announcement strip and site header. */
-  top: clamp(178px, 23vh, 260px);
+.seasonal-banner__eyebrow {
+  color: #d9e8c7;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .19em;
+  line-height: 1.3;
 }
+.seasonal-banner__headline {
+  color: #f3d68b;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(18px, 2.7vw, 29px);
+  font-weight: 700;
+  line-height: 1.15;
+  text-wrap: balance;
+  text-shadow: 0 1px 10px rgba(238, 196, 92, .16);
+}
+.seasonal-banner__expiry {
+  color: rgba(255,255,255,.9);
+  font-size: clamp(10px, 1.25vw, 12px);
+  line-height: 1.35;
+}
+.seasonal-banner__expiry b { color: #f3d68b; font-weight: 700; }
+
 .seasonal-snow {
   position: fixed;
   inset: 0;
-  z-index: 24;
+  z-index: 10;
   overflow: hidden;
   pointer-events: none;
 }
 .seasonal-snow span {
   position: absolute;
   top: -8vh;
-  color: rgba(220, 242, 247, .78);
-  text-shadow: 0 1px 5px rgba(255,255,255,.45);
-  font-size: clamp(13px, 2vw, 21px);
-  animation: cgpa-snow-fall 13s linear infinite;
+  color: rgba(226, 243, 246, .72);
+  text-shadow: 0 1px 5px rgba(255,255,255,.35);
+  font-size: clamp(12px, 1.8vw, 19px);
+  animation: cgpa-snow-fall 16s linear infinite;
+  will-change: transform;
 }
-.seasonal-snow span:nth-child(1) { left: 7%; animation-delay: -2s; animation-duration: 15s; }
-.seasonal-snow span:nth-child(2) { left: 19%; animation-delay: -9s; animation-duration: 18s; font-size: 13px; }
-.seasonal-snow span:nth-child(3) { left: 34%; animation-delay: -5s; animation-duration: 12s; }
-.seasonal-snow span:nth-child(4) { left: 49%; animation-delay: -12s; animation-duration: 17s; font-size: 16px; }
-.seasonal-snow span:nth-child(5) { left: 64%; animation-delay: -7s; animation-duration: 14s; }
-.seasonal-snow span:nth-child(6) { left: 76%; animation-delay: -3s; animation-duration: 19s; font-size: 15px; }
-.seasonal-snow span:nth-child(7) { left: 88%; animation-delay: -11s; animation-duration: 13s; }
-.seasonal-snow span:nth-child(8) { left: 96%; animation-delay: -6s; animation-duration: 16s; font-size: 14px; }
+.seasonal-snow span:nth-child(1) { left: 7%; animation-delay: -2s; animation-duration: 17s; }
+.seasonal-snow span:nth-child(2) { left: 19%; animation-delay: -9s; animation-duration: 21s; font-size: 12px; }
+.seasonal-snow span:nth-child(3) { left: 34%; animation-delay: -5s; animation-duration: 15s; }
+.seasonal-snow span:nth-child(4) { left: 49%; animation-delay: -12s; animation-duration: 20s; font-size: 15px; }
+.seasonal-snow span:nth-child(5) { left: 64%; animation-delay: -7s; animation-duration: 18s; }
+.seasonal-snow span:nth-child(6) { left: 76%; animation-delay: -3s; animation-duration: 22s; font-size: 14px; }
+.seasonal-snow span:nth-child(7) { left: 88%; animation-delay: -11s; animation-duration: 16s; }
+.seasonal-snow span:nth-child(8) { left: 96%; animation-delay: -6s; animation-duration: 19s; font-size: 13px; }
 @keyframes cgpa-snow-fall {
   0% { transform: translate3d(0, -5vh, 0) rotate(0deg); opacity: 0; }
-  10% { opacity: .8; }
-  50% { transform: translate3d(18px, 52vh, 0) rotate(150deg); }
-  90% { opacity: .7; }
-  100% { transform: translate3d(-12px, 108vh, 0) rotate(300deg); opacity: 0; }
+  12% { opacity: .72; }
+  50% { transform: translate3d(12px, 52vh, 0) rotate(120deg); }
+  88% { opacity: .65; }
+  100% { transform: translate3d(-10px, 108vh, 0) rotate(240deg); opacity: 0; }
 }
-@media (max-width: 767px) {
-  .seasonal-banner { padding: 9px 8px; gap: 7px; font-size: 12px; }
-  .seasonal-banner__sparkle { font-size: 15px; }
-  .seasonal-corner { width: 42px; height: 48px; }
-  .seasonal-corner__art { font-size: 38px; }
-  .seasonal-corner--tree {
-    left: max(5px, env(safe-area-inset-left, 0px));
-    bottom: max(8px, env(safe-area-inset-bottom, 0px));
+@media (max-width: 600px) {
+  .seasonal-banner {
+    grid-template-columns: 42px minmax(0, 1fr) 42px;
+    gap: 5px;
+    min-height: 88px;
+    padding: 9px 8px;
   }
-  .seasonal-corner--santa {
-    right: max(6px, env(safe-area-inset-right, 0px));
-    top: clamp(178px, 23vh, 220px);
-  }
-  .seasonal-snow span { font-size: 14px; }
+  .seasonal-banner__tree { font-size: 37px; }
+  .seasonal-banner__santa { font-size: 35px; }
+  .seasonal-banner__message { gap: 3px; }
+  .seasonal-banner__eyebrow { font-size: 8px; letter-spacing: .13em; }
+  .seasonal-banner__headline { font-size: clamp(15px, 4vw, 20px); }
+  .seasonal-banner__expiry { font-size: 9px; }
 }
-@media (max-width: 380px) {
-  .seasonal-banner { padding-inline: 5px; font-size: 11px; gap: 5px; }
-  .seasonal-corner { width: 34px; height: 40px; }
-  .seasonal-corner__art { font-size: 32px; }
+@media (max-width: 360px) {
+  .seasonal-banner {
+    grid-template-columns: 32px minmax(0, 1fr) 32px;
+    min-height: 82px;
+    gap: 3px;
+    padding-inline: 5px;
+  }
+  .seasonal-banner__tree { font-size: 30px; }
+  .seasonal-banner__santa { font-size: 29px; }
+  .seasonal-banner__eyebrow { font-size: 7px; letter-spacing: .1em; }
+  .seasonal-banner__headline { font-size: 14px; }
+  .seasonal-banner__expiry { font-size: 8px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .seasonal-corner, .seasonal-corner__art { animation: none !important; transition: none !important; }
   .seasonal-snow span { animation: none !important; }
 }
