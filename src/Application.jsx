@@ -96,4 +96,34 @@ function Router() {
   if (['/login', '/register', '/forgot-password', '/onboarding'].includes(path)) return page;
   return <PublicLayout path={path}>{path === '/' && <CookieConsent />}<ReadingProgress />{page}{path === '/' && <CreatorShowcase />}</PublicLayout>;
 }
-export default function Application() { return <AppearanceProvider><ToastProvider><SessionProvider><CalculatorProvider><Router /><AcademicGuide /></CalculatorProvider></SessionProvider></ToastProvider></AppearanceProvider>; }
+
+function SeasonalDecor() {
+  const now = new Date();
+  const starts = new Date(2026, 10, 5);
+  const ends = new Date(2027, 0, 6);
+  if (now < starts || now >= ends) return null;
+
+  return <>
+    <style>{`
+      .cgpa-seasonal-topline{position:fixed;inset:0 0 auto;height:3px;z-index:9998;pointer-events:none;background:linear-gradient(90deg,#a51f2b 0 33%,#d6ad55 33% 66%,#176b45 66%);opacity:.9}
+      .cgpa-seasonal-flakes{position:fixed;inset:0;z-index:9997;overflow:hidden;pointer-events:none}
+      .cgpa-seasonal-flake{position:absolute;top:-24px;color:#b7d9e8;opacity:.48;font-size:13px;animation:cgpa-gentle-snow linear infinite;text-shadow:0 1px 5px rgba(100,150,180,.16)}
+      .cgpa-seasonal-flake:nth-child(1){left:8%;animation-duration:19s;animation-delay:-8s}
+      .cgpa-seasonal-flake:nth-child(2){left:27%;font-size:10px;animation-duration:24s;animation-delay:-15s}
+      .cgpa-seasonal-flake:nth-child(3){left:53%;animation-duration:21s;animation-delay:-4s}
+      .cgpa-seasonal-flake:nth-child(4){left:76%;font-size:11px;animation-duration:26s;animation-delay:-18s}
+      .cgpa-seasonal-flake:nth-child(5){left:94%;animation-duration:22s;animation-delay:-11s}
+      .cgpa-seasonal-corner{position:fixed;top:8px;right:12px;z-index:9996;pointer-events:none;color:#c7a45c;font-size:17px;opacity:.72;filter:drop-shadow(0 1px 2px rgba(0,0,0,.08))}
+      @keyframes cgpa-gentle-snow{0%{transform:translate3d(0,-20px,0) rotate(0deg);opacity:0}12%{opacity:.48}88%{opacity:.42}100%{transform:translate3d(24px,105vh,0) rotate(220deg);opacity:0}}
+      @media(prefers-reduced-motion:reduce){.cgpa-seasonal-flake{animation:none;display:none}}
+      @media(max-width:600px){.cgpa-seasonal-corner{right:8px;font-size:14px;top:6px}}
+    `}</style>
+    <div className="cgpa-seasonal-topline" aria-hidden="true" />
+    <div className="cgpa-seasonal-flakes" aria-hidden="true">
+      {Array.from({ length: 5 }, (_, i) => <span className="cgpa-seasonal-flake" key={i}>✳</span>)}
+    </div>
+    <span className="cgpa-seasonal-corner" aria-hidden="true">✦</span>
+  </>;
+}
+
+export default function Application() { return <AppearanceProvider><ToastProvider><SessionProvider><CalculatorProvider><Router /><SeasonalDecor /><AcademicGuide /></CalculatorProvider></SessionProvider></ToastProvider></AppearanceProvider>; }
