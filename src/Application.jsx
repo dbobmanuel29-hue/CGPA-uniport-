@@ -94,7 +94,7 @@ function Router() {
   if (path === '/app' || path.startsWith('/app/')) { if (publicCalculator && !session.user) return <PublicLayout path={path}><ReadingProgress />{page}</PublicLayout>; return <WorkspaceLayout path={path}>{page}</WorkspaceLayout>; }
   if (path === '/admin' || path.startsWith('/admin/')) return <WorkspaceLayout path={path} admin>{page}</WorkspaceLayout>;
   if (['/login', '/register', '/forgot-password', '/onboarding'].includes(path)) return page;
-  return <PublicLayout path={path}>{path === '/' && <CookieConsent />}<ReadingProgress />{page}{path === '/' && <CreatorShowcase />}</PublicLayout>;
+  return <PublicLayout path={path}>{path === '/' && <><SeasonalDecor /><CookieConsent /></>}<ReadingProgress />{page}{path === '/' && <CreatorShowcase />}</PublicLayout>;
 }
 
 function SeasonalDecor() {
@@ -126,4 +126,4 @@ function SeasonalDecor() {
   </>;
 }
 
-export default function Application() { return <AppearanceProvider><ToastProvider><SessionProvider><CalculatorProvider><Router /><SeasonalDecor /><AcademicGuide /></CalculatorProvider></SessionProvider></ToastProvider></AppearanceProvider>; }
+export default function Application() { return <AppearanceProvider><ToastProvider><SessionProvider><CalculatorProvider><Router /><AcademicGuide /></CalculatorProvider></SessionProvider></ToastProvider></AppearanceProvider>; }
